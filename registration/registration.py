@@ -1,10 +1,13 @@
-from aiogram import Dispatcher, F
+from aiogram import Router, F
 from aiogram.types import Message
 from handlers.registration_hand import registration_menu  # Импортируем меню
 
+# Создайте роутер
+router = Router()
+
 async def show_welcome(message: Message):
     await message.answer(
-        'Добро пожаловать в @StudyUp_bot! 🎓\n\n'
+        'Добро пожаловать в @StudyBoost_bot! 🎓\n\n'
         'Этот бот создан для студентов, чтобы облегчить обмен знаниями и ресурсами. Здесь вы можете:\n\n'
         '🔹 Обмениваться конспектами и лабораторными работами: Делитесь своими материалами и получайте доступ к работам других студентов.\n\n'
         '🔹 Зарабатывать очки: Активное участие в платформе вознаграждается! Набирайте очки за взаимодействие, и первые три студента с наибольшим количеством очков получат денежные призы по итогам месяца.\n\n'
@@ -16,33 +19,31 @@ async def show_welcome(message: Message):
         reply_markup=registration_menu
     )
 
-
 async def register_user(message: Message):
     # Логика регистрации пользователя
     await message.answer('Вы успешно зарегистрированы!')
 
-def register_handlers(dp: Dispatcher):
-
-    @dp.message(F.text == '/start')
+def register_handlers(router: Router):
+    @router.message(F.text == '/start')
     async def start_handler(message: Message):
-        await show_welcome(message)  # Показываем приветственное сообщение с кнопками
+        await show_welcome(message)
 
-    @dp.message(F.text == 'Регистрация 📝')
+    @router.message(F.text == 'Регистрация 📝')
     async def registration_handler(message: Message):
         await register_user(message)
 
-    @dp.message(F.text == 'Войти в систему 🚪')
+    @router.message(F.text == 'Войти в систему 🚪')
     async def login_handler(message: Message):
         await message.answer('Запрашиваем данные на вход')
 
-    @dp.message(F.text == 'Инструкция 📕')
+    @router.message(F.text == 'Инструкция 📕')
     async def instruction_handler(message: Message):
         await message.answer('Здесь нужно отправить файл pdf')
 
-    @dp.message(F.text == 'Создатель ©️')
+    @router.message(F.text == 'Создатель ©️')
     async def creator_handler(message: Message):
         await message.answer('Здесь отправляем мою фотографию и краткую информацию обо мне')
 
-    @dp.message(F.text == 'Помощь ❓')
+    @router.message(F.text == 'Помощь ❓')
     async def help_handler(message: Message):
         await message.answer('Просим отправить вопрос, по которому пользователь хотел обратиться')
