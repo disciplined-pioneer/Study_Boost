@@ -3,8 +3,12 @@ from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 from keyboards.registration_keyb import registration_menu
 from states.registration_states import RegistrationStates
+from config import ADMIN_ID
 
 router = Router()
+
+# Счетчик новых пользователей
+new_users_count = 0
 
 # Приветственное сообщение
 async def show_welcome(message: Message):
@@ -64,12 +68,45 @@ async def process_faculty(message: Message, state: FSMContext):
     await message.answer("Введите название вашего факультета: ")
     await state.set_state(RegistrationStates.faculty)  # Установить название факультета
 
-# Завершаем состояние регистрации
+# Запрос фото оплаты
 @router.message(F.text, RegistrationStates.faculty)
+async def request_payment_photo(message: Message, state: FSMContext):
+    await state.update_data(faculty=message.text)  # Сохранить факультет
+    await message.answer("Пожалуйста, отправьте фото оплаты:")
+    await state.set_state(RegistrationStates.payment_photo)  # Установить состояние ожидания фото
+
+# Обработка получения фото оплаты
+@router.message(F.photo, RegistrationStates.payment_photo)
 async def finish_registration(message: Message, state: FSMContext):
-    await state.update_data(faculty=message.text)
+    global new_users_count
     data = await state.get_data()
     user_id = message.from_user.id
 
-    await message.answer(f"Вы зарегистрированы! Ваш ID: {user_id}\nДанные: {data}")
+    # Увеличиваем счетчик новых пользователей
+    new_users_count += 1
+
+    # Форматирование сообщения для администратора
+    user_info = (
+        f"Новый пользователь зарегистрирован:\n"
+        f"Имя: {data.get('name')}\n"
+        f"Город университета: {data.get('university_city')}\n"
+        f"Название университета: {data.get('name_university')}\n"
+        f"Курс: {data.get('course')}\n"
+        f"Факультет: {data.get('faculty')}\n"
+        f"ID пользователя: {user_id}"
+    )
+
+    # Отправка сообщения администратору с обработкой исключений
+    try:
+        # Отправка фото с сообщением
+        await router.bot.send_photo(
+            ADMIN_ID, 
+            message.photo[-1].file_id,  # Берем самое большое качество фото
+            caption=user_info  # Текст сообщения
+        )
+        await router.bot.send_message(ADMIN_ID, f"Общее количество новых пользователей: {new_users_count}")
+    except Exception as e:
+        await message.answer(f"Не удалось отправить сообщение администратору: {str(e)}")
+
+    await message.answer(f"Вы были успешно зарегистрированы! Администратор скоро проверит ваши данные и даст вам доступ!")
     await state.clear()  # Завершить состояние, очищая все данные

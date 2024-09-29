@@ -1,6 +1,5 @@
 from aiogram import Router, F
 from aiogram.types import Message
-from keyboards.registration_keyb import registration_menu  # Импортируем меню
 
 router = Router()
 
