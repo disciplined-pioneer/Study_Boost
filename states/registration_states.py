@@ -1,4 +1,3 @@
-from aiogram.dispatcher import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 
 class RegistrationStates(StatesGroup):
