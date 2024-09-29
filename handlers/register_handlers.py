@@ -1,10 +1,10 @@
 from aiogram import Router, F
 from aiogram.types import Message
-from handlers.registration_hand import registration_menu  # Импортируем меню
+from keyboards.registration_keyb import registration_menu
 
-# Создайте роутер
 router = Router()
 
+# приветственное сообщение
 async def show_welcome(message: Message):
     await message.answer(
         'Добро пожаловать в @StudyBoost_bot! 🎓\n\n'
@@ -19,31 +19,11 @@ async def show_welcome(message: Message):
         reply_markup=registration_menu
     )
 
-async def register_user(message: Message):
-    # Логика регистрации пользователя
-    await message.answer('Вы успешно зарегистрированы!')
+@router.message(F.text == '/start')
+async def start_handler(message: Message):
+    await show_welcome(message)
 
-def register_handlers(router: Router):
-    @router.message(F.text == '/start')
-    async def start_handler(message: Message):
-        await show_welcome(message)
-
-    @router.message(F.text == 'Регистрация 📝')
-    async def registration_handler(message: Message):
-        await register_user(message)
-
-    @router.message(F.text == 'Войти в систему 🚪')
-    async def login_handler(message: Message):
-        await message.answer('Запрашиваем данные на вход')
-
-    @router.message(F.text == 'Инструкция 📕')
-    async def instruction_handler(message: Message):
-        await message.answer('Здесь нужно отправить файл pdf')
-
-    @router.message(F.text == 'Создатель ©️')
-    async def creator_handler(message: Message):
-        await message.answer('Здесь отправляем мою фотографию и краткую информацию обо мне')
-
-    @router.message(F.text == 'Помощь ❓')
-    async def help_handler(message: Message):
-        await message.answer('Просим отправить вопрос, по которому пользователь хотел обратиться')
+@router.message(F.text == 'Регистрация 📝')
+async def registration_handler(message: Message):
+    await message.answer('Введите ваше имя для регистрации:')
+    # Логика регистрации здесь

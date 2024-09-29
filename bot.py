@@ -1,15 +1,17 @@
 from aiogram import Bot, Dispatcher
 from aiogram import Router
 from config import TOKEN
-from registration.registration import register_handlers  # Импортируем функцию для регистрации хэндлеров
+from handlers.register_handlers import router as registration_router  # Роутер для регистрации
+from handlers.general_handlers import router as general_router  # Роутер для общих обработчиков
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
-# Создайте роутер
-router = Router()
-
 async def main():
-    register_handlers(router)  # Регистрируем обработчики
-    dp.include_router(router)  # Включаем роутер в диспетчер
+    dp.include_router(registration_router)  # Включаем роутер регистрации
+    dp.include_router(general_router)  # Включаем роутер общих обработчиков
     await dp.start_polling(bot)
+
+if __name__ == '__main__':
+    import asyncio
+    asyncio.run(main())
