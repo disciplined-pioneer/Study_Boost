@@ -1,14 +1,15 @@
 from aiogram import Router, F
-from aiogram.types import Message
+from aiogram.types import Message, InputFile
 from aiogram.fsm.context import FSMContext
 from keyboards.registration_keyb import registration_menu
+from keyboards.admin_keyb import access_keyboard
 from states.registration_states import RegistrationStates
 from config import ADMIN_ID
 
-router = Router()
+# Хранение данных новых пользователей
+new_users = []  # Глобальный список новых пользователей
 
-# Счетчик новых пользователей
-new_users_count = 0
+router = Router()
 
 # Приветственное сообщение
 async def show_welcome(message: Message):
@@ -45,49 +46,59 @@ async def start_registration(message: Message, state: FSMContext):
 async def process_university_city(message: Message, state: FSMContext):
     await state.update_data(name=message.text)  # Сохранить имя
     await message.answer("Введите город, в котором расположен ваш университет: ")
-    await state.set_state(RegistrationStates.university_city)  # Установить состояние ожидания города университета
+    await state.set_state(RegistrationStates.university_city)
 
 # Название университета
 @router.message(F.text, RegistrationStates.university_city)
 async def process_name_university(message: Message, state: FSMContext):
     await state.update_data(university_city=message.text)  # Сохранить город университета
     await message.answer("Введите название университета: ")
-    await state.set_state(RegistrationStates.name_university)  # Установить название университета
+    await state.set_state(RegistrationStates.name_university)
 
 # Номер курса
 @router.message(F.text, RegistrationStates.name_university)
 async def process_course(message: Message, state: FSMContext):
     await state.update_data(name_university=message.text)  # Сохранить название университета
     await message.answer("Введите номер вашего курса: ")
-    await state.set_state(RegistrationStates.course)  # Установить курс
+    await state.set_state(RegistrationStates.course)
 
 # Название факультета
 @router.message(F.text, RegistrationStates.course)
 async def process_faculty(message: Message, state: FSMContext):
     await state.update_data(course=message.text)  # Сохранить номер курса
     await message.answer("Введите название вашего факультета: ")
-    await state.set_state(RegistrationStates.faculty)  # Установить название факультета
+    await state.set_state(RegistrationStates.faculty)
 
 # Запрос фото оплаты
 @router.message(F.text, RegistrationStates.faculty)
 async def request_payment_photo(message: Message, state: FSMContext):
     await state.update_data(faculty=message.text)  # Сохранить факультет
     await message.answer("Пожалуйста, отправьте фото оплаты:")
-    await state.set_state(RegistrationStates.payment_photo)  # Установить состояние ожидания фото
+    await state.set_state(RegistrationStates.payment_photo)
 
-# Обработка получения фото оплаты
+# Завершение регистрации и добавление пользователя в список
 @router.message(F.photo, RegistrationStates.payment_photo)
 async def finish_registration(message: Message, state: FSMContext):
-    global new_users_count
+    global new_users  # Объявляем new_users глобальной переменной
     data = await state.get_data()
     user_id = message.from_user.id
 
-    # Увеличиваем счетчик новых пользователей
-    new_users_count += 1
+    # Получаем фотографию оплаты
+    payment_photo = message.photo[-1].file_id
 
-    # Форматирование сообщения для администратора
-    user_info = (
-        f"Новый пользователь зарегистрирован:\n"
+    # Сохраняем данные пользователя
+    user_info = {
+        "Имя": data.get("name"),
+        "Город университета": data.get("university_city"),
+        "Название университета": data.get("name_university"),
+        "Курс": data.get("course"),
+        "Факультет": data.get("faculty"),
+        "ID пользователя": user_id,
+        "Фото оплаты": payment_photo,
+    }
+    
+    # Формируем текст для отправки админу
+    user_info_text = (
         f"Имя: {data.get('name')}\n"
         f"Город университета: {data.get('university_city')}\n"
         f"Название университета: {data.get('name_university')}\n"
@@ -95,18 +106,15 @@ async def finish_registration(message: Message, state: FSMContext):
         f"Факультет: {data.get('faculty')}\n"
         f"ID пользователя: {user_id}"
     )
+    
+    # Отправляем информацию админу
+    await message.bot.send_photo(
+        chat_id=ADMIN_ID,
+        photo=payment_photo,
+        caption=user_info_text,
+        reply_markup=access_keyboard
+    )
 
-    # Отправка сообщения администратору с обработкой исключений
-    try:
-        # Отправка фото с сообщением
-        await router.bot.send_photo(
-            ADMIN_ID, 
-            message.photo[-1].file_id,  # Берем самое большое качество фото
-            caption=user_info  # Текст сообщения
-        )
-        await router.bot.send_message(ADMIN_ID, f"Общее количество новых пользователей: {new_users_count}")
-    except Exception as e:
-        await message.answer(f"Не удалось отправить сообщение администратору: {str(e)}")
-
-    await message.answer(f"Вы были успешно зарегистрированы! Администратор скоро проверит ваши данные и даст вам доступ!")
-    await state.clear()  # Завершить состояние, очищая все данные
+    # Здесь можно добавить код для добавления пользователя в базу данных или список
+    new_users.append(user_info)  # Добавляем пользователя в глобальный список
+    await message.answer("Регистрация завершена! 🎉")
