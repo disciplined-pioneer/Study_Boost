@@ -1,10 +1,10 @@
 from aiogram import Router, F
-from aiogram.types import Message, InputFile
+from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 from keyboards.registration_keyb import registration_menu
-from keyboards.admin_keyb import access_keyboard
 from states.registration_states import RegistrationStates
 from config import ADMIN_ID
+from keyboards.admin_keyb import access_keyboard
 
 # Хранение данных новых пользователей
 new_users = []  # Глобальный список новых пользователей
@@ -97,6 +97,9 @@ async def finish_registration(message: Message, state: FSMContext):
         "Фото оплаты": payment_photo,
     }
     
+    # Сохраняем user_id в состояние
+    await state.update_data(user_id=user_id)  # Сохраняем user_id
+
     # Формируем текст для отправки админу
     user_info_text = (
         f"Имя: {data.get('name')}\n"
@@ -115,6 +118,5 @@ async def finish_registration(message: Message, state: FSMContext):
         reply_markup=access_keyboard
     )
 
-    # Здесь можно добавить код для добавления пользователя в базу данных или список
     new_users.append(user_info)  # Добавляем пользователя в глобальный список
     await message.answer("Регистрация завершена! 🎉")
