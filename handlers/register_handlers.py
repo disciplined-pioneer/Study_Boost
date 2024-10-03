@@ -94,6 +94,7 @@ async def finish_registration(message: Message, state: FSMContext):
         "Курс": data.get("course"),
         "Факультет": data.get("faculty"),
         "ID пользователя": user_id,
+        "ID сообщения": message.message_id,
         "Фото оплаты": payment_photo,
     }
     
@@ -107,6 +108,7 @@ async def finish_registration(message: Message, state: FSMContext):
         f"Название университета: {data.get('name_university')}\n"
         f"Курс: {data.get('course')}\n"
         f"Факультет: {data.get('faculty')}\n"
+        f"ID сообщения: {message.message_id}\n"
         f"ID пользователя: {user_id}"
     )
     
@@ -119,4 +121,6 @@ async def finish_registration(message: Message, state: FSMContext):
     )
 
     new_users.append(user_info)  # Добавляем пользователя в глобальный список
-    await message.answer("Регистрация завершена! 🎉")
+    await message.answer('Поздравляем, регистрация завершена! 🎉\n\n'
+                         'В скором времени администратор проверит ваши данны и оформит вам подписку\n\n'
+                         'После проверки Вам придёт уведомление. Хорошего времени суток!')
