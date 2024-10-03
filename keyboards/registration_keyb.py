@@ -1,4 +1,5 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 registration_menu = ReplyKeyboardMarkup(
     keyboard=[
@@ -10,3 +11,7 @@ registration_menu = ReplyKeyboardMarkup(
     ],
     resize_keyboard=True  # Сделаем клавиатуру компактной
 )
+
+agreement = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="Я согласен ✅", callback_data="agreement_users")]
+    ])
