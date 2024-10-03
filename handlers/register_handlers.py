@@ -62,19 +62,26 @@ async def process_course(message: Message, state: FSMContext):
     await message.answer("Введите номер вашего курса: ")
     await state.set_state(RegistrationStates.course)
 
-# Название факультета
+# Название курса
 @router.message(F.text, RegistrationStates.course)
-async def process_faculty(message: Message, state: FSMContext):
+async def process_course(message: Message, state: FSMContext):
     await state.update_data(course=message.text)  # Сохранить номер курса
     await message.answer("Введите название вашего факультета: ")
-    await state.set_state(RegistrationStates.faculty)
+    await state.set_state(RegistrationStates.faculty)  # Переход к следующему состоянию
 
-# Запрос фото оплаты
+# Название факультета
 @router.message(F.text, RegistrationStates.faculty)
-async def request_payment_photo(message: Message, state: FSMContext):
-    await state.update_data(faculty=message.text)  # Сохранить факультет
+async def process_faculty(message: Message, state: FSMContext):
+    await state.update_data(faculty=message.text)  # Сохранить название факультета
+    await message.answer("Введите Ваш пароль для входа: ")
+    await state.set_state(RegistrationStates.password)  # Переход к следующему состоянию
+
+# Ввод пароля для входа
+@router.message(F.text, RegistrationStates.password)
+async def process_password(message: Message, state: FSMContext):
+    await state.update_data(password=message.text)  # Сохранить пароль
     await message.answer("Пожалуйста, отправьте фото оплаты:")
-    await state.set_state(RegistrationStates.payment_photo)
+    await state.set_state(RegistrationStates.payment_photo)  # Переход к следующему состоянию
 
 # Завершение регистрации и добавление пользователя в список
 @router.message(F.photo, RegistrationStates.payment_photo)
@@ -88,14 +95,16 @@ async def finish_registration(message: Message, state: FSMContext):
 
     # Сохраняем данные пользователя
     user_info = {
-        "Имя": data.get("name"),
-        "Город университета": data.get("university_city"),
-        "Название университета": data.get("name_university"),
-        "Курс": data.get("course"),
-        "Факультет": data.get("faculty"),
-        "ID пользователя": user_id,
-        "ID сообщения": message.message_id,
-        "Фото оплаты": payment_photo,
+        "name_user": data.get("name"),
+        "city_university": data.get("university_city"),
+        "name_university": data.get("name_university"),
+        "course": data.get("course"),
+        "faculty": data.get("faculty"),
+        "password": data.get('password'),
+        "telegam": message.from_user.username,
+        "ID_user": user_id,
+        "ID_message": message.message_id,
+        "photo_payment": payment_photo,
     }
     
     # Сохраняем user_id в состояние
@@ -108,8 +117,10 @@ async def finish_registration(message: Message, state: FSMContext):
         f"Название университета: {data.get('name_university')}\n"
         f"Курс: {data.get('course')}\n"
         f"Факультет: {data.get('faculty')}\n"
+        f"telegam: {message.from_user.username}\n"
+        f"Пароль пользователя: {data.get('password')}\n"
         f"ID сообщения: {message.message_id}\n"
-        f"ID пользователя: {user_id}"
+        f"ID пользователя: {user_id}\n"
     )
     
     # Отправляем информацию админу

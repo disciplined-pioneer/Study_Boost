@@ -7,3 +7,4 @@ class RegistrationStates(StatesGroup):
     course = State()
     faculty = State()
     payment_photo = State()
+    password = State()
