@@ -7,9 +7,6 @@ from config import ADMIN_ID
 from keyboards.admin_keyb import access_keyboard
 from datetime import datetime
 
-from aiogram import types
-from keyboards.registration_keyb import agreement
-
 from database.requests.user_search import check_user_registration
 
 # Хранение данных новых пользователей
@@ -23,8 +20,7 @@ async def registration_handler(message: Message, state: FSMContext):
 
     # проверка на наличие пользователя в БД
     user_id = message.from_user.id
-    DATABASE = "database/data/users.db"
-    result, user_info = await check_user_registration(user_id, DATABASE)
+    result, _ = await check_user_registration(user_id)
     if result:
         await message.answer('УПС! Вы уже зарегистрированы! Пожалуйста, зайдите в систему с помощью пароля')
     else:
@@ -86,7 +82,7 @@ async def finish_registration(message: Message, state: FSMContext):
 
     # Получаем фотографию оплаты
     payment_photo = message.photo[-1].file_id
-
+    from datetime import datetime, timedelta
     # Сохраняем данные пользователя
     user_info = {
         "name_user": data.get("name"),
@@ -99,7 +95,8 @@ async def finish_registration(message: Message, state: FSMContext):
         "ID_user": user_id,
         "ID_message": message.message_id,
         "photo_payment": payment_photo,
-        "date_registration": datetime.now().date()
+        "date_registration": datetime.now().date() - timedelta(days=100)
+
     }
     
     # Сохраняем user_id в состояние

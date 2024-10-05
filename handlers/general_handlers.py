@@ -1,7 +1,11 @@
 from aiogram import Router, F
 from aiogram.types import Message
+from datetime import datetime
 
 from database.requests.user_search import check_user_registration
+from database.requests.user_payment import check_user_payment
+
+from keyboards.platform_keyb import platform_menu
 
 router = Router()
 
@@ -10,12 +14,20 @@ async def login_handler(message: Message):
 
     # Проверка наличия пользваотеля в БД
     user_id = message.from_user.id
-    DATABASE = "database/data/users.db"
-    result, user_info = await check_user_registration(user_id, DATABASE)
-    password = user_info[8]
-
+    result, _ = await check_user_registration(user_id)
+    
     if result:
-        await message.answer(f'Пожалуйста, введите пароль от вашей учётной записи {password}: ')
+        
+        # Проверяем, действует ли ещё подписка
+        user_payment = await check_user_payment(user_id)
+        expiration_date = user_payment[3]
+        now_date = datetime.now().date()
+        expiration_date = datetime.strptime(expiration_date, '%Y-%m-%d').date()
+
+        if expiration_date > now_date:
+            await message.answer(f'Доступ к платформе разрешён', reply_markup=platform_menu)
+        else:
+            await message.answer(f'Ваша подписка не оплачена!')
     else:
         await message.answer('Вы не были зарегистрированы! Пожалуйста, зарегистрируйтесь и попробуйте снова!')
     
