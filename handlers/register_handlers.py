@@ -5,46 +5,16 @@ from keyboards.registration_keyb import registration_menu
 from states.registration_states import RegistrationStates
 from config import ADMIN_ID
 from keyboards.admin_keyb import access_keyboard
+from datetime import datetime
 
 from aiogram import types
 from keyboards.registration_keyb import agreement
 
+from database.requests.user_search import check_user_registration
+
 # Хранение данных новых пользователей
-new_users = []  # Глобальный список новых пользователей
-
+new_users = []
 router = Router()
-
-# Приветственное сообщение
-async def show_welcome(message: Message):
-    await message.answer(
-        'Добро пожаловать в @StudyBoost_bot! 🎓\n\n'
-        'Этот бот создан для студентов, чтобы облегчить обмен знаниями и ресурсами. Здесь вы можете:\n\n'
-        '🔹 Обмениваться конспектами и лабораторными работами: Делитесь своими материалами и получайте доступ к работам других студентов.\n\n'
-        '🔹 Зарабатывать очки: Активное участие в платформе вознаграждается! Набирайте очки за взаимодействие, и первые три студента с наибольшим количеством очков получат денежные призы по итогам месяца.\n\n'
-        '🔹 Узнавать о преподавателях: Ознакомьтесь с рейтингом преподавателей и их ожиданиями от студентов.\n\n'
-        '🔹 Организовывать мероприятия: Присоединяйтесь к тусовкам и мероприятиям, чтобы познакомиться с другими студентами и расширить кругозор.\n\n'
-        '🔹 Получать советы: Читайте полезные советы, чтобы улучшить свою учебу и организовать время.\n\n'
-        'Присоединяйтесь к нам и сделайте свою учебу проще и интереснее! 📚✨',
-        reply_markup=registration_menu
-    )
-
-# Обработчик команды /start
-@router.message(F.text == '/start')
-async def start_handler(message: Message):
-
-    # Отправляем документ
-    await message.bot.send_document(
-        chat_id=message.from_user.id,
-        document='BQACAgIAAxkBAAIQJWb-yNqpCOhKkViHeQp96c48vuHgAAKEaAAC1Tr5Sz35edJ2tLeBNgQ',
-        caption = f'Уважаемый пользователь, пожалуйста, ознакомьтесь с пользовательским соглашением!\n\nПосле прочтения нажмите на кнопку ниже с надписью "Я согласен ✅"',
-        reply_markup=agreement
-    )
-    #await show_welcome(message)
-    
-@router.callback_query(F.data == "agreement_users")
-async def handle_button_click(callback_query: types.CallbackQuery):
-    await callback_query.answer("Благодарим за использование нашей платформы!")
-    await show_welcome(callback_query.message)
 
 
 # Обработчик для начала регистрации
@@ -102,53 +72,61 @@ async def process_password(message: Message, state: FSMContext):
 # Завершение регистрации и добавление пользователя в список
 @router.message(F.photo, RegistrationStates.payment_photo)
 async def finish_registration(message: Message, state: FSMContext):
-    global new_users  # Объявляем new_users глобальной переменной
+    global new_users
     data = await state.get_data()
     user_id = message.from_user.id
 
-    # Получаем фотографию оплаты
-    payment_photo = message.photo[-1].file_id
+    # проверка на наличие пользователя в БД
+    DATABASE = "database/data/users.db"
+    result = await check_user_registration(user_id, DATABASE)
+    if result:
+        await message.answer('УПС! Вы уже зарегистрированы! Пожалуйста, зайдите в систему с помощью пароля')
+    else:
 
-    # Сохраняем данные пользователя
-    user_info = {
-        "name_user": data.get("name"),
-        "city_university": data.get("university_city"),
-        "name_university": data.get("name_university"),
-        "course": data.get("course"),
-        "faculty": data.get("faculty"),
-        "password": data.get('password'),
-        "telegam": message.from_user.username,
-        "ID_user": user_id,
-        "ID_message": message.message_id,
-        "photo_payment": payment_photo,
-    }
-    
-    # Сохраняем user_id в состояние
-    await state.update_data(user_id=user_id)  # Сохраняем user_id
+        # Получаем фотографию оплаты
+        payment_photo = message.photo[-1].file_id
 
-    # Формируем текст для отправки админу
-    user_info_text = (
-        f"Имя: {data.get('name')}\n\n"
-        f"Город университета: {data.get('university_city')}\n\n"
-        f"Название университета: {data.get('name_university')}\n\n"
-        f"Курс: {data.get('course')}\n\n"
-        f"Факультет: {data.get('faculty')}\n\n"
-        f"Телеграм: {message.from_user.username}\n\n"
-        f"Пароль пользователя: {data.get('password')}\n\n"
-        f"ID сообщения: {message.message_id}\n\n"
-        f"ID пользователя: {user_id}\n\n"
-    )
-    
-    # Отправляем информацию админу
-    await message.bot.send_photo(
-        chat_id=ADMIN_ID,
-        photo=payment_photo,
-        caption=user_info_text,
-        reply_markup=access_keyboard
-    )
+        # Сохраняем данные пользователя
+        user_info = {
+            "name_user": data.get("name"),
+            "city_university": data.get("university_city"),
+            "name_university": data.get("name_university"),
+            "course": data.get("course"),
+            "faculty": data.get("faculty"),
+            "password": data.get('password'),
+            "telegram": message.from_user.username,
+            "ID_user": user_id,
+            "ID_message": message.message_id,
+            "photo_payment": payment_photo,
+            "date_registration": datetime.now().date()
+        }
+        
+        # Сохраняем user_id в состояние
+        await state.update_data(user_id=user_id)  # Сохраняем user_id
 
-    new_users.append(user_info)  # Добавляем пользователя в глобальный список
-    await message.answer('Поздравляем, регистрация успешно завершена! 🎉\n\n'
-                     'В ближайшее время администратор проверит ваши данные и активирует подписку.\n\n'
-                     'После этого вы получите уведомление. Желаем вам отличного дня!')
+        # Формируем текст для отправки админу
+        user_info_text = (
+            f"Имя: {data.get('name')}\n\n"
+            f"Город университета: {data.get('university_city')}\n\n"
+            f"Название университета: {data.get('name_university')}\n\n"
+            f"Курс: {data.get('course')}\n\n"
+            f"Факультет: {data.get('faculty')}\n\n"
+            f"Телеграм: {message.from_user.username}\n\n"
+            f"Пароль пользователя: {data.get('password')}\n\n"
+            f"ID сообщения: {message.message_id}\n\n"
+            f"ID пользователя: {user_id}\n\n"
+        )
+        
+        # Отправляем информацию админу
+        await message.bot.send_photo(
+            chat_id=ADMIN_ID,
+            photo=payment_photo,
+            caption=user_info_text,
+            reply_markup=access_keyboard
+        )
+
+        new_users.append(user_info)  # Добавляем пользователя в глобальный список
+        await message.answer('Поздравляем, регистрация успешно завершена! 🎉\n\n'
+                        'В ближайшее время администратор проверит ваши данные и активирует подписку.\n\n'
+                        'После этого вы получите уведомление. Желаем вам отличного дня!')
 

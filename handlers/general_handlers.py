@@ -7,9 +7,19 @@ router = Router()
 async def login_handler(message: Message):
     await message.answer('Запрашиваем данные на вход')
 
+@router.message(F.text == 'Оплата подписки 💵')
+async def login_handler(message: Message):
+    await message.answer('Здесь объясним как оплатить подписку и стоимость каждой из них')
+
 @router.message(F.text == 'Инструкция 📕')
 async def instruction_handler(message: Message):
-    await message.answer('Здесь нужно отправить файл pdf')
+
+    # Отправляем документ
+    await message.bot.send_document(
+        chat_id=message.from_user.id,
+        document='BQACAgIAAxkBAAIQJWb-yNqpCOhKkViHeQp96c48vuHgAAKEaAAC1Tr5Sz35edJ2tLeBNgQ',
+        caption = f'Инструкция содержит подробное описание всех функций платформы, пошаговое руководство по регистрации и использованию бота, а также примеры обмена учебными материалами и заработка очков за активность',
+    )
 
 @router.message(F.text == 'Создатель ©️')
 async def creator_handler(message: Message):

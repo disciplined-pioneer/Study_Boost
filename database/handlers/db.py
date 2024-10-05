@@ -1,5 +1,4 @@
 import os
-import aiosqlite
 import asyncio
 
 from database_create import create_db
@@ -18,19 +17,19 @@ async def main():
     await create_db(DATABASE)  # Создаем базу данных
 
     user_data = {
-        'name_user': '1',
+        'name_user': '15555555',
         'city_university': '1',
         'name_university': '1',
         'course': '1',
         'faculty': '1',
         'password': '1234567890',
-        'telegram': 'yluxw',  # Исправлено на 'telegram'
+        'telegram': 'yluxw55555', 
         'ID_user': 802587774,
         'ID_message': 4023,
         'photo_payment': 'AgACAgIAAxkBAAIOAAFm_jJmOBbkizBpItkcc3ReDKshbAACIOIxG9U68Utm7tDbEIeFGQEAAwIAA3kAAzYE'
     }
 
-    await register_user(user_data) # Регистрируем пользователя
+    await register_user(user_data, DATABASE) # Регистрируем пользователя
     await print_all_users(DATABASE)  # Печатаем всех пользователей
 
 if __name__ == '__main__':

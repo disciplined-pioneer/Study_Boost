@@ -2,10 +2,16 @@ from aiogram import Router, F
 from aiogram.types import CallbackQuery
 from aiogram import Bot
 
-from keyboards.admin_keyb import subscription_menu, access_keyboard
+from keyboards.admin_keyb import subscription_menu
 from handlers.register_handlers import new_users
 
 from keyboards.platform_keyb import platform_menu
+
+import os
+from database.handlers.database_create import create_db
+from database.handlers.database_handler import register_user
+from database.handlers.print_db import print_all_users
+
 
 router = Router()
 
@@ -23,37 +29,44 @@ async def access(callback: CallbackQuery, bot: Bot):
 # определение подписки
 @router.callback_query(F.data.startswith('subscription_'))
 async def subscription_choice(callback: CallbackQuery, bot: Bot):
+
+    # Получаем выбранный тип подписки из данных callback
     subscription_type = callback.data.replace('subscription_', '').replace('_', ' ').title()
     
-    # Получаем ID текущего сообщения
+    # Получаем ID текущего сообщения и ищем пользователя
     current_message_id = callback.message.message_id - 1
-    print(new_users)
-    if not new_users:
-        await callback.message.answer("Нет пользователей, ожидающих подписку.")
-        return
-
-    # Находим нужного пользователя по id сообщения
-    user_id = None
-    for i in range(len(new_users)):
-        if new_users[i]['ID_message'] == current_message_id:
-            user_info = new_users.pop(i)  # Удаляем пользователя из списка
-            user_id = user_info.get("ID_user")
-            break
+    user_info = next((user for user in new_users if user['ID_message'] == current_message_id), None)
 
     # Проверка, найден ли пользователь
-    if user_id is None:
+    if not user_info:
         await callback.message.answer("Пользователь для данной подписки не найден.")
         return
+
+    user_id = user_info["ID_user"]
+
+    # Обновляем данные пользователя и регистрируем его в БД
+    user_info['subscription_type'] = subscription_type
+    db_dir = 'database/data'
+    os.makedirs(db_dir, exist_ok=True)
+    database = os.path.join(db_dir, 'users.db') 
     
-    # Отправляем уведомление пользователю ( и администратору  )и добавляем меню `platform_menu`
+    await create_db(database)
+    await register_user(user_info, database)
+    #await print_all_users(database)
+    new_users.remove(user_info)
+
+    # Отправляем уведомление пользователю и добавляем меню `platform_menu`
     await bot.send_message(
         user_id,
         f"Вам был предоставлен доступ к платформе StudyBoost с подпиской: {subscription_type}! ✅",
-        reply_markup=platform_menu  # Отправляем сообщение вместе с клавиатурой platform_menu
+        reply_markup=platform_menu
     )
 
+    # Подтверждаем действие администратору
     await callback.message.answer(f"Вы предоставили доступ пользователю с ID: {user_id} ✅")
     await callback.message.edit_reply_markup(reply_markup=None)
+
+
 
 
 
