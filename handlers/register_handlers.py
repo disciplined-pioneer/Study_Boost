@@ -20,7 +20,15 @@ router = Router()
 # Обработчик для начала регистрации
 @router.message(F.text == 'Регистрация 📝')
 async def registration_handler(message: Message, state: FSMContext):
-    await start_registration(message, state)
+
+    # проверка на наличие пользователя в БД
+    user_id = message.from_user.id
+    DATABASE = "database/data/users.db"
+    result, user_info = await check_user_registration(user_id, DATABASE)
+    if result:
+        await message.answer('УПС! Вы уже зарегистрированы! Пожалуйста, зайдите в систему с помощью пароля')
+    else:
+        await start_registration(message, state)
 
 # Начало регистрации
 async def start_registration(message: Message, state: FSMContext):
@@ -76,57 +84,50 @@ async def finish_registration(message: Message, state: FSMContext):
     data = await state.get_data()
     user_id = message.from_user.id
 
-    # проверка на наличие пользователя в БД
-    DATABASE = "database/data/users.db"
-    result = await check_user_registration(user_id, DATABASE)
-    if result:
-        await message.answer('УПС! Вы уже зарегистрированы! Пожалуйста, зайдите в систему с помощью пароля')
-    else:
+    # Получаем фотографию оплаты
+    payment_photo = message.photo[-1].file_id
 
-        # Получаем фотографию оплаты
-        payment_photo = message.photo[-1].file_id
+    # Сохраняем данные пользователя
+    user_info = {
+        "name_user": data.get("name"),
+        "city_university": data.get("university_city"),
+        "name_university": data.get("name_university"),
+        "course": data.get("course"),
+        "faculty": data.get("faculty"),
+        "password": data.get('password'),
+        "telegram": message.from_user.username,
+        "ID_user": user_id,
+        "ID_message": message.message_id,
+        "photo_payment": payment_photo,
+        "date_registration": datetime.now().date()
+    }
+    
+    # Сохраняем user_id в состояние
+    await state.update_data(user_id=user_id)  # Сохраняем user_id
 
-        # Сохраняем данные пользователя
-        user_info = {
-            "name_user": data.get("name"),
-            "city_university": data.get("university_city"),
-            "name_university": data.get("name_university"),
-            "course": data.get("course"),
-            "faculty": data.get("faculty"),
-            "password": data.get('password'),
-            "telegram": message.from_user.username,
-            "ID_user": user_id,
-            "ID_message": message.message_id,
-            "photo_payment": payment_photo,
-            "date_registration": datetime.now().date()
-        }
-        
-        # Сохраняем user_id в состояние
-        await state.update_data(user_id=user_id)  # Сохраняем user_id
+    # Формируем текст для отправки админу
+    user_info_text = (
+        f"Имя: {data.get('name')}\n\n"
+        f"Город университета: {data.get('university_city')}\n\n"
+        f"Название университета: {data.get('name_university')}\n\n"
+        f"Курс: {data.get('course')}\n\n"
+        f"Факультет: {data.get('faculty')}\n\n"
+        f"Телеграм: {message.from_user.username}\n\n"
+        f"Пароль пользователя: {data.get('password')}\n\n"
+        f"ID сообщения: {message.message_id}\n\n"
+        f"ID пользователя: {user_id}\n\n"
+    )
+    
+    # Отправляем информацию админу
+    await message.bot.send_photo(
+        chat_id=ADMIN_ID,
+        photo=payment_photo,
+        caption=user_info_text,
+        reply_markup=access_keyboard
+    )
 
-        # Формируем текст для отправки админу
-        user_info_text = (
-            f"Имя: {data.get('name')}\n\n"
-            f"Город университета: {data.get('university_city')}\n\n"
-            f"Название университета: {data.get('name_university')}\n\n"
-            f"Курс: {data.get('course')}\n\n"
-            f"Факультет: {data.get('faculty')}\n\n"
-            f"Телеграм: {message.from_user.username}\n\n"
-            f"Пароль пользователя: {data.get('password')}\n\n"
-            f"ID сообщения: {message.message_id}\n\n"
-            f"ID пользователя: {user_id}\n\n"
-        )
-        
-        # Отправляем информацию админу
-        await message.bot.send_photo(
-            chat_id=ADMIN_ID,
-            photo=payment_photo,
-            caption=user_info_text,
-            reply_markup=access_keyboard
-        )
-
-        new_users.append(user_info)  # Добавляем пользователя в глобальный список
-        await message.answer('Поздравляем, регистрация успешно завершена! 🎉\n\n'
-                        'В ближайшее время администратор проверит ваши данные и активирует подписку.\n\n'
-                        'После этого вы получите уведомление. Желаем вам отличного дня!')
+    new_users.append(user_info)  # Добавляем пользователя в глобальный список
+    await message.answer('Поздравляем, регистрация успешно завершена! 🎉\n\n'
+                    'В ближайшее время администратор проверит ваши данные и активирует подписку.\n\n'
+                    'После этого вы получите уведомление. Желаем вам отличного дня!')
 

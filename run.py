@@ -1,5 +1,5 @@
 import asyncio
-from bot import main  # Импортируем основную функцию из bot.py
+from bot import main
 
 if __name__ == "__main__":
     try:

@@ -8,7 +8,7 @@ registration_menu = ReplyKeyboardMarkup(
         [KeyboardButton(text='Регистрация 📝'), KeyboardButton(text='Войти в систему 🚪')],
         [KeyboardButton(text='Создатель ©️'), KeyboardButton(text='Помощь ❓')]
     ],
-    resize_keyboard=True  # Сделаем клавиатуру компактной
+    resize_keyboard=True
 )
 
 agreement = InlineKeyboardMarkup(inline_keyboard=[

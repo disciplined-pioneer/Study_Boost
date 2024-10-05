@@ -1,12 +1,24 @@
 from aiogram import Router, F
 from aiogram.types import Message
 
+from database.requests.user_search import check_user_registration
+
 router = Router()
 
 @router.message(F.text == 'Войти в систему 🚪')
 async def login_handler(message: Message):
-    await message.answer('Запрашиваем данные на вход')
 
+    # Проверка наличия пользваотеля в БД
+    user_id = message.from_user.id
+    DATABASE = "database/data/users.db"
+    result, user_info = await check_user_registration(user_id, DATABASE)
+    password = user_info[8]
+
+    if result:
+        await message.answer(f'Пожалуйста, введите пароль от вашей учётной записи {password}: ')
+    else:
+        await message.answer('Вы не были зарегистрированы! Пожалуйста, зарегистрируйтесь и попробуйте снова!')
+    
 @router.message(F.text == 'Оплата подписки 💵')
 async def login_handler(message: Message):
     await message.answer('Здесь объясним как оплатить подписку и стоимость каждой из них')
