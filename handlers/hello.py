@@ -1,7 +1,6 @@
 from aiogram import Router, F
 from aiogram.types import Message
 from keyboards.registration_keyb import registration_menu
-from keyboards.admin_keyb import access_keyboard
 
 from aiogram import types
 from keyboards.registration_keyb import agreement

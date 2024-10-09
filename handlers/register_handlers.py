@@ -1,12 +1,11 @@
 from aiogram import Router, F
 from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
-from keyboards.registration_keyb import registration_menu
 from states.registration_states import RegistrationStates
 from config import ADMIN_ID
 from keyboards.admin_keyb import access_keyboard
-from datetime import datetime
 
+from datetime import datetime, timedelta
 from database.requests.user_search import check_user_registration
 
 # Хранение данных новых пользователей
@@ -22,7 +21,7 @@ async def registration_handler(message: Message, state: FSMContext):
     user_id = message.from_user.id
     result, _ = await check_user_registration(user_id)
     if result:
-        await message.answer('УПС! Вы уже зарегистрированы! Пожалуйста, зайдите в систему с помощью пароля')
+        await message.answer('УПС! Вы уже зарегистрированы! Пожалуйста, войдите в платформу, нажав на кнопку "Войти в систему 🚪"')
     else:
         await start_registration(message, state)
 
@@ -76,7 +75,6 @@ async def finish_registration(message: Message, state: FSMContext):
     # Получаем фотографию оплаты
     payment_photo = message.photo[-1].file_id
 
-    from datetime import datetime, timedelta
     # Сохраняем данные пользователя
     user_info = {
         "name_user": data.get("name"),
@@ -88,7 +86,7 @@ async def finish_registration(message: Message, state: FSMContext):
         "ID_user": user_id,
         "ID_message": message.message_id,
         "photo_payment": payment_photo,
-        "date_registration": datetime.now().date()
+        "date_registration": datetime.now().date() - timedelta(days=100)
     }
     
     # Сохраняем user_id в состояние

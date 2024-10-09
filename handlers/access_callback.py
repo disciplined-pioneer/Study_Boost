@@ -8,12 +8,10 @@ from handlers.register_handlers import new_users
 from keyboards.platform_keyb import platform_menu
 
 from database.handlers.database_handler import register_user, add_subscription_status, add_payment
-from database.handlers.print_db import print_all_users
 
 from datetime import timedelta
 from aiogram import Bot
 from aiogram.types import CallbackQuery
-
 
 router = Router()
 
