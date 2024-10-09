@@ -6,8 +6,8 @@ async def register_user(user_data):
     async with aiosqlite.connect(database_path) as db:
         try:
             await db.execute(''' 
-                INSERT INTO users (ID_user, telegram, name_user, city_university, name_university, course, faculty, password, ID_message, photo_payment)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO users (ID_user, telegram, name_user, city_university, name_university, course, faculty, ID_message, photo_payment)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
                 user_data['ID_user'],
                 user_data['telegram'],
@@ -16,7 +16,6 @@ async def register_user(user_data):
                 user_data['name_university'],
                 user_data['course'],
                 user_data['faculty'],
-                user_data['password'],
                 user_data['ID_message'],
                 user_data['photo_payment']
             ))

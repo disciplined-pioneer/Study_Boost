@@ -22,8 +22,9 @@ subscription_menu = InlineKeyboardMarkup(
 # Клавиатура с причинами отказа
 deny_access_menu = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text="Некорректный формат данных", callback_data="deny_format")],
-    [InlineKeyboardButton(text="Оплата не была полученна", callback_data="deny_payment")],
+    [InlineKeyboardButton(text="Оплата не была получена", callback_data="deny_payment")],
     [InlineKeyboardButton(text="Подозрение на мошенничество", callback_data="deny_fraud")],
-    [InlineKeyboardButton(text="Назад 🔙", callback_data="back_to_access")]
+    [InlineKeyboardButton(text="Оплата была получена не в полном объёме", callback_data="deny_payment_no_enough")],
+    [InlineKeyboardButton(text="Предоставить доступ ✅", callback_data="access")]
 ])
 

@@ -2,15 +2,17 @@ from aiogram import Router, F
 from aiogram.types import CallbackQuery
 from aiogram import Bot
 
-import datetime
 from keyboards.admin_keyb import subscription_menu
 from handlers.register_handlers import new_users
 
 from keyboards.platform_keyb import platform_menu
 
-import os
 from database.handlers.database_handler import register_user, add_subscription_status, add_payment
 from database.handlers.print_db import print_all_users
+
+from datetime import timedelta
+from aiogram import Bot
+from aiogram.types import CallbackQuery
 
 
 router = Router()
@@ -26,13 +28,9 @@ async def access(callback: CallbackQuery, bot: Bot):
     await bot.edit_message_reply_markup(chat_id=admin_id, message_id=message_id, reply_markup=subscription_menu)
     await callback.answer()
 
-# определение подписки
-from datetime import timedelta
-from aiogram import Bot
-from aiogram.types import CallbackQuery
-
 @router.callback_query(F.data.startswith('subscription_'))
 async def subscription_choice(callback: CallbackQuery, bot: Bot):
+
     # Получаем выбранный тип подписки из данных callback
     subscription_type = callback.data.replace('subscription_', '').replace('_', ' ').title()
 
@@ -75,18 +73,3 @@ async def subscription_choice(callback: CallbackQuery, bot: Bot):
     await callback.message.answer(f"Вы предоставили доступ пользователю с ID: {user_id} ✅")
     await callback.message.edit_reply_markup(reply_markup=None)
 
-
-
-
-
-
-@router.callback_query(F.data == "no_access")
-async def no_access(callback: CallbackQuery, bot: Bot):
-    admin_id = callback.from_user.id
-    await callback.answer("В доступе отказано")
-    await callback.message.edit_reply_markup(reply_markup=None)
-
-    # Уведомляем о отказе доступа
-    await bot.send_message(admin_id, 'В доступе было отказано ❌'
-                                    '\nПожалуйста, попробуйте ещё раз')
-    await callback.message.answer(f"Вы не предоставили доступ пользователю с ID: {admin_id} ❌")

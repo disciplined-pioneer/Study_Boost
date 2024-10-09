@@ -26,7 +26,7 @@ async def registration_handler(message: Message, state: FSMContext):
     else:
         await start_registration(message, state)
 
-# Начало регистрации
+# Имя пользователя
 async def start_registration(message: Message, state: FSMContext):
     await message.answer("Пожалуйста, укажите ваше имя: ")
     await state.set_state(RegistrationStates.name)  # Установить состояние ожидания имени
@@ -52,25 +52,18 @@ async def process_course(message: Message, state: FSMContext):
     await message.answer("На каком курсе вы обучаетесь? Пожалуйста, укажите номер курса: ")
     await state.set_state(RegistrationStates.course)
 
-# Название курса
+# Название факультета
 @router.message(F.text, RegistrationStates.course)
 async def process_course(message: Message, state: FSMContext):
     await state.update_data(course=message.text)  # Сохранить номер курса
     await message.answer("Введите название вашего факультета: ")
     await state.set_state(RegistrationStates.faculty)  # Переход к следующему состоянию
 
-# Название факультета
+# Фото оплаты
 @router.message(F.text, RegistrationStates.faculty)
-async def process_faculty(message: Message, state: FSMContext):
-    await state.update_data(faculty=message.text)  # Сохранить название факультета
-    await message.answer("Придумайте и введите пароль для вашей учётной записи: ")
-    await state.set_state(RegistrationStates.password)  # Переход к следующему состоянию
-
-# Ввод пароля для входа
-@router.message(F.text, RegistrationStates.password)
 async def process_password(message: Message, state: FSMContext):
-    await state.update_data(password=message.text)  # Сохранить пароль
-    await message.answer("Пожалуйста, отправьте фото, подтверждающее оплату:")
+    await state.update_data(faculty=message.text)  # Сохранить название факультета
+    await message.answer("Пожалуйста, отправьте фото, подтверждающее оплату: ")
     await state.set_state(RegistrationStates.payment_photo)  # Переход к следующему состоянию
 
 # Завершение регистрации и добавление пользователя в список
@@ -82,6 +75,7 @@ async def finish_registration(message: Message, state: FSMContext):
 
     # Получаем фотографию оплаты
     payment_photo = message.photo[-1].file_id
+
     from datetime import datetime, timedelta
     # Сохраняем данные пользователя
     user_info = {
@@ -90,13 +84,11 @@ async def finish_registration(message: Message, state: FSMContext):
         "name_university": data.get("name_university"),
         "course": data.get("course"),
         "faculty": data.get("faculty"),
-        "password": data.get('password'),
         "telegram": message.from_user.username,
         "ID_user": user_id,
         "ID_message": message.message_id,
         "photo_payment": payment_photo,
-        "date_registration": datetime.now().date() - timedelta(days=100)
-
+        "date_registration": datetime.now().date() #- timedelta(days=100)
     }
     
     # Сохраняем user_id в состояние
@@ -110,7 +102,6 @@ async def finish_registration(message: Message, state: FSMContext):
         f"Курс: {data.get('course')}\n\n"
         f"Факультет: {data.get('faculty')}\n\n"
         f"Телеграм: {message.from_user.username}\n\n"
-        f"Пароль пользователя: {data.get('password')}\n\n"
         f"ID сообщения: {message.message_id}\n\n"
         f"ID пользователя: {user_id}\n\n"
     )
