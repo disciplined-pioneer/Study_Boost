@@ -4,7 +4,7 @@ from handlers.register_handlers import router as registration_router  # Роут
 from handlers.general_handlers import router as general_router  # Роутер для общих обработчиков
 
 from handlers.access_callback import router as access_users  # Роутер для доступа к платформе
-from handlers.no_access_callback import router as no_access_users  # Роутер для отказа к платформе
+from handlers.deny_access import router as no_access_users  # Роутер для отказа к платформе
 
 from handlers.hello import router as hello  # Роутер для приветствия
 
