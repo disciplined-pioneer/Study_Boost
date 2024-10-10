@@ -82,11 +82,11 @@ async def finish_registration(message: Message, state: FSMContext):
         "name_university": data.get("name_university"),
         "course": data.get("course"),
         "faculty": data.get("faculty"),
-        "telegram": message.from_user.username,
+        "telegram": '@' + message.from_user.username,
         "ID_user": user_id,
         "ID_message": message.message_id,
         "photo_payment": payment_photo,
-        "date_registration": datetime.now().date() - timedelta(days=100)
+        "date_registration": datetime.now().date() #- timedelta(days=100)
     }
     
     # Сохраняем user_id в состояние
@@ -99,7 +99,7 @@ async def finish_registration(message: Message, state: FSMContext):
         f"Название университета: {data.get('name_university')}\n\n"
         f"Курс: {data.get('course')}\n\n"
         f"Факультет: {data.get('faculty')}\n\n"
-        f"Телеграм: {message.from_user.username}\n\n"
+        f"Телеграм: {'@' + message.from_user.username}\n\n"
         f"ID сообщения: {message.message_id}\n\n"
         f"ID пользователя: {user_id}\n\n"
     )
