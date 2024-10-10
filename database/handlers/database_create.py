@@ -1,7 +1,7 @@
-import aiosqlite
 import os
-import asyncio
+import aiosqlite
 
+# Создание таблицы пользователей
 async def create_users_table():
     database_path = 'database/data/users.db'
     os.makedirs(os.path.dirname(database_path), exist_ok=True)

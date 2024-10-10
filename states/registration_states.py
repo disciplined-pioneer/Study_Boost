@@ -2,7 +2,7 @@ from aiogram.fsm.state import State, StatesGroup
 
 class RegistrationStates(StatesGroup):
     name = State()
-    university_city = State()
+    city_university = State()
     name_university = State()
     course = State()
     faculty = State()

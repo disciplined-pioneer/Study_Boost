@@ -2,6 +2,7 @@ from aiogram import Router, F
 from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 from states.registration_states import RegistrationStates
+
 from config import ADMIN_ID
 from keyboards.admin_keyb import access_keyboard
 
@@ -34,10 +35,10 @@ async def start_registration(message: Message, state: FSMContext):
 async def process_university_city(message: Message, state: FSMContext):
     await state.update_data(name=message.text)  # Сохранить имя
     await message.answer("Введите город, в котором расположено ваше учебное заведение: ")
-    await state.set_state(RegistrationStates.university_city)
+    await state.set_state(RegistrationStates.city_university)
 
 # Название университета
-@router.message(F.text, RegistrationStates.university_city)
+@router.message(F.text, RegistrationStates.city_university)
 async def process_name_university(message: Message, state: FSMContext):
     await state.update_data(university_city=message.text)  # Сохранить город университета
     await message.answer("Укажите полное название вашего учебного заведения: ")
@@ -77,31 +78,32 @@ async def finish_registration(message: Message, state: FSMContext):
     # Сохраняем данные пользователя
     user_info = {
         "name_user": data.get("name"),
-        "city_university": data.get("university_city"),
+        "city_university": data.get("city_university"),
         "name_university": data.get("name_university"),
         "course": data.get("course"),
         "faculty": data.get("faculty"),
-        "telegram": '@' + message.from_user.username,
+        "telegram": f"@{message.from_user.username}" if message.from_user.username else "Не указан",
         "ID_user": user_id,
         "ID_message": message.message_id,
         "photo_payment": payment_photo,
         "date_registration": datetime.now().date() #- timedelta(days=100)
     }
-    
+
     # Сохраняем user_id в состояние
     await state.update_data(user_id=user_id)  # Сохраняем user_id
 
     # Формируем текст для отправки админу
     user_info_text = (
         f"Имя: {data.get('name')}\n\n"
-        f"Город университета: {data.get('university_city')}\n\n"
+        f"Город университета: {data.get('city_university')}\n\n"
         f"Название университета: {data.get('name_university')}\n\n"
         f"Курс: {data.get('course')}\n\n"
         f"Факультет: {data.get('faculty')}\n\n"
-        f"Телеграм: {'@' + message.from_user.username}\n\n"
+        f"Телеграм: {'@' + message.from_user.username if message.from_user.username else 'Не указан'}\n\n"
         f"ID сообщения: {message.message_id}\n\n"
         f"ID пользователя: {user_id}\n\n"
     )
+
     
     # Отправляем информацию админу
     await message.bot.send_photo(
