@@ -12,7 +12,6 @@ from database.requests.user_search import check_user_registration
 new_users = []
 router = Router()
 
-
 # Обработчик для начала регистрации
 @router.message(F.text == 'Регистрация 📝')
 async def registration_handler(message: Message, state: FSMContext):

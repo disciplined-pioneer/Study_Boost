@@ -6,12 +6,16 @@ from aiogram import types
 from aiogram.fsm.context import FSMContext
 from states.payment_states import PaymentStates
 
+from handlers.register_handlers import new_users
+
 router = Router()
 
 @router.message(F.photo, PaymentStates.payment_photo)  # Используем фильтр для проверки типа контента
 async def receive_payment_photo(message: types.Message, state: FSMContext):
     photo_id = message.photo[-1].file_id
     await message.answer("Фотография успешно получена!")
+
+
     
     # Завершаем состояние
     await state.clear()
@@ -21,7 +25,8 @@ async def login_handler(message: types.Message, state: FSMContext):
 
     # Проверка наличия пользователя в БД
     user_id = message.from_user.id
-    result, _ = await check_user_registration(user_id)
+    result, user_info = await check_user_registration(user_id)
+    print(user_info)
     
     if result:
         # Проверяем, действует ли ещё подписка
