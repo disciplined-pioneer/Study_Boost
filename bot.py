@@ -10,6 +10,8 @@ from handlers.general_handlers import router as general_router  # Роутер �
 from handlers.access_callback import router as access_users_router  # Роутер для доступа к платформе
 from handlers.deny_access_callback import router as deny_access_users_router  # Роутер для отказа к платформе
 
+from handlers.platform_handlers import router as platform_router
+
 
 from database.handlers.database_create import create_all_databases
 
@@ -26,5 +28,6 @@ async def main():
     dp.include_router(general_router)  # Включаем роутер общих обработчиков
     dp.include_router(access_users_router)  # Включаем роутер для доступа к платформе 
     dp.include_router(deny_access_users_router)  # Включаем роутер для отказа в доступе
-    
+    dp.include_router(platform_router)  # Включаем роутер для советов
+
     await dp.start_polling(bot)

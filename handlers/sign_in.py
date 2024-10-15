@@ -72,6 +72,7 @@ async def receive_payment_photo(message: types.Message, state: FSMContext):
 
 @router.message(F.text == 'Войти в систему 🚪')
 async def login_handler(message: types.Message, state: FSMContext):
+    
     # Проверка наличия пользователя в БД
     user_id = message.from_user.id
     result, user_info = await check_user_registration(user_id)
