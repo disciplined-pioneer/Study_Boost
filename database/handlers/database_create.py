@@ -15,8 +15,8 @@ async def create_users_table():
                 name_user TEXT,
                 city_university TEXT,
                 name_university TEXT,
-                course TEXT,
                 faculty TEXT,
+                course TEXT,
                 ID_message INTEGER,
                 photo_payment TEXT
             )
