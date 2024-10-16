@@ -138,14 +138,14 @@ async def add_rating_calculation(ID_user, rating_value, action_type):
 
 
 # Добавление советов   
-async def add_user_advice(ID_user, date_publication, content, grade_advice):
+async def add_user_advice(ID_user, date_publication, content, type_advice, grade_advice):
     database_path = 'database/data/users_advice.db'
     async with aiosqlite.connect(database_path) as db:
         try:
             await db.execute(''' 
-                INSERT INTO users_advice (ID_user, date_publication, content, grade_advice)
-                VALUES (?, ?, ?, ?)
-            ''', (ID_user, date_publication, content, grade_advice))
+                INSERT INTO users_advice (ID_user, date_publication, content, type_advice, grade_advice)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (ID_user, date_publication, content, type_advice, grade_advice))
             await db.commit()
             return 'Совет пользователя успешно добавлен!'
         except Exception as e:

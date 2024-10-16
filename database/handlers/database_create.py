@@ -126,6 +126,7 @@ async def users_adviсe():
                 ID_user INTEGER,
                 date_publication TEXT,
                 content TEXT,
+                type_advice,
                 grade_adviсe TEXT,
                 UNIQUE(ID_user)
             )
