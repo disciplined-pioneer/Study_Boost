@@ -1,7 +1,7 @@
 import os
 import aiosqlite
 
-# Создание таблицы пользователей
+# Создание таблиц с информацией пользователях
 async def create_users_table():
     database_path = 'database/data/users.db'
     os.makedirs(os.path.dirname(database_path), exist_ok=True)
@@ -54,6 +54,7 @@ async def create_payments_table():
         ''')
         await db.commit()
 
+# Рейтинг пользователей
 async def create_users_rating():
     database_path = 'database/data/users_rating.db'
     os.makedirs(os.path.dirname(database_path), exist_ok=True)
@@ -63,7 +64,8 @@ async def create_users_rating():
             CREATE TABLE IF NOT EXISTS users_rating (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 ID_user INTEGER,
-                rating TEXT
+                rating TEXT,
+                UNIQUE(ID_user)
             )
         ''')
         await db.commit()
@@ -106,16 +108,42 @@ async def create_rating_calculation():
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 ID_user INTEGER,
                 rating_value TEXT,
-                action_type TEXT
+                action_type TEXT,
+                UNIQUE(ID_user)
             )
         ''')
         await db.commit()
 
+# Советы пользователей
+async def users_adviсe():
+    database_path = 'database/data/users_adviсe.db'
+    os.makedirs(os.path.dirname(database_path), exist_ok=True)
 
+    async with aiosqlite.connect(database_path) as db:
+        await db.execute(''' 
+            CREATE TABLE IF NOT EXISTS users_adviсe (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                ID_user INTEGER,
+                date_publication TEXT,
+                content TEXT,
+                grade_adviсe TEXT,
+                UNIQUE(ID_user)
+            )
+        ''')
+        await db.commit()
+
+# Создание всех таблиц
 async def create_all_databases():
+
+    # Инф. про пользователей
     await create_users_table()
     await create_subscription_status_table()
     await create_payments_table()
+
+    # Рейтинг
     await create_users_rating()
     await create_rating_criteria()
     await create_rating_calculation()
+
+    # Советы
+    await users_adviсe()
