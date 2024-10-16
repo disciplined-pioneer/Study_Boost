@@ -12,11 +12,11 @@ platform_menu = ReplyKeyboardMarkup(
 
 adviсe_menu = ReplyKeyboardMarkup(
     keyboard=[
+        [KeyboardButton(text='Добавить совет ➕'), KeyboardButton(text='Назад 🔙')],
         [KeyboardButton(text='Учёба и успеваемость 👨🏻‍🏫')],
         [KeyboardButton(text='Здоровье и благополучие ❤️')],
         [KeyboardButton(text='Социальная жизнь 🧍')],
-        [KeyboardButton(text='Работа и карьера 💼')],
-        [KeyboardButton(text='Случайный совет ❓')]
+        [KeyboardButton(text='Работа и карьера 💼')]
     ],
     resize_keyboard=True  # Сделаем клавиатуру компактной
 )

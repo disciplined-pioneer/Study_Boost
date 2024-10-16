@@ -3,7 +3,7 @@ from aiogram.types import CallbackQuery
 from aiogram import Bot
 
 from keyboards.admin_keyb import subscription_menu
-from handlers.register_handlers import new_users
+from handlers.start_hadlers.register_handlers import new_users
 
 from keyboards.platform_keyb import platform_menu
 

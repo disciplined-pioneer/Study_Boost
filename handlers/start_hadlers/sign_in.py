@@ -7,7 +7,7 @@ from aiogram.fsm.context import FSMContext
 from states.payment_states import PaymentStates
 
 from config import ADMIN_ID
-from handlers.register_handlers import new_users
+from handlers.start_hadlers.register_handlers import new_users
 from keyboards.admin_keyb import access_keyboard
 
 router = Router()
