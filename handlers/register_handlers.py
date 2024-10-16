@@ -84,7 +84,7 @@ async def finish_registration(message: Message, state: FSMContext):
         "ID_user": user_id,
         "ID_message": message.message_id,
         "photo_payment": payment_photo,
-        "date_registration": datetime.now().date() #- timedelta(days=100)
+        "date_registration": datetime.now().date() - timedelta(days=100)
     }
 
     # Сохраняем user_id в состояние
