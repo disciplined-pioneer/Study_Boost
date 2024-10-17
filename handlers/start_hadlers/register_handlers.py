@@ -84,11 +84,11 @@ async def finish_registration(message: Message, state: FSMContext):
         "ID_user": user_id,
         "ID_message": message.message_id,
         "photo_payment": payment_photo,
-        "date_registration": datetime.now().date() - timedelta(days=100)
+        "date_registration": datetime.now().date() #- timedelta(days=100)
     }
 
     # Сохраняем user_id в состояние
-    await state.update_data(user_id=user_id)  # Сохраняем user_id
+    #await state.update_data(user_id=user_id)  # Сохраняем user_id
 
     # Формируем текст для отправки админу
     user_info_text = (
@@ -114,4 +114,5 @@ async def finish_registration(message: Message, state: FSMContext):
     await message.answer('Поздравляем, регистрация успешно завершена! 🎉\n\n'
                     'В ближайшее время администратор проверит ваши данные и активирует подписку.\n\n'
                     'После этого вы получите уведомление. Желаем вам отличного дня!')
+    await state.clear()
 
