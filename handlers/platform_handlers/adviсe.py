@@ -7,6 +7,9 @@ from aiogram.types import CallbackQuery
 from aiogram.fsm.context import FSMContext
 
 from states.adviсe_states import AdviсeStates
+from datetime import datetime
+
+from database.handlers.database_handler import add_user_advice
 
 from database.requests.user_access import can_use_feature
 
@@ -22,7 +25,7 @@ async def category_selected(callback: CallbackQuery, state: FSMContext):
 
     # Сохранение выбранной категории в состояние
     selected_category = callback.data
-    await state.update_data(selected_category=selected_category)
+    await state.update_data(category_advice=selected_category)
     
     # Ответ пользователю и завершение обработки
     await callback.message.reply("Пожалуйста, введите текст вашего совета:")
@@ -32,12 +35,26 @@ async def category_selected(callback: CallbackQuery, state: FSMContext):
 # Текст совета
 @router.message(F.text, AdviсeStates.category_advice)
 async def process_advice(message: Message, state: FSMContext):
+    
     data = await state.get_data()  # Получаем данные состояния
-    selected_category = data.get("selected_category")  # Извлекаем выбранную категорию
+    user_id = message.from_user.id
 
-    await state.update_data(category_advice=message.text)
-    await message.answer(f"Ваш совет с текстом: '{message.text}' в категории '{selected_category}' был сохранён!")
-
+    # Добавляем оставшиеся данные
+    await state.update_data(date_publication=datetime.now().date())
+    await state.update_data(ID_user=user_id)
+    await state.update_data(content=message.text)
+    
+    # Сохраняем данные в БД
+    data = data = await state.get_data()
+    user_advice_response = await add_user_advice(ID_user=data.get('ID_user'),
+                          date_publication=data.get('date_publication'),
+                          content=data.get('content'),
+                          type_advice=data.get('category_advice'),
+                          grade_advice='0')
+    if user_advice_response == "Совет пользователя успешно добавлен!":
+        await message.answer(f"Спасибо, Ваш совет был добавлен!")
+    else:
+        await message.answer(f"УПС, произошла ошибка: {user_advice_response}")
     await state.clear()  # Завершаем состояние
 
 

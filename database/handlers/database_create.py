@@ -115,20 +115,19 @@ async def create_rating_calculation():
         await db.commit()
 
 # Советы пользователей
-async def users_adviсe():
-    database_path = 'database/data/users_adviсe.db'
+async def create_users_advice():
+    database_path = 'database/data/users_advice.db'
     os.makedirs(os.path.dirname(database_path), exist_ok=True)
 
     async with aiosqlite.connect(database_path) as db:
         await db.execute(''' 
-            CREATE TABLE IF NOT EXISTS users_adviсe (
+            CREATE TABLE IF NOT EXISTS users_advice (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 ID_user INTEGER,
                 date_publication TEXT,
                 content TEXT,
-                type_advice,
-                grade_adviсe TEXT,
-                UNIQUE(ID_user)
+                type_advice TEXT,
+                grade_advice TEXT
             )
         ''')
         await db.commit()
@@ -147,4 +146,4 @@ async def create_all_databases():
     await create_rating_calculation()
 
     # Советы
-    await users_adviсe()
+    await create_users_advice()
