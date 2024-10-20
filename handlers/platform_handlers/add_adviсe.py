@@ -9,7 +9,8 @@ from aiogram.fsm.context import FSMContext
 from states.adviсe_states import AdviсeStates
 from datetime import datetime
 
-from database.handlers.database_handler import add_user_advice
+from database.handlers.database_handler import add_user_advice, add_user_rating
+from database.requests.random_advice import get_random_advice
 
 from database.requests.user_access import can_use_feature
 
@@ -19,18 +20,23 @@ router = Router()
 async def start_add(message: Message, state: FSMContext):
     await message.reply("Пожалуйста, выберите категорию:", reply_markup=category_keyboard)
 
-# Обработчик нажатия на кнопку инлайн-клавиатуры
-@router.callback_query()
+# Обработчик нажатия на кнопки инлайн-клавиатуры для добавления совета
+@router.callback_query(lambda c: c.data in ['study', 'health', 'social', 'work'])
 async def category_selected(callback: CallbackQuery, state: FSMContext):
+    # Проверяем, в каком состоянии находимся
+    current_state = await state.get_state()
+    if current_state != AdviсeStates.category_advice:  # Только если состояние не 'category_advice'
+        # Сохранение выбранной категории в состояние
+        selected_category = callback.data
+        await state.update_data(category_advice=selected_category)
 
-    # Сохранение выбранной категории в состояние
-    selected_category = callback.data
-    await state.update_data(category_advice=selected_category)
-    
-    # Ответ пользователю и завершение обработки
-    await callback.message.reply("Пожалуйста, введите текст вашего совета:")
-    await callback.answer()
-    await state.set_state(AdviсeStates.category_advice)
+        # Ответ пользователю и завершение обработки
+        await callback.message.reply("Пожалуйста, введите текст вашего совета:")
+        await callback.answer()
+        await state.set_state(AdviсeStates.category_advice)
+    else:
+        await callback.answer("Сейчас нельзя выбрать категорию, завершите текущее действие.")
+
 
 # Текст совета
 @router.message(F.text, AdviсeStates.category_advice)
@@ -52,11 +58,11 @@ async def process_advice(message: Message, state: FSMContext):
                           type_advice=data.get('category_advice'),
                           grade_advice='0')
     if user_advice_response == "Совет пользователя успешно добавлен!":
-        await message.answer(f"Спасибо, Ваш совет был добавлен!")
+        await add_user_rating(user_id)
+        await message.answer(f"Спасибо за ваш вклад! Ваш совет был добавлен, и вы получили +0.5 баллов к вашему рейтингу. Каждый совет имеет значение!")
     else:
         await message.answer(f"УПС, произошла ошибка: {user_advice_response}")
     await state.clear()  # Завершаем состояние
-
 
 
 @router.message(F.text == "Назад 🔙")

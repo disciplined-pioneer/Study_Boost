@@ -1,3 +1,4 @@
+import os
 import aiosqlite
 
 # Регистрация пользователей с обновлением данных при совпадении по ID_user
@@ -89,21 +90,25 @@ async def add_payment(ID_user, payment_date, expiration_date):
         
 
 # Добавление рейтинга пользователя
-async def add_or_update_user_rating(ID_user, rating):
+async def add_user_rating(ID_user: int):
     database_path = 'database/data/users_rating.db'
+    os.makedirs(os.path.dirname(database_path), exist_ok=True)
+
     async with aiosqlite.connect(database_path) as db:
-        try:
-            # Используем `INSERT OR REPLACE` для автоматического обновления при совпадении
-            await db.execute(''' 
-                INSERT OR REPLACE INTO users_rating 
-                (ID_user, rating)
-                VALUES (?, ?)
-            ''', (ID_user, rating))
-            await db.commit()
-            return 'Рейтинг пользователя успешно обновлён!'
-        except Exception as e:
-            print(f"Ошибка при добавлении/обновлении рейтинга пользователя: {e}")
-            return 'Произошла ошибка при добавлении/обновлении рейтинга!'
+        
+        # Проверка, существует ли пользователь в базе
+        cursor = await db.execute('SELECT rating FROM users_rating WHERE ID_user = ?', (ID_user,))
+        result = await cursor.fetchone()
+
+        if result:  # Пользователь существует, обновляем рейтинг
+            current_rating = float(result[0])
+            new_rating = current_rating + 0.5
+            await db.execute('UPDATE users_rating SET rating = ? WHERE ID_user = ?', (new_rating, ID_user))
+        else:  # Пользователя нет, добавляем нового с рейтингом 0.5
+            new_rating = 0.5
+            await db.execute('INSERT INTO users_rating (ID_user, rating) VALUES (?, ?)', (ID_user, str(new_rating)))
+
+        await db.commit()
 
 # Добавление критерий оценки
 async def add_rating_criteria(action_type, value_rating):

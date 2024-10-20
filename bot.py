@@ -11,7 +11,8 @@ from handlers.start_hadlers.access_callback import router as access_users_router
 from handlers.start_hadlers.deny_access_callback import router as deny_access_users_router  # Роутер для отказа к платформе
 
 from handlers.platform_handlers.platform_handlers import router as platform_router # Роутер для главный кнопок
-from handlers.platform_handlers.adviсe import router as adviсe_router  # Роутер для советов
+from handlers.platform_handlers.add_adviсe import router as adviсe_router  # Роутер для добавления советов
+from handlers.platform_handlers.view_advice import router as view_advice  # Роутер для просмотра советов
 
 
 from database.handlers.database_create import create_all_databases
@@ -30,6 +31,7 @@ async def main():
     dp.include_router(access_users_router)  # Включаем роутер для доступа к платформе 
     dp.include_router(deny_access_users_router)  # Включаем роутер для отказа в доступе
     dp.include_router(platform_router)  # Включаем роутер для главный кнопок
-    dp.include_router(adviсe_router)  # Включаем роутер для советов
+    dp.include_router(adviсe_router)  # Включаем роутер для добаваления советов
+    dp.include_router(view_advice ) # Включаем роутер для просмотра советов
 
     await dp.start_polling(bot)
