@@ -1,17 +1,12 @@
-from aiogram import Router, F
+from datetime import timedelta
+
+from aiogram import Router, F, Bot
 from aiogram.types import CallbackQuery
-from aiogram import Bot
 
 from keyboards.admin_keyb import subscription_menu
-from handlers.start_hadlers.register_handlers import new_users
-
 from keyboards.platform_keyb import platform_menu
-
+from handlers.start_hadlers.register_handlers import new_users
 from database.handlers.database_handler import register_user, add_subscription_status, add_payment
-
-from datetime import timedelta
-from aiogram import Bot
-from aiogram.types import CallbackQuery
 
 router = Router()
 

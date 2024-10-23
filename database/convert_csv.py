@@ -1,8 +1,9 @@
-import aiosqlite
-import csv
 import os
 import glob
+import csv
 import asyncio
+
+import aiosqlite
 
 # Список служебных таблиц, которые следует исключить
 EXCLUDED_TABLES = ('sqlite_sequence', 'sqlite_stat1', 'sqlite_stat4')

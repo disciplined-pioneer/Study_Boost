@@ -1,7 +1,6 @@
 from config import TOKEN
 from aiogram import Bot, Dispatcher
 
-
 from handlers.start_hadlers.hello import router as hello_router  # Роутер для приветствия
 from handlers.start_hadlers.sign_in import router as sign_in_router # Роутер для входа в систему
 from handlers.start_hadlers.register_handlers import router as registration_router  # Роутер для регистрации
@@ -11,8 +10,8 @@ from handlers.start_hadlers.access_callback import router as access_users_router
 from handlers.start_hadlers.deny_access_callback import router as deny_access_users_router  # Роутер для отказа к платформе
 
 from handlers.platform_handlers.platform_handlers import router as platform_router # Роутер для главный кнопок
-from handlers.platform_handlers.add_adviсe import router as adviсe_router  # Роутер для добавления советов
-from handlers.platform_handlers.view_advice import router as view_advice  # Роутер для просмотра советов
+from handlers.platform_handlers.adviсe_handlers.add_adviсe import router as adviсe_router  # Роутер для добавления советов
+from handlers.platform_handlers.adviсe_handlers.view_advice import router as view_advice  # Роутер для просмотра советов
 
 
 from database.handlers.database_create import create_all_databases

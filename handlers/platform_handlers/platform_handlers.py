@@ -1,5 +1,5 @@
-from aiogram import Router, F
 from aiogram import types
+from aiogram import Router, F
 from keyboards.platform_keyb import platform_menu, advice_menu
 
 from database.requests.user_access import can_use_feature

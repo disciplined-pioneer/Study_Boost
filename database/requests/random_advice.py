@@ -1,6 +1,7 @@
 import random
 import aiosqlite
 
+# Поиск пользователя по его ID
 async def get_user_name(ID_user: int):
     database_path = 'database/data/users.db'
     
@@ -13,6 +14,7 @@ async def get_user_name(ID_user: int):
         else:
             return None  # Если пользователь не найден
 
+# Ищем случайный совет
 async def get_random_advice(advice_type: str):
     database_path = 'database/data/users_advice.db'
     

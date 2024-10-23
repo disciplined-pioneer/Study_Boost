@@ -1,10 +1,8 @@
 from aiogram import Router, F
 from aiogram.types import Message
-from keyboards.registration_keyb import registration_menu
-
 from aiogram import types
-from keyboards.registration_keyb import agreement
 
+from keyboards.registration_keyb import registration_menu, agreement
 
 router = Router()
 

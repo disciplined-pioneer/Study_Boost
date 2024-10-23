@@ -1,7 +1,5 @@
 from aiogram import Router, F
 from aiogram.types import Message
-from keyboards.platform_keyb import platform_menu
-from database.requests.user_search import check_user_registration, check_user_payment
 
 router = Router()
 

@@ -1,9 +1,10 @@
-from aiogram.types import Message, CallbackQuery
 from aiogram import Router, F
-from database.requests.random_advice import get_random_advice, get_user_name
-from keyboards.platform_keyb import view_category_keyboard
+from aiogram.types import Message, CallbackQuery
 
 from keyboards.platform_keyb import grade_keyboard
+from keyboards.platform_keyb import view_category_keyboard
+
+from database.requests.random_advice import get_random_advice, get_user_name
 
 router = Router()
 

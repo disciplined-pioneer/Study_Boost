@@ -1,17 +1,13 @@
-from aiogram import types
-from aiogram.types import Message
-from aiogram import Router, F
-from keyboards.platform_keyb import platform_menu, category_keyboard
+from datetime import datetime
 
-from aiogram.types import CallbackQuery
+from aiogram import types
+from aiogram import Router, F
+from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 
 from states.adviсe_states import AdviсeStates
-from datetime import datetime
-
 from database.handlers.database_handler import add_user_advice, add_user_rating
-from database.requests.random_advice import get_random_advice
-
+from keyboards.platform_keyb import platform_menu, category_keyboard
 from database.requests.user_access import can_use_feature
 
 router = Router()

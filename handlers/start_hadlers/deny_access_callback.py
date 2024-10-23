@@ -1,12 +1,8 @@
-from aiogram import Router, F
+from aiogram import Router, F, Bot
 from aiogram.types import CallbackQuery
-from aiogram import Bot
 
 from keyboards.admin_keyb import deny_access_menu
 from handlers.start_hadlers.register_handlers import new_users
-
-from aiogram import Bot
-from aiogram.types import CallbackQuery
 
 router = Router()
 

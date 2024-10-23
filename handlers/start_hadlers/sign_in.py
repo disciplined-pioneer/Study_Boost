@@ -1,14 +1,16 @@
-from aiogram import Router, F
 from datetime import datetime
-from keyboards.platform_keyb import platform_menu
-from database.requests.user_search import check_user_registration, check_user_payment
-from aiogram import types
+
+from aiogram import Router, F, types
 from aiogram.fsm.context import FSMContext
+
+from keyboards.platform_keyb import platform_menu
+from keyboards.admin_keyb import access_keyboard
 from states.payment_states import PaymentStates
 
 from config import ADMIN_ID
+from database.requests.user_search import check_user_registration, check_user_payment
 from handlers.start_hadlers.register_handlers import new_users
-from keyboards.admin_keyb import access_keyboard
+
 
 router = Router()
 
