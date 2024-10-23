@@ -38,3 +38,9 @@ view_category_keyboard = InlineKeyboardMarkup(
         [InlineKeyboardButton(text='Работа и карьера 💼', callback_data='view_work')]
     ]
 )
+
+grade_keyboard = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [InlineKeyboardButton(text='👍', callback_data='like'), InlineKeyboardButton(text='👎', callback_data='dislike')]
+    ]
+)

@@ -3,6 +3,8 @@ from aiogram import Router, F
 from database.requests.random_advice import get_random_advice, get_user_name
 from keyboards.platform_keyb import view_category_keyboard
 
+from keyboards.platform_keyb import grade_keyboard
+
 router = Router()
 
 # Обработчик нажатия на кнопку "Просмотреть категории 🗂"
@@ -22,6 +24,5 @@ async def process_callback_advice(callback_query: CallbackQuery):
     else:
         user_name = await get_user_name(user_id)  # Получаем имя пользователя, который дал совет
         if user_name:
-            await callback_query.message.answer(f"{user_name} советует Вам: {random_advice}")
-    
+            await callback_query.message.answer(f"Совет от {user_name}: \n✍️ «{random_advice}»\n\n🎯 Какую оценку вы дадите этому совету? Оставьте свою оценку ниже!", reply_markup=grade_keyboard)
     await callback_query.answer()
