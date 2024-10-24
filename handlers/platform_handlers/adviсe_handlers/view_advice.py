@@ -1,10 +1,14 @@
+import re
+from datetime import datetime
+
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 
 from keyboards.platform_keyb import grade_keyboard
 from keyboards.platform_keyb import view_category_keyboard
 
-from database.requests.random_advice import get_random_advice, get_user_name
+from database.requests.random_advice import get_random_advice
+from database.handlers.database_handler import add_user_rating_history
 
 router = Router()
 
@@ -22,9 +26,40 @@ async def process_callback_advice(callback_query: CallbackQuery):
     random_advice = await get_random_advice(advice_type)
     if random_advice == "К сожалению, нет доступных советов по этой категории":
         await callback_query.message.answer("К сожалению, нет доступных советов по этой категории")
-    
     else:
-        user_name = await get_user_name(int(random_advice['ID_user']))  # Получаем имя пользователя, который дал совет
-        if user_name:
-            await callback_query.message.answer(f"Совет от {user_name}: \n✍️ «{random_advice['content']}»\n\nРейтинг материала: {random_advice['like_advice']} 👍 | 👎 {random_advice['dislike_advice']}", reply_markup=grade_keyboard)
+        await callback_query.message.answer(f"Совет от пользователя ID_{random_advice['ID_user']}: \n✍️ «{random_advice['content']}»\n\nРейтинг совета: {random_advice['like_advice']} 👍 | 👎 {random_advice['dislike_advice']}", reply_markup=grade_keyboard)
     await callback_query.answer()
+
+# Обработчик нажатия на кнопки для лайка и дизлайка
+@router.callback_query(lambda c: c.data in ['like', 'dislike'])
+async def process_rating_callback(callback_query: CallbackQuery):
+    action_type = callback_query.data  # Получаем тип действия: "like" или "dislike"
+    accrual_date = datetime.now().date()
+    rating_value = '1' if action_type == 'like' else '-1'  # Начисляем +1 за лайк и -1 за дизлайк
+
+    # Используем регулярное выражение для поиска ID
+    message_text = callback_query.message.text
+    match = re.search(r'ID_(\d+)', message_text)
+    if match:
+        user_id = int(match.group(1))  # Преобразуем ID в целое число
+
+        # Добавляем рейтинг в историю для пользователя, который опубликовал совет
+        await add_user_rating_history(
+            id_user=user_id,
+            accrual_date=accrual_date,
+            action_type=action_type + '_advice',
+            rating_value=rating_value
+        )
+
+        # Отправляем сообщение пользователю, который опубликовал совет
+        try:
+            await callback_query.bot.send_message(
+                chat_id=user_id,
+                text=f"Ваш совет получил {'лайк' if action_type == 'like' else 'дизлайк'}!"
+            )
+        except Exception as e:
+            print(f"Не удалось отправить сообщение пользователю {user_id}: {e}")
+
+    # Ответ пользователю об успешном начислении рейтинга
+    await callback_query.answer(f"Спасибо! Ваш {'лайк' if action_type == 'like' else 'дизлайк'} учтен.")
+    await callback_query.message.edit_reply_markup()  # Убираем клавиатуру после голосования

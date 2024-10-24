@@ -1,0 +1,7 @@
+id,id_user,accrual_date,action_type,rating_value
+1,802587774,2024-10-24,add_advice,0.5
+2,802587774,2024-10-24,add_advice,0.5
+3,802587774,2024-10-24,add_advice,0.5
+4,802587774,2024-10-24 23:54:47.702417,like_advice,1
+5,802587774,2024-10-24,like_advice,1
+6,802587774,2024-10-24,dislike_advice,-1
