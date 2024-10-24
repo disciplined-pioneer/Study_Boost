@@ -19,11 +19,12 @@ async def process_callback_advice(callback_query: CallbackQuery):
     advice_type = callback_query.data.split('_')[1]  # Получаем тип совета из callback_data
 
     # Получаем случайный совет по выбранной категории
-    random_advice, user_id = await get_random_advice(advice_type)
+    random_advice = await get_random_advice(advice_type)
     if random_advice == "К сожалению, нет доступных советов по этой категории":
         await callback_query.message.answer("К сожалению, нет доступных советов по этой категории")
+    
     else:
-        user_name = await get_user_name(user_id)  # Получаем имя пользователя, который дал совет
+        user_name = await get_user_name(int(random_advice['ID_user']))  # Получаем имя пользователя, который дал совет
         if user_name:
-            await callback_query.message.answer(f"Совет от {user_name}: \n✍️ «{random_advice}»\n\n🎯 Какую оценку вы дадите этому совету? Оставьте свою оценку ниже!", reply_markup=grade_keyboard)
+            await callback_query.message.answer(f"Совет от {user_name}: \n✍️ «{random_advice['content']}»\n\nРейтинг материала: {random_advice['like_advice']} 👍 | 👎 {random_advice['dislike_advice']}", reply_markup=grade_keyboard)
     await callback_query.answer()
