@@ -13,9 +13,7 @@ from handlers.platform_handlers.platform_handlers import router as platform_rout
 from handlers.platform_handlers.adviсe_handlers.add_adviсe import router as adviсe_router  # Роутер для добавления советов
 from handlers.platform_handlers.adviсe_handlers.view_advice import router as view_advice  # Роутер для просмотра советов
 
-
 from database.handlers.database_create import create_all_databases
-
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()

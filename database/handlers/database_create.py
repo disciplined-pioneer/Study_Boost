@@ -54,62 +54,20 @@ async def create_payments_table():
         ''')
         await db.commit()
 
-# Рейтинг пользователей
-async def create_users_rating():
-    database_path = 'database/data/users_rating.db'
+
+# Таблица для хранения истории рейтинга пользователей
+async def create_users_rating_history():
+    database_path = 'database/data/users_rating_history.db'
     os.makedirs(os.path.dirname(database_path), exist_ok=True)
 
     async with aiosqlite.connect(database_path) as db:
         await db.execute(''' 
-            CREATE TABLE IF NOT EXISTS users_rating (
+            CREATE TABLE IF NOT EXISTS users_rating_history (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                ID_user INTEGER,
-                rating TEXT,
-                UNIQUE(ID_user)
-            )
-        ''')
-        await db.commit()
-
-async def create_rating_criteria():
-    database_path = 'database/data/rating_criteria.db'
-    os.makedirs(os.path.dirname(database_path), exist_ok=True)
-
-    async with aiosqlite.connect(database_path) as db:
-        await db.execute(''' 
-            CREATE TABLE IF NOT EXISTS rating_criteria (
-                rating_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id_user INTEGER,
+                accrual_date DATE,
                 action_type TEXT,
-                value_rating TEXT
-            )
-        ''')
-        
-        # Вставка данных с правильными названиями колонок
-        rating_data = [
-            ('advice', '0.5'),
-            ('material', '2'),
-            ('like_advice', '1'),
-            ('like_material', '1')
-        ]
-
-        await db.executemany('''
-            INSERT INTO rating_criteria (action_type, value_rating) 
-            VALUES (?, ?)
-        ''', rating_data)
-
-        await db.commit()
-
-async def create_rating_calculation():
-    database_path = 'database/data/rating_calculation.db'
-    os.makedirs(os.path.dirname(database_path), exist_ok=True)
-
-    async with aiosqlite.connect(database_path) as db:
-        await db.execute(''' 
-            CREATE TABLE IF NOT EXISTS rating_calculation (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                ID_user INTEGER,
-                rating_value TEXT,
-                action_type TEXT,
-                UNIQUE(ID_user)
+                rating_value TEXT
             )
         ''')
         await db.commit()
@@ -127,10 +85,12 @@ async def create_users_advice():
                 date_publication TEXT,
                 content TEXT,
                 type_advice TEXT,
-                grade_advice TEXT
+                like_advice TEXT,
+                dislike_advice TEXT
             )
         ''')
         await db.commit()
+
 
 # Создание всех таблиц
 async def create_all_databases():
@@ -141,9 +101,7 @@ async def create_all_databases():
     await create_payments_table()
 
     # Рейтинг
-    await create_users_rating()
-    await create_rating_criteria()
-    await create_rating_calculation()
+    await create_users_rating_history()
 
     # Советы
     await create_users_advice()

@@ -89,68 +89,27 @@ async def add_payment(ID_user, payment_date, expiration_date):
             return 'Произошла ошибка при добавлении/обновлении платежа!'
         
 
-# Добавление рейтинга пользователя
-async def add_user_rating(ID_user: int):
-    database_path = 'database/data/users_rating.db'
-    os.makedirs(os.path.dirname(database_path), exist_ok=True)
-
+# Добавление истории рейтинга пользователя
+async def add_user_rating_history(id_user: int, accrual_date: str, action_type: str, rating_value: str):
+    database_path = 'database/data/users_rating_history.db'
+    
     async with aiosqlite.connect(database_path) as db:
-        
-        # Проверка, существует ли пользователь в базе
-        cursor = await db.execute('SELECT rating FROM users_rating WHERE ID_user = ?', (ID_user,))
-        result = await cursor.fetchone()
-
-        if result:  # Пользователь существует, обновляем рейтинг
-            current_rating = float(result[0])
-            new_rating = current_rating + 0.5
-            await db.execute('UPDATE users_rating SET rating = ? WHERE ID_user = ?', (new_rating, ID_user))
-        else:  # Пользователя нет, добавляем нового с рейтингом 0.5
-            new_rating = 0.5
-            await db.execute('INSERT INTO users_rating (ID_user, rating) VALUES (?, ?)', (ID_user, str(new_rating)))
-
+        await db.execute('''
+            INSERT INTO users_rating_history (id_user, accrual_date, action_type, rating_value)
+            VALUES (?, ?, ?, ?)
+        ''', (id_user, accrual_date, action_type, rating_value))
         await db.commit()
-
-# Добавление критерий оценки
-async def add_rating_criteria(action_type, value_rating):
-    database_path = 'database/data/rating_criteria.db'
-    async with aiosqlite.connect(database_path) as db:
-        try:
-            # Добавляем новый критерий
-            await db.execute(''' 
-                INSERT INTO rating_criteria (action_type, value_rating)
-                VALUES (?, ?)
-            ''', (action_type, value_rating))
-            await db.commit()
-            return 'Критерий рейтинга успешно добавлен!'
-        except Exception as e:
-            print(f"Ошибка при добавлении критерия рейтинга: {e}")
-            return 'Произошла ошибка при добавлении критерия рейтинга!'
-        
-# Расчёт рейтинаг пользователя
-async def add_rating_calculation(ID_user, rating_value, action_type):
-    database_path = 'database/data/rating_calculation.db'
-    async with aiosqlite.connect(database_path) as db:
-        try:
-            await db.execute(''' 
-                INSERT INTO rating_calculation (ID_user, rating_value, action_type)
-                VALUES (?, ?, ?)
-            ''', (ID_user, rating_value, action_type))
-            await db.commit()
-            return 'Расчёт рейтинга успешно добавлен!'
-        except Exception as e:
-            print(f"Ошибка при добавлении расчёта рейтинга: {e}")
-            return 'Произошла ошибка при добавлении расчёта рейтинга!'
 
 
 # Добавление советов   
-async def add_user_advice(ID_user, date_publication, content, type_advice, grade_advice):
+async def add_user_advice(ID_user, date_publication, content, type_advice, like_advice, dislike_advice):
     database_path = 'database/data/users_advice.db'
     async with aiosqlite.connect(database_path) as db:
         try:
             await db.execute(''' 
-                INSERT INTO users_advice (ID_user, date_publication, content, type_advice, grade_advice)
-                VALUES (?, ?, ?, ?, ?)
-            ''', (ID_user, date_publication, content, type_advice, grade_advice))
+                INSERT INTO users_advice (ID_user, date_publication, content, type_advice, like_advice, dislike_advice)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ''', (ID_user, date_publication, content, type_advice, like_advice, dislike_advice))
             await db.commit()
             return 'Совет пользователя успешно добавлен!'
         except Exception as e:
