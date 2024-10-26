@@ -9,6 +9,7 @@ from keyboards.platform_keyb import view_category_keyboard
 
 from database.requests.random_advice import get_random_advice
 from database.handlers.database_handler import add_user_rating_history
+from database.handlers.advice_handler import like_advice, dislike_advice
 
 router = Router()
 
@@ -27,7 +28,7 @@ async def process_callback_advice(callback_query: CallbackQuery):
     if random_advice == "К сожалению, нет доступных советов по этой категории":
         await callback_query.message.answer("К сожалению, нет доступных советов по этой категории")
     else:
-        await callback_query.message.answer(f"Совет от пользователя ID_{random_advice['ID_user']}: \n✍️ «{random_advice['content']}»\n\nРейтинг совета: {random_advice['like_advice']} 👍 | 👎 {random_advice['dislike_advice']}", reply_markup=grade_keyboard)
+        await callback_query.message.answer(f"Совет №{random_advice['id']} от пользователя ID_{random_advice['ID_user']}: \n✍️ «{random_advice['content']}»\n\nРейтинг совета: {random_advice['like_advice']} 👍 | 👎 {random_advice['dislike_advice']}", reply_markup=grade_keyboard)
     await callback_query.answer()
 
 # Обработчик нажатия на кнопки для лайка и дизлайка
@@ -37,19 +38,28 @@ async def process_rating_callback(callback_query: CallbackQuery):
     accrual_date = datetime.now().date()
     rating_value = '1' if action_type == 'like' else '-1'  # Начисляем +1 за лайк и -1 за дизлайк
 
-    # Используем регулярное выражение для поиска ID
+    # Используем регулярное выражение для поиска ID и номера совета
     message_text = callback_query.message.text
-    match = re.search(r'ID_(\d+)', message_text)
-    if match:
-        user_id = int(match.group(1))  # Преобразуем ID в целое число
+    match_id = re.search(r'ID_(\d+)', message_text)
+    match_advice_number = re.search(r"Совет №(\d+)", message_text)
 
-        # Добавляем рейтинг в историю для пользователя, который опубликовал совет
+    if match_id:
+        user_id = int(match_id.group(1))  # Преобразуем ID в целое число
+        advice_number = int(match_advice_number.group(1))  # Преобразуем номер совета в целое число
+
+        # Добавляем рейтинг для пользователя, который опубликовал совет
         await add_user_rating_history(
             id_user=user_id,
             accrual_date=accrual_date,
             action_type=action_type + '_advice',
             rating_value=rating_value
         )
+
+        # Добавлеяем лайк или дизлайк на совет
+        if action_type == "like":
+            await like_advice(advice_number)
+        if action_type == "dislike":
+            await dislike_advice(advice_number)
 
         # Отправляем сообщение пользователю, который опубликовал совет
         try:
@@ -62,4 +72,5 @@ async def process_rating_callback(callback_query: CallbackQuery):
 
     # Ответ пользователю об успешном начислении рейтинга
     await callback_query.answer(f"Спасибо! Ваш {'лайк' if action_type == 'like' else 'дизлайк'} учтен.")
-    await callback_query.message.edit_reply_markup()  # Убираем клавиатуру после голосования
+    if callback_query.message.reply_markup:
+        await callback_query.message.edit_reply_markup()
