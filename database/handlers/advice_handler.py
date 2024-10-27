@@ -8,7 +8,7 @@ async def like_advice(advice_id: int):
         await db.execute('''
             UPDATE users_advice
             SET like_advice = COALESCE(like_advice, 0) + 1
-            WHERE id = ?
+            WHERE advice_id = ?
         ''', (advice_id,))
         await db.commit()
 
@@ -20,6 +20,6 @@ async def dislike_advice(advice_id: int):
         await db.execute('''
             UPDATE users_advice
             SET dislike_advice = COALESCE(dislike_advice, 0) + 1
-            WHERE id = ?
+            WHERE advice_id = ?
         ''', (advice_id,))
         await db.commit()

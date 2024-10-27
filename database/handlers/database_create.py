@@ -64,7 +64,9 @@ async def create_users_rating_history():
         await db.execute(''' 
             CREATE TABLE IF NOT EXISTS users_rating_history (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                advice_id INTEGER,
                 id_user INTEGER,
+                granted_by INTEGER,
                 accrual_date DATE,
                 action_type TEXT,
                 rating_value TEXT
@@ -80,7 +82,7 @@ async def create_users_advice():
     async with aiosqlite.connect(database_path) as db:
         await db.execute(''' 
             CREATE TABLE IF NOT EXISTS users_advice (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                advice_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 ID_user INTEGER,
                 date_publication TEXT,
                 content TEXT,

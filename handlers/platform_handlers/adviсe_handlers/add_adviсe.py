@@ -9,6 +9,7 @@ from states.adviсe_states import AdviсeStates
 from database.handlers.database_handler import add_user_advice, add_user_rating_history
 from keyboards.platform_keyb import platform_menu, category_keyboard
 from database.requests.user_access import can_use_feature
+from database.requests.advice import get_last_advice_id
 
 router = Router()
 
@@ -36,10 +37,9 @@ async def category_selected(callback: CallbackQuery, state: FSMContext):
         await callback.answer("Сейчас нельзя выбрать категорию, завершите текущее действие.")
 
 
-# Текст совета
+# Обработчик для текста совета
 @router.message(F.text, AdviсeStates.category_advice)
 async def process_advice(message: Message, state: FSMContext):
-    
     data = await state.get_data()  # Получаем данные состояния
     user_id = message.from_user.id
 
@@ -47,25 +47,36 @@ async def process_advice(message: Message, state: FSMContext):
     await state.update_data(date_publication=datetime.now().date())
     await state.update_data(ID_user=user_id)
     await state.update_data(content=message.text)
-    
-    # Сохраняем данные в БД
-    data = data = await state.get_data()
-    user_advice_response = await add_user_advice(ID_user=data.get('ID_user'),
-                          date_publication=data.get('date_publication'),
-                          content=data.get('content'),
-                          type_advice=data.get('category_advice'),
-                          like_advice='0',
-                          dislike_advice='0')
-    
+
+    # Сохраняем данные в БД и получаем ID добавленного совета
+    data = await state.get_data()
+    user_advice_response = await add_user_advice(
+        ID_user=data.get('ID_user'),
+        date_publication=data.get('date_publication'),
+        content=data.get('content'),
+        type_advice=data.get('category_advice'),
+        like_advice='0',
+        dislike_advice='0'
+    )
+
     if user_advice_response == "Совет пользователя успешно добавлен!":
+        
+        # Получаем advice_id последнего добавленного совета
+        advice_id = await get_last_advice_id()  # Здесь вам нужно реализовать эту функцию
+
         date = datetime.now().date()
-        await add_user_rating_history(id_user=user_id,
-                                      accrual_date=date,
-                                      action_type="add_advice",
-                                      rating_value='0.5')
+        await add_user_rating_history(
+            advice_id=advice_id,  # Передаем advice_id
+            id_user=user_id,
+            granted_by=user_id,
+            accrual_date=date,
+            action_type="add_advice",
+            rating_value='0.5'
+        )
         await message.answer(f"Спасибо за ваш вклад! Ваш совет был добавлен, и вы получили +0.5 баллов к вашему рейтингу. Каждый совет имеет значение!")
     else:
         await message.answer(f"УПС, произошла ошибка: {user_advice_response}")
+        
     await state.clear()  # Завершаем состояние
 
 
