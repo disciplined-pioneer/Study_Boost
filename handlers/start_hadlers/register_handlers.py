@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-
 from aiogram import Router, F
 from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
@@ -59,7 +58,7 @@ async def process_course(message: Message, state: FSMContext):
 # Фото оплаты
 @router.message(F.text, RegistrationStates.course)
 async def process_payment_photo(message: Message, state: FSMContext):
-    await state.update_data(course=message.text)  # Сохранить номер курса
+    await state.update_data(course=message.text)
     await message.answer("Пожалуйста, отправьте фото, подтверждающее оплату: ")
     await state.set_state(RegistrationStates.payment_photo)
 
@@ -69,9 +68,12 @@ async def finish_registration(message: Message, state: FSMContext):
     global new_users
     data = await state.get_data()
     user_id = message.from_user.id
+    referrer_id = data.get("referrer_id")  # Получаем ID реферера, если есть
 
     # Получаем фотографию оплаты
     payment_photo = message.photo[-1].file_id
+
+    print(data)
 
     # Сохраняем данные пользователя
     user_info = {
@@ -84,11 +86,9 @@ async def finish_registration(message: Message, state: FSMContext):
         "ID_user": user_id,
         "ID_message": message.message_id,
         "photo_payment": payment_photo,
-        "date_registration": datetime.now().date() #- timedelta(days=100)
+        "referrer_id": referrer_id,  # Добавляем ID реферера
+        "date_registration": datetime.now().date()
     }
-
-    # Сохраняем user_id в состояние
-    #await state.update_data(user_id=user_id)  # Сохраняем user_id
 
     # Формируем текст для отправки админу
     user_info_text = (
@@ -100,6 +100,7 @@ async def finish_registration(message: Message, state: FSMContext):
         f"Телеграм: {'@' + message.from_user.username if message.from_user.username else 'Не указан'}\n\n"
         f"ID сообщения: {message.message_id}\n\n"
         f"ID пользователя: {user_id}\n\n"
+        f"ID реферера: {referrer_id or 'Отсутствует'}\n\n"
     )
 
     # Отправляем информацию админу
@@ -110,9 +111,10 @@ async def finish_registration(message: Message, state: FSMContext):
         reply_markup=access_keyboard
     )
 
-    new_users.append(user_info)  # Добавляем пользователя в глобальный список
-    await message.answer('Поздравляем, регистрация успешно завершена! 🎉\n\n'
-                    'В ближайшее время администратор проверит ваши данные и активирует подписку.\n\n'
-                    'После этого вы получите уведомление. Желаем вам отличного дня!')
+    new_users.append(user_info)
+    await message.answer(
+        'Поздравляем, регистрация успешно завершена! 🎉\n\n'
+        'В ближайшее время администратор проверит ваши данные и активирует подписку.\n\n'
+        'После этого вы получите уведомление. Желаем вам отличного дня!'
+    )
     await state.clear()
-

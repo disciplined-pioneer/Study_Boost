@@ -1,6 +1,7 @@
 from aiogram import Router, F
 from aiogram.types import Message
 from aiogram import types
+from aiogram.fsm.context import FSMContext
 
 from keyboards.registration_keyb import registration_menu, agreement
 
@@ -20,18 +21,30 @@ async def show_welcome(message: Message):
         reply_markup=registration_menu
     )
 
-# Обработчик команды /start
-@router.message(F.text == '/start')
-async def start_handler(message: Message):
+# Обработчик команды /start с реферальным кодом
+@router.message(F.text.startswith('/start'))
+async def start_handler(message: Message, state: FSMContext):
+    # Проверяем, содержит ли команда аргумент (реферальный ID)
+    args = message.text.split()
+    if len(args) > 1:
+        referrer_id = args[1]  # Извлекаем ID реферера из команды start
+        await state.update_data(referrer_id=referrer_id)  # Сохраняем ID реферера в состоянии
+        await message.answer(f"Добро пожаловать! Вы пришли по реферальной ссылке от пользователя с ID: {referrer_id}")
+    else:
+        referrer_id = 'None'  # Извлекаем ID реферера из команды start
+        await state.update_data(referrer_id=referrer_id)
+        await message.answer("Добро пожаловать!")
 
-    # Отправляем документ
+    # Отправляем документ с соглашением
     await message.bot.send_document(
         chat_id=message.from_user.id,
         document='BQACAgIAAxkBAAIQJWb-yNqpCOhKkViHeQp96c48vuHgAAKEaAAC1Tr5Sz35edJ2tLeBNgQ',
-        caption = f'Уважаемый пользователь, пожалуйста, ознакомьтесь с пользовательским соглашением!\n\nПосле прочтения нажмите на кнопку ниже с надписью "Я согласен ✅"',
+        caption = 'Уважаемый пользователь, пожалуйста, ознакомьтесь с пользовательским соглашением!\n\n'
+                  'После прочтения нажмите на кнопку ниже с надписью "Я согласен ✅"',
         reply_markup=agreement
     )
-    
+
+# Обработчик нажатия на кнопку соглашения
 @router.callback_query(F.data == "agreement_users")
 async def handle_button_click(callback_query: types.CallbackQuery):
     await callback_query.answer("Благодарим за использование нашей платформы!")

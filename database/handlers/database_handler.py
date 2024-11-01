@@ -9,11 +9,12 @@ async def register_user(user_data):
             # Используем `INSERT OR REPLACE` для автоматического обновления при совпадении
             await db.execute(''' 
                 INSERT OR REPLACE INTO users 
-                (ID_user, telegram, name_user, city_university, name_university, faculty, course, ID_message, photo_payment)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (ID_user, telegram, referrer_id, name_user, city_university, name_university, faculty, course, ID_message, photo_payment)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
                 user_data['ID_user'],
                 user_data['telegram'],
+                user_data['referrer_id'],
                 user_data['name_user'],
                 user_data['city_university'],
                 user_data['name_university'],
