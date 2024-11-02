@@ -12,7 +12,6 @@ async def get_top_10_users():
     database_path = 'database/data/users_rating_history.db'
     
     async with aiosqlite.connect(database_path) as db:
-        # SQL-запрос для получения топ-10 пользователей за текущий месяц по сумме рейтингов
         query = '''
         SELECT id_user, SUM(CAST(rating_value AS REAL)) AS total_rating
         FROM users_rating_history
@@ -40,7 +39,6 @@ async def user_rating(id_user):
     database_path = 'database/data/users_rating_history.db'
     
     async with aiosqlite.connect(database_path) as db:
-        # SQL-запрос для получения рейтинга пользователя за текущий месяц
         query = '''
         SELECT SUM(CAST(rating_value AS REAL)) AS total_rating
         FROM users_rating_history
@@ -53,4 +51,30 @@ async def user_rating(id_user):
         
         # Возвращаем рейтинг пользователя или 0, если нет записей
         return result[0] if result[0] is not None else 0
+
+# Вывод информации о пользователе
+async def fetch_user_data(user_id):
+    database_path = 'database/data/users.db'
+    
+    async with aiosqlite.connect(database_path) as db:
+        async with db.execute('''
+            SELECT id, ID_user, telegram, referrer_id, name_user, city_university, name_university, faculty, course
+            FROM users
+            WHERE ID_user = ?
+        ''', (user_id,)) as cursor:
+            user_data = await cursor.fetchone()
+            if user_data:
+                return {
+                    "id": user_data[0],
+                    "ID_user": user_data[1],
+                    "telegram": user_data[2],
+                    "referrer_id": user_data[3],
+                    "name_user": user_data[4],
+                    "city_university": user_data[5],
+                    "name_university": user_data[6],
+                    "faculty": user_data[7],
+                    "course": user_data[8],
+                }
+            else:
+                return None  # Пользователь не найден
 

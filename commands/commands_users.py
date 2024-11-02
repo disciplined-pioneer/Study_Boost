@@ -1,8 +1,9 @@
 from aiogram import Router, F
 from aiogram.types import Message
-from aiogram.utils.markdown import text, bold
-from handlers.commands_handlers.commands_handlers import get_top_10_users
+
 from handlers.commands_handlers.commands_handlers import user_rating
+from handlers.commands_handlers.commands_handlers import fetch_user_data
+from handlers.commands_handlers.commands_handlers import get_top_10_users
 
 
 router = Router()
@@ -41,4 +42,27 @@ async def my_rating(message: Message):
             "💪 Не упустите возможность заработать баллы! Участвуйте в активности!"
         )
 
-    await message.answer(response, parse_mode='HTML')  # Изменено на HTML
+    await message.answer(response, parse_mode='HTML')
+
+# Вывод информации о пользователе
+@router.message(lambda message: message.text == '/my_data')
+async def my_data(message: Message):
+    user_id = message.from_user.id
+    user_info = await fetch_user_data(user_id)
+
+    if user_info:
+        response_text = (
+            f"👤 <b>Ваши данные:</b>\n"
+            f"\n<b>ID пользователя:</b> {user_info['ID_user']}\n"
+            f"\n<b>Telegram:</b> {user_info['telegram']}\n"
+            f"\n<b>ID Реферала:</b> {user_info['referrer_id'] or 'Нет'}\n"
+            f"\n<b>Имя:</b> {user_info['name_user']}\n"
+            f"\n<b>Город университета:</b> {user_info['city_university'] or 'Не указано'}\n"
+            f"\n<b>Название университета:</b> {user_info['name_university'] or 'Не указано'}\n"
+            f"\n<b>Факультет:</b> {user_info['faculty'] or 'Не указано'}\n"
+            f"\n<b>Курс:</b> {user_info['course'] or 'Не указано'}\n"
+        )
+    else:
+        response_text = "❌ <b>Данные о пользователе не найдены.</b>"
+
+    await message.answer(response_text, parse_mode='HTML')
