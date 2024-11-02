@@ -1,10 +1,10 @@
 from aiogram import Router
 from aiogram.types import Message
-from aiogram.filters import CommandStart, Command
 
 from handlers.commands_handlers.commands_handlers import user_rating
 from handlers.commands_handlers.commands_handlers import fetch_user_data
 from handlers.commands_handlers.commands_handlers import get_top_10_users
+from database.requests.user_search import count_referrals
 
 router = Router()
 
@@ -82,4 +82,18 @@ async def referral_handler(message: Message):
         "1️⃣ <b>+5 баллов к вашему рейтингу</b> за каждого нового реферала 📈\n"
         "2️⃣ <b>Бесплатная подписка НАВСЕГДА</b> при достижении 10 рефералов 🆓\n\n"
         "Станьте топ-пользователем и наслаждайтесь всеми преимуществами!"
+    , parse_mode="HTML")
+
+# Вывод количества рефералом пользователя
+@router.message(lambda message: message.text == '/my_referal')
+async def referral_handler(message: Message):
+    user_id = message.from_user.id
+    referral_count = await count_referrals(user_id)  # Функция для подсчета рефералов
+    
+    await message.answer(
+        f"👥 <b>Количество ваших рефералов на данный момент:</b> <u>{referral_count}</u>\n\n"
+        "📢 <b>Преимущества реферальной программы:</b>\n\n"
+        "1️⃣ За каждого нового реферала вы получаете <b>+5 баллов</b> к вашему рейтингу 📈\n"
+        f"2️⃣ Если вы приведёте <b>10 пользователей</b>, подписка для вас станет <b>бесплатной НАВСЕГДА</b> 🆓\n\n"
+        "💡 <i>Приглашайте друзей и повышайте свой рейтинг, чтобы открыть все преимущества!</i>"
     , parse_mode="HTML")
