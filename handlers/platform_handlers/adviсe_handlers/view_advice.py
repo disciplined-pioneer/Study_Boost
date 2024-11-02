@@ -8,16 +8,24 @@ from keyboards.platform_keyb import grade_keyboard
 from keyboards.platform_keyb import view_category_keyboard
 
 from database.requests.advice import get_random_advice
+from database.requests.user_access import can_use_feature
+from database.requests.advice import check_rating_history
 from database.handlers.database_handler import add_user_rating_history
 from database.handlers.advice_handler import like_advice, dislike_advice
-from database.requests.advice import check_rating_history
 
 router = Router()
 
 # Обработчик нажатия на кнопку "Просмотреть категории"
 @router.message(F.text == 'Просмотреть категории 🗂')
 async def view_categories(message: Message):
-    await message.reply("Пожалуйста, выберите категорию:", reply_markup=view_category_keyboard)
+
+    user_id = message.from_user.id
+    can_use, response_message = await can_use_feature(user_id)
+
+    if can_use:
+        await message.reply("Пожалуйста, выберите категорию:", reply_markup=view_category_keyboard)
+    else:
+        await message.answer(response_message)
 
 # Обработчик нажатия на кнопки для просмотра советов
 @router.callback_query(lambda c: c.data.startswith('view_'))

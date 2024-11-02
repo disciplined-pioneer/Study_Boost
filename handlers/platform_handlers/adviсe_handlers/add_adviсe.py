@@ -6,7 +6,6 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 
 from states.adviсe_states import AdviсeStates
-from states.payment_states import PaymentStates
 
 from keyboards.platform_keyb import platform_menu, category_keyboard
 
