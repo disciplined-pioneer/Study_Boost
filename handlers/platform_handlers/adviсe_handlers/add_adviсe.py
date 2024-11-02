@@ -6,16 +6,26 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 
 from states.adviсe_states import AdviсeStates
-from database.handlers.database_handler import add_user_advice, add_user_rating_history
+from states.payment_states import PaymentStates
+
 from keyboards.platform_keyb import platform_menu, category_keyboard
-from database.requests.user_access import can_use_feature
+
 from database.requests.advice import get_last_advice_id
+from database.requests.user_access import can_use_feature
+from database.handlers.database_handler import add_user_advice, add_user_rating_history
 
 router = Router()
 
 @router.message(F.text == 'Добавить совет ➕')
 async def start_add(message: Message, state: FSMContext):
-    await message.reply("Пожалуйста, выберите категорию:", reply_markup=category_keyboard)
+
+    user_id = message.from_user.id
+    can_use, response_message = await can_use_feature(user_id)
+
+    if can_use:
+        await message.reply("Пожалуйста, выберите категорию:", reply_markup=category_keyboard)
+    else:
+        await message.answer(response_message)
 
 # Обработчик нажатия на кнопки инлайн-клавиатуры для добавления совета
 @router.callback_query(lambda c: c.data in ['study', 'health', 'social', 'work'])
