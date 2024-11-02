@@ -1,7 +1,9 @@
-from aiogram import types
 from aiogram import Router, F
 from aiogram.types import Message
+from aiogram.utils.markdown import text, bold
 from handlers.commands_handlers.commands_handlers import get_top_10_users
+from handlers.commands_handlers.commands_handlers import user_rating
+
 
 router = Router()
 
@@ -22,3 +24,21 @@ async def top_users(message: Message):
     # Отправляем сообщение
     await message.answer(text, parse_mode="HTML")
 
+@router.message(lambda message: message.text == '/my_rating')
+async def my_rating(message: Message):
+    user_id = message.from_user.id
+    rating = await user_rating(user_id)  # Получаем рейтинг пользователя
+
+    # Форматируем сообщение
+    if rating > 0:
+        response = (
+            f"🌟 <b>Ваш рейтинг за текущий месяц:</b> <b>{rating:.1f}</b>\n"
+            "🎉 Поздравляем с вашими достижениями! Продолжайте в том же духе!"
+        )
+    else:
+        response = (
+            "❌ У вас пока нет рейтинга за текущий месяц.\n"
+            "💪 Не упустите возможность заработать баллы! Участвуйте в активности!"
+        )
+
+    await message.answer(response, parse_mode='HTML')  # Изменено на HTML
