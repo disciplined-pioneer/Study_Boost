@@ -1,6 +1,6 @@
 from aiogram import types
 from aiogram import Router, F
-from keyboards.platform_keyb import platform_menu, advice_menu
+from keyboards.platform_keyb import platform_menu, settings_menu, advice_menu
 
 from database.requests.user_access import can_use_feature
 
@@ -36,5 +36,16 @@ async def events_handler(message: types.Message):
 
     if can_use:
         await message.answer(f'Выводим информацию, связанную с мероприятиями', reply_markup=platform_menu)
+    else:
+        await message.answer(response_message)
+
+@router.message(F.text == "Настройки ⚙️")
+async def events_handler(message: types.Message):
+
+    user_id = message.from_user.id
+    can_use, response_message = await can_use_feature(user_id)
+
+    if can_use:
+        await message.answer(f'Вы перешли в настройки платформы ⚙️', reply_markup=settings_menu)
     else:
         await message.answer(response_message)

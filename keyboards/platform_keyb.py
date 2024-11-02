@@ -1,17 +1,27 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-# Обновлённое меню платформы
 platform_menu = ReplyKeyboardMarkup(
     keyboard=[
-        [KeyboardButton(text='Советы 🦉'), KeyboardButton(text='Материалы 📔')],
+        [KeyboardButton(text='Советы 🦉')],
         [KeyboardButton(text='Мероприятия 🎉')],
-        [KeyboardButton(text='Помощь ❓'), KeyboardButton(text='Предложения ➕')]
+        [KeyboardButton(text='Материалы 📔')],
+        [KeyboardButton(text='Настройки ⚙️')]
     ],
     resize_keyboard=True  # Сделаем клавиатуру компактной
 )
 
-# Обновлённое меню для советов
+settings_menu = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text='Команды 📜')],
+        [KeyboardButton(text='Предложения ➕')],
+        [KeyboardButton(text='Помощь ❓')],
+        [KeyboardButton(text='Назад 🔙')]
+    ],
+    resize_keyboard=True  # Сделаем клавиатуру компактной
+)
+
+# Меню для советов
 advice_menu = ReplyKeyboardMarkup(
     keyboard=[
         [KeyboardButton(text='Просмотреть категории 🗂')],

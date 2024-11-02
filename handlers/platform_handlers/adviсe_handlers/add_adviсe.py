@@ -1,18 +1,17 @@
 from datetime import datetime
 
-from aiogram import types
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 
 from states.adviсe_states import AdviсeStates
 
-from keyboards.platform_keyb import platform_menu, category_keyboard
+from keyboards.platform_keyb import category_keyboard
 
 from database.requests.advice import get_last_advice_id
 from database.requests.user_access import can_use_feature
-from database.handlers.database_handler import add_user_advice, add_user_rating_history
 from NI_assistants.sentiment_text import analyze_sentiment
+from database.handlers.database_handler import add_user_advice, add_user_rating_history
 
 router = Router()
 
@@ -96,14 +95,3 @@ async def process_advice(message: Message, state: FSMContext):
         await message.answer(f"УПС, произошла ошибка: {user_advice_response}")
         
     await state.clear()  # Завершаем состояние
-
-@router.message(F.text == "Назад 🔙")
-async def back_handler(message: types.Message):
-
-    user_id = message.from_user.id
-    can_use, response_message = await can_use_feature(user_id)
-
-    if can_use:
-        await message.answer(f'Вы вернулись в главное меню 😊', reply_markup=platform_menu)
-    else:
-        await message.answer(response_message)
