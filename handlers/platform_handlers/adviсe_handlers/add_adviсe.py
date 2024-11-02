@@ -12,6 +12,7 @@ from keyboards.platform_keyb import platform_menu, category_keyboard
 from database.requests.advice import get_last_advice_id
 from database.requests.user_access import can_use_feature
 from database.handlers.database_handler import add_user_advice, add_user_rating_history
+from NI_assistants.sentiment_text import analyze_sentiment
 
 router = Router()
 
@@ -45,7 +46,6 @@ async def category_selected(callback: CallbackQuery, state: FSMContext):
     else:
         await callback.answer("Сейчас нельзя выбрать категорию, завершите текущее действие.")
 
-
 # Обработчик для текста совета
 @router.message(F.text, AdviсeStates.category_advice)
 async def process_advice(message: Message, state: FSMContext):
@@ -56,6 +56,15 @@ async def process_advice(message: Message, state: FSMContext):
     await state.update_data(date_publication=datetime.now().date())
     await state.update_data(ID_user=user_id)
     await state.update_data(content=message.text)
+
+    # Проверка качества текста
+    sentiment_score = await analyze_sentiment(message.text)
+    
+    # Устанавливаем порог для принятия текста (например, не ниже -0.05 для допустимой тональности)
+    if sentiment_score <= -0.01:
+        await message.answer("Ваш текст содержит негативные выражения. Пожалуйста, попробуйте переформулировать свой совет")
+        await state.clear()  # Завершаем состояние
+        return
 
     # Сохраняем данные в БД и получаем ID добавленного совета
     data = await state.get_data()
