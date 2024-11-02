@@ -68,6 +68,11 @@ async def subscription_choice(callback: CallbackQuery, bot: Bot):
     if referrer_id and referrer_id != 'None':
         referral_count = await count_referrals(referrer_id)
         referral_message = f"У Вас появился новый реферал! ✅ \nВсего рефералов на данный момент: {referral_count}"
+
+        # Изменяем статус подписки, если нужно
+        if referral_count == 10:
+            pass
+
         
         # Отправка сообщения рефералу
         await bot.send_message(chat_id=referrer_id, text=referral_message)
