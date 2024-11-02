@@ -116,4 +116,3 @@ async def add_user_advice(ID_user, date_publication, content, type_advice, like_
         except Exception as e:
             print(f"Ошибка при добавлении совета пользователя: {e}")
             return 'Произошла ошибка при добавлении совета пользователя!'
-

@@ -88,7 +88,6 @@ async def process_advice(message: Message, state: FSMContext):
         
     await state.clear()  # Завершаем состояние
 
-
 @router.message(F.text == "Назад 🔙")
 async def back_handler(message: types.Message):
 

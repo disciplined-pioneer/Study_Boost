@@ -27,4 +27,3 @@ deny_access_menu = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text="Оплата была получена не в полном объёме", callback_data="deny_payment_no_enough")],
     [InlineKeyboardButton(text="Предоставить доступ ✅", callback_data="access")]
 ])
-

@@ -73,8 +73,6 @@ async def finish_registration(message: Message, state: FSMContext):
     # Получаем фотографию оплаты
     payment_photo = message.photo[-1].file_id
 
-    print(data)
-
     # Сохраняем данные пользователя
     user_info = {
         "name_user": data.get("name"),

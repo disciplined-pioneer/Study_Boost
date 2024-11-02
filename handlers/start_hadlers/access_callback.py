@@ -65,4 +65,3 @@ async def subscription_choice(callback: CallbackQuery, bot: Bot):
     # Подтверждаем действие администратору
     await callback.message.answer(f"Вы предоставили доступ пользователю с ID: {user_id} ✅")
     await callback.message.edit_reply_markup(reply_markup=None)
-

@@ -1,6 +1,6 @@
+from aiogram import types
 from aiogram import Router, F
 from aiogram.types import Message
-from aiogram import types
 from aiogram.fsm.context import FSMContext
 
 from keyboards.registration_keyb import registration_menu, agreement

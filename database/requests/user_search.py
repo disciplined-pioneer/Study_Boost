@@ -14,4 +14,3 @@ async def check_user_payment(user_id):
         async with db.execute("SELECT * FROM payments WHERE ID_user = ? ORDER BY expiration_date DESC", (user_id,)) as cursor:
             user_payments = await cursor.fetchall()
             return user_payments[0]
-
