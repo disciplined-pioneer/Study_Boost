@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from aiogram import Router, F, Bot
 from aiogram.types import CallbackQuery
@@ -70,9 +70,23 @@ async def subscription_choice(callback: CallbackQuery, bot: Bot):
         referral_message = f"У Вас появился новый реферал! ✅ \nВсего рефералов на данный момент: {referral_count}"
 
         # Изменяем статус подписки, если нужно
-        if referral_count == 10:
-            pass
+        if referral_count == 1:
+            now_date = datetime.now().date()
+            await add_subscription_status(referrer_id, 'Unlimited')
+            await add_payment(referrer_id, now_date, now_date + timedelta(36500))
 
+            # Отправляем уведомление о результате обновления подписки
+            await bot.send_message(
+                referrer_id,
+                (
+                    "🎉 Поздравляем! 🎉\n\n"
+                    "Вы успешно пригласили 10 рефералов и получили статус подписки <b>Unlimited</b>! ✅\n\n"
+                    "Теперь у вас <b>неограниченный доступ</b> ко всем возможностям нашей платформы.\n\n"
+                    "Откройте для себя больше возможностей и продолжайте делиться ими с друзьями! 🚀"
+                ),
+                reply_markup=platform_menu,
+                parse_mode="HTML"
+            )
         
         # Отправка сообщения рефералу
         await bot.send_message(chat_id=referrer_id, text=referral_message)

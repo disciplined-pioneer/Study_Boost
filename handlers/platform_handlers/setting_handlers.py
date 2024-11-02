@@ -20,7 +20,6 @@ async def commands_handler(message: Message):
     )
     await message.answer(commands_text, parse_mode="HTML")
 
-
 @router.message(F.text == "Назад 🔙")
 async def back_handler(message: types.Message):
 
