@@ -68,7 +68,7 @@ async def finish_registration(message: Message, state: FSMContext):
     global new_users
     data = await state.get_data()
     user_id = message.from_user.id
-    referrer_id = data.get("referrer_id")  # Получаем ID реферера, если есть
+    referrer_id = data.get("referrer_id")
 
     # Получаем фотографию оплаты
     payment_photo = message.photo[-1].file_id
@@ -84,7 +84,7 @@ async def finish_registration(message: Message, state: FSMContext):
         "ID_user": user_id,
         "ID_message": message.message_id,
         "photo_payment": payment_photo,
-        "referrer_id": referrer_id,  # Добавляем ID реферера
+        "referrer_id": referrer_id,
         "date_registration": datetime.now().date()
     }
 
@@ -109,6 +109,7 @@ async def finish_registration(message: Message, state: FSMContext):
         reply_markup=access_keyboard
     )
 
+    # Отправляем сообщение пользователю
     new_users.append(user_info)
     await message.answer(
         'Поздравляем, регистрация успешно завершена! 🎉\n\n'

@@ -81,7 +81,7 @@ async def process_rating_callback(callback_query: CallbackQuery):
         # Отправляем сообщение пользователю, который опубликовал совет
         await callback_query.bot.send_message(
             chat_id=user_id,
-            text=f"Вы получили {'лайк' if action_type == 'like' else 'дизлайк'} от пользователя ID_{callback_query.from_user.id}!"
+            text=f"Вы получили {'лайк' if action_type == 'like' else 'дизлайк'} от пользователя ID: {callback_query.from_user.id}!"
         )
     else:
         await callback_query.answer(f"Вы уже оставляли свой отзыв для этого совета!")

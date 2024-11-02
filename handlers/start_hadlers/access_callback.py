@@ -7,6 +7,7 @@ from keyboards.admin_keyb import subscription_menu
 from keyboards.platform_keyb import platform_menu
 from handlers.start_hadlers.register_handlers import new_users
 from database.handlers.database_handler import register_user, add_subscription_status, add_payment
+from database.requests.user_search import count_referrals
 
 router = Router()
 
@@ -61,6 +62,15 @@ async def subscription_choice(callback: CallbackQuery, bot: Bot):
         f"Вам был предоставлен доступ к платформе StudyBoost с подпиской: {subscription_type}! ✅",
         reply_markup=platform_menu
     )
+
+    # Отправляем сообщение рефералу, если он есть
+    referrer_id = user_info['referrer_id']
+    if referrer_id and referrer_id != 'None':
+        referral_count = await count_referrals(referrer_id)
+        referral_message = f"У Вас появился новый реферал! ✅ \nВсего рефералов на данный момент: {referral_count}"
+        
+        # Отправка сообщения рефералу
+        await bot.send_message(chat_id=referrer_id, text=referral_message)
 
     # Подтверждаем действие администратору
     await callback.message.answer(f"Вы предоставили доступ пользователю с ID: {user_id} ✅")
