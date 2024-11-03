@@ -1,10 +1,10 @@
 from aiogram import Router
 from aiogram.types import Message
 
+from database.requests.user_search import count_referrals
 from handlers.commands_handlers.commands_handlers import user_rating
 from handlers.commands_handlers.commands_handlers import fetch_user_data
 from handlers.commands_handlers.commands_handlers import get_top_10_users
-from database.requests.user_search import count_referrals
 
 router = Router()
 

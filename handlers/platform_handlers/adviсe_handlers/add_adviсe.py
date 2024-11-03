@@ -79,11 +79,11 @@ async def process_advice(message: Message, state: FSMContext):
     if user_advice_response == "Совет пользователя успешно добавлен!":
         
         # Получаем advice_id последнего добавленного совета
-        advice_id = await get_last_advice_id()  # Здесь вам нужно реализовать эту функцию
+        advice_id = await get_last_advice_id()
 
         date = datetime.now().date()
         await add_user_rating_history(
-            advice_id=advice_id,  # Передаем advice_id
+            advice_id=advice_id,
             id_user=user_id,
             granted_by=user_id,
             accrual_date=date,
