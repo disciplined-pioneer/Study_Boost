@@ -1,4 +1,5 @@
 import aiosqlite
+from datetime import date, time
 
 # Регистрация пользователей с обновлением данных при совпадении по ID_user
 async def register_user(user_data):
@@ -115,3 +116,16 @@ async def add_user_advice(ID_user, date_publication, content, type_advice, like_
         except Exception as e:
             print(f"Ошибка при добавлении совета пользователя: {e}")
             return 'Произошла ошибка при добавлении совета пользователя!'
+
+
+# Добавление материалов
+async def add_event(ID_user: int, date_publication: date, place: str, event_date: date, event_time: time, description: str):
+    database_path = 'database/data/events.db'
+    
+    async with aiosqlite.connect(database_path) as db:
+        await db.execute('''
+            INSERT INTO events (ID_user, date_publication, place, date, time, description)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (ID_user, date_publication, place, event_date, event_time, description))
+        
+        await db.commit()

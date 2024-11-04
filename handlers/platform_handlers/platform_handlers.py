@@ -38,7 +38,7 @@ async def events_handler(message: types.Message):
     can_use, response_message = await can_use_feature(user_id)
 
     if can_use:
-        await message.answer(f'Пожалуйста, выберите за какой период времени вы хотите просмотреть Мероприятия', reply_markup=events_menu)
+        await message.answer("Выберите период для просмотра мероприятий:", reply_markup=events_menu)
     else:
         await message.answer(response_message)
 

@@ -12,8 +12,10 @@ from handlers.start_hadlers.deny_access_callback import router as deny_access_us
 from handlers.platform_handlers.platform_handlers import router as platform_router # Роутер для главный кнопок
 from handlers.platform_handlers.setting_handlers import router as setting_router # Роутер для панели настроек
 
-from handlers.platform_handlers.adviсe_handlers.add_adviсe import router as adviсe_router  # Роутер для добавления советов
+from handlers.platform_handlers.adviсe_handlers.add_adviсe import router as add_adviсe_router  # Роутер для добавления советов
 from handlers.platform_handlers.adviсe_handlers.view_advice import router as view_advice_router  # Роутер для просмотра советов
+
+from handlers.platform_handlers.events_handlers.add_events import router as add_events_router  # Роутер для добавления мероприятий
 
 from commands.commands_users import router as users_router # Роутер для команд пользователей
 from commands.commands_admin import router as admin_router # Роутер для команд админа
@@ -37,8 +39,10 @@ async def main():
     dp.include_router(platform_router)  # Включаем роутер для главный кнопок
     dp.include_router(setting_router)  # Включаем роутер для кнопок настройки
 
-    dp.include_router(adviсe_router)  # Включаем роутер для добаваления советов
+    dp.include_router(add_adviсe_router)  # Включаем роутер для добаваления советов
     dp.include_router(view_advice_router) # Включаем роутер для просмотра советов
+
+    dp.include_router(add_events_router)  # Включаем роутер для добаваления советов
 
     dp.include_router(users_router) # Включаем роутер для команд пользователей
     dp.include_router(admin_router) # Включаем роутер для команд админа
