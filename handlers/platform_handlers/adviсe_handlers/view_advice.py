@@ -4,8 +4,8 @@ from datetime import datetime
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 
-from keyboards.platform_keyb import grade_keyboard
-from keyboards.platform_keyb import view_category_keyboard
+from keyboards.advice_keyb import grade_keyboard
+from keyboards.advice_keyb import view_category_keyboard
 
 from database.requests.advice import get_random_advice
 from database.requests.user_access import can_use_feature

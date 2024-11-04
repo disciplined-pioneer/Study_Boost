@@ -6,7 +6,7 @@ from aiogram.fsm.context import FSMContext
 
 from states.adviсe_states import AdviсeStates
 
-from keyboards.platform_keyb import category_keyboard
+from keyboards.advice_keyb import category_keyboard
 
 from database.requests.advice import get_last_advice_id
 from database.requests.user_access import can_use_feature

@@ -94,6 +94,24 @@ async def create_users_advice():
         ''')
         await db.commit()
 
+# Мероприятия студентов
+async def create_events_table():
+    database_path = 'database/data/events.db'
+    os.makedirs(os.path.dirname(database_path), exist_ok=True)
+    
+    async with aiosqlite.connect(database_path) as db:
+        await db.execute(''' 
+            CREATE TABLE IF NOT EXISTS events (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                ID_user INTEGER,
+                date_publication DATE,
+                place TEXT,
+                date DATE,
+                time TIME,
+                description TEXT
+            )
+        ''')
+        await db.commit()
 
 # Создание всех таблиц
 async def create_all_databases():
@@ -108,3 +126,6 @@ async def create_all_databases():
 
     # Советы
     await create_users_advice()
+
+    # Мероприятия
+    await create_events_table()
