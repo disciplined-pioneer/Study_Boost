@@ -56,7 +56,7 @@ async def notify_referrer(bot: Bot, referrer_id, user_id):
     
     await bot.send_message(chat_id=referrer_id, text=referral_message)
     
-    if referral_count == 1:
+    if referral_count == 10:
         
         await add_subscription_status(referrer_id, 'Unlimited')
         await add_payment(referrer_id, now_date, now_date + timedelta(days=36500))

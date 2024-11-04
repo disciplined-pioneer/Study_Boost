@@ -1,7 +1,9 @@
 from aiogram import types
 from aiogram import Router, F
-from keyboards.platform_keyb import platform_menu, settings_menu
+
 from keyboards.advice_keyb import advice_menu
+from keyboards.events_keyb import events_menu
+from keyboards.platform_keyb import platform_menu, settings_menu
 
 from database.requests.user_access import can_use_feature
 
@@ -36,7 +38,7 @@ async def events_handler(message: types.Message):
     can_use, response_message = await can_use_feature(user_id)
 
     if can_use:
-        await message.answer(f'Выводим информацию, связанную с мероприятиями', reply_markup=platform_menu)
+        await message.answer(f'Пожалуйста, выберите за какой период времени вы хотите просмотреть Мероприятия', reply_markup=events_menu)
     else:
         await message.answer(response_message)
 
