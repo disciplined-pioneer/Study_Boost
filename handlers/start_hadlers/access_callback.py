@@ -40,19 +40,22 @@ def calculate_expiration_date(payment_date, subscription_type):
     return payment_date + timedelta(days=days)
 
 # Функция для уведомления пользователя о подписке
-async def notify_user(bot: Bot, user_id, subscription_type):
-    await bot.send_message(
-        user_id,
-        f"Вам был предоставлен доступ к платформе StudyBoost с подпиской: {subscription_type}! ✅",
-        reply_markup=platform_menu
+async def notify_user(bot: Bot, user_id, subscription_type, bonus_awarded: bool = False):
+
+    text = (
+        f"Вам предоставлен доступ к платформе StudyBoost с подпиской «{subscription_type}»! ✅"
+        f"{'\n\nТакже вам начислено 10 баллов за регистрацию по реферальной ссылке.' if bonus_awarded else ''}"
     )
+    
+    await bot.send_message(user_id, text, reply_markup=platform_menu)
+
 
 # Функция для уведомления реферала
-async def notify_referrer(bot: Bot, referrer_id, user_id):
-    now_date = datetime.now().date()
+async def notify_referrer(bot: Bot, referrer_id, user_id, now_date):
+    
     referral_count = await count_referrals(referrer_id)
-    referral_message = f"У Вас появился новый реферал! ✅ \nВсего рефералов на данный момент: {referral_count}"
-    #await add_user_rating_history(id_user=referrer_id, granted_by=user_id, accrual_date=now_date, action_type="new_referral", rating_value='5')
+    referral_message = f"У Вас появился новый реферал! ✅ \nВаш рейтинг был повышен на +5 баллов! \nВсего рефералов на данный момент: {referral_count}"
+    await add_user_rating_history(advice_id='None', material_id='None', id_user=referrer_id, granted_by=user_id, accrual_date=now_date, action_type="new_referral", rating_value='5')
     
     await bot.send_message(chat_id=referrer_id, text=referral_message)
     
@@ -98,12 +101,16 @@ async def subscription_choice(callback: CallbackQuery, bot: Bot):
 
     # Удаляем пользователя из списка новых и отправляем уведомления
     new_users.remove(user_info)
-    await notify_user(bot, user_id, subscription_type)
 
     # Проверка и уведомление реферала
+    now_date = datetime.now().date()
     referrer_id = user_info.get('referrer_id')
     if referrer_id != 'None':
-        await notify_referrer(bot, referrer_id, user_id)
+        await notify_referrer(bot, referrer_id, user_id, now_date)
+        await add_user_rating_history(advice_id='None', material_id='None', id_user=user_id, granted_by=referrer_id, accrual_date=now_date, action_type="new_referral", rating_value='10')
+        await notify_user(bot, user_id, subscription_type, bonus_awarded=True)
+    else:
+        await notify_user(bot, user_id, subscription_type, bonus_awarded=True)
 
     # Подтверждение администратору
     await callback.message.answer(f"Вы предоставили доступ пользователю с ID: {user_id} ✅")
