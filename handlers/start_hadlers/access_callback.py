@@ -77,6 +77,7 @@ async def notify_referrer(bot: Bot, referrer_id, user_id):
 # Основная функция для выбора подписки
 @router.callback_query(F.data.startswith('subscription_'))
 async def subscription_choice(callback: CallbackQuery, bot: Bot):
+
     # Получаем информацию о пользователе
     user_info = await get_user_info(callback, new_users)
     if not user_info:
@@ -101,7 +102,7 @@ async def subscription_choice(callback: CallbackQuery, bot: Bot):
 
     # Проверка и уведомление реферала
     referrer_id = user_info.get('referrer_id')
-    if referrer_id:
+    if referrer_id != 'None':
         await notify_referrer(bot, referrer_id, user_id)
 
     # Подтверждение администратору

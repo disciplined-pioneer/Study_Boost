@@ -91,14 +91,14 @@ async def add_payment(ID_user, payment_date, expiration_date):
         
 
 # Добавление истории рейтинга пользователя
-async def add_user_rating_history(advice_id:int, id_user: int, granted_by: int, accrual_date: str, action_type: str, rating_value: str):
+async def add_user_rating_history(advice_id:str, material_id:str, id_user: int, granted_by: int, accrual_date: str, action_type: str, rating_value: str):
     database_path = 'database/data/users_rating_history.db'
     
     async with aiosqlite.connect(database_path) as db:
         await db.execute('''
-            INSERT INTO users_rating_history (advice_id, id_user, granted_by, accrual_date, action_type, rating_value)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ''', (advice_id, id_user, granted_by, accrual_date, action_type, rating_value))
+            INSERT INTO users_rating_history (advice_id, material_id, id_user, granted_by, accrual_date, action_type, rating_value)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', (advice_id, material_id, id_user, granted_by, accrual_date, action_type, rating_value))
         await db.commit()
 
 

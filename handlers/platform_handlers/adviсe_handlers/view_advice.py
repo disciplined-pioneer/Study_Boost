@@ -57,7 +57,7 @@ async def process_rating_callback(callback_query: CallbackQuery):
 
     # Обрабатываем действие пользователя
     user_id = int(match_id.group(1))  # Преобразуем ID в целое число
-    advice_number = int(match_advice_number.group(1))  # Преобразуем номер совета в целое число
+    advice_number = str(match_advice_number.group(1))  # Преобразуем номер совета в целое число
     result = await check_rating_history(advice_number, callback_query.from_user.id)
 
     if result:
@@ -65,6 +65,7 @@ async def process_rating_callback(callback_query: CallbackQuery):
         # Добавляем рейтинг пользователю, который опубликовал совет
         await add_user_rating_history(
             advice_id=advice_number,
+            material_id='None',
             id_user=user_id,
             granted_by=callback_query.from_user.id,
             accrual_date=accrual_date,

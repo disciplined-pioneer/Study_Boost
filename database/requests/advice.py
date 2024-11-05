@@ -51,4 +51,4 @@ async def get_last_advice_id() -> int:
     async with aiosqlite.connect(database_path) as db:
         cursor = await db.execute('SELECT MAX(advice_id) FROM users_advice')
         advice_id = await cursor.fetchone()
-        return advice_id[0] if advice_id else None
+        return str(advice_id[0]) if advice_id else 'None'

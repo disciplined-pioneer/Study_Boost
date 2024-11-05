@@ -84,6 +84,7 @@ async def process_advice(message: Message, state: FSMContext):
         date = datetime.now().date()
         await add_user_rating_history(
             advice_id=advice_id,
+            material_id='None',
             id_user=user_id,
             granted_by=user_id,
             accrual_date=date,

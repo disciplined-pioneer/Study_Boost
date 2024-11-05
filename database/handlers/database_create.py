@@ -65,7 +65,8 @@ async def create_users_rating_history():
         await db.execute(''' 
             CREATE TABLE IF NOT EXISTS users_rating_history (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                advice_id INTEGER,
+                advice_id TEXT,
+                material_id TEXT,
                 id_user INTEGER,
                 granted_by INTEGER,
                 accrual_date DATE,
