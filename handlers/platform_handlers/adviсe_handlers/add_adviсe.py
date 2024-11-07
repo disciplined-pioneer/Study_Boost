@@ -58,8 +58,6 @@ async def process_advice(message: Message, state: FSMContext):
 
     # Проверка качества текста
     sentiment_score = await analyze_sentiment(message.text)
-    
-    # Устанавливаем порог для принятия текста (например, не ниже -0.05 для допустимой тональности)
     if sentiment_score <= -0.01:
         await message.answer("Ваш текст содержит негативные выражения. Пожалуйста, попробуйте переформулировать свой совет")
         await state.clear()  # Завершаем состояние

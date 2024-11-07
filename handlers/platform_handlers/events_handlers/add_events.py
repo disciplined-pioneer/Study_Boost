@@ -1,13 +1,14 @@
 from datetime import datetime
 
 from aiogram import Router, F
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 
 from states.events_states import EventsStates
 
-from database.requests.user_access import can_use_feature
 from database.handlers.database_handler import add_event
+from database.requests.user_access import can_use_feature
+from NI_assistants.sentiment_text import analyze_sentiment
 
 router = Router()
 # Обработчик для начала добавления мероприятия
@@ -39,11 +40,20 @@ async def process_event_date(message: Message, state: FSMContext):
 # Обработчик для места проведения
 @router.message(EventsStates.place)
 async def process_place(message: Message, state: FSMContext):
+
     place = message.text.strip()
     if place:
-        await state.update_data(place=place)
-        await message.reply("Введите время проведения мероприятия (например, 15:30):")
-        await state.set_state(EventsStates.time)
+
+        # Проверка качества текста
+        sentiment_score = await analyze_sentiment(message.text)
+        if sentiment_score <= -0.01:
+            await message.answer("Ваш текст содержит негативные выражения. Пожалуйста, попробуйте переформулировать свой текст")
+            await state.clear()  # Завершаем состояние
+            return
+        else:
+            await state.update_data(place=place)
+            await message.reply("Введите время проведения мероприятия (например, 15:30):")
+            await state.set_state(EventsStates.time)
     else:
         await message.reply("Место не может быть пустым.")
         await state.clear()
@@ -64,21 +74,31 @@ async def process_event_time(message: Message, state: FSMContext):
 # Обработчик для описания и сохранения данных
 @router.message(EventsStates.description)
 async def process_description(message: Message, state: FSMContext):
+    
     description = message.text.strip()
     if description:
-        data = await state.get_data()
 
-        # Записываем данные в БД
-        await add_event(
-            ID_user=data['ID_user'],
-            date_publication=data['date_publication'],
-            place=data['place'],
-            event_date=data['date'],
-            event_time=data['time'],  # event_time теперь строка
-            description=description
-        )
-        await message.reply("Мероприятие успешно добавлено!")
-        await state.clear()
+        # Проверка качества текста
+        sentiment_score = await analyze_sentiment(message.text)
+        if sentiment_score <= -0.01:
+            await message.answer("Ваш текст содержит негативные выражения. Пожалуйста, попробуйте переформулировать свой текст")
+            await state.clear()  # Завершаем состояние
+            return
+        
+        else:
+            data = await state.get_data()
+
+            # Записываем данные в БД
+            await add_event(
+                ID_user=data['ID_user'],
+                date_publication=data['date_publication'],
+                place=data['place'],
+                event_date=data['date'],
+                event_time=data['time'],  # event_time теперь строка
+                description=description
+            )
+            await message.reply("Мероприятие успешно добавлено!")
+            await state.clear()
     else:
         await message.reply("Описание не может быть пустым.")
         await state.clear()
