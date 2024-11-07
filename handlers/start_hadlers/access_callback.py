@@ -6,9 +6,10 @@ from aiogram.types import CallbackQuery
 from keyboards.admin_keyb import subscription_menu
 from keyboards.platform_keyb import platform_menu
 from handlers.start_hadlers.register_handlers import new_users
-from database.handlers.database_handler import register_user, add_subscription_status, add_payment
+
 from database.requests.user_search import count_referrals
 from database.handlers.database_handler import add_user_rating_history
+from database.handlers.database_handler import register_user, add_subscription_status, add_payment
 
 router = Router()
 
