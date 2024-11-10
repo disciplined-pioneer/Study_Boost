@@ -114,6 +114,7 @@ async def create_events_table():
         ''')
         await db.commit()
 
+
 # Создание всех таблиц
 async def create_all_databases():
 

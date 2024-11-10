@@ -91,3 +91,4 @@ async def payment_information(user_id):
         async with db.execute('SELECT payment_date, expiration_date FROM payments WHERE ID_user = ?', (user_id,)) as cursor:
             payment_data = await cursor.fetchone()
             return payment_data
+        

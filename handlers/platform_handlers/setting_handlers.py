@@ -16,7 +16,8 @@ async def commands_handler(message: Message):
         "<b>/my_rating</b> - Отображение текущего рейтинга и прогресса.\n\n"
         "<b>/referal_link</b> - Ваша уникальная реферальная ссылка для приглашения друзей.\n\n"
         "<b>/my_referal</b> - Просмотр количества приглашённых вами друзей и описание ваших бонусов.\n\n"
-        "<b>/top_users</b> - Список Топ-10 пользователей с наивысшим рейтингом."
+        "<b>/top_users</b> - Список Топ-10 пользователей с наивысшим рейтингом.\n\n"
+        "<b>/subscription_status</b> - Информация о типе Вашей подписки.\n\n"
     )
     await message.answer(commands_text, parse_mode="HTML")
 

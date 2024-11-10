@@ -1,24 +1,27 @@
+from config import ADMIN_ID
 from datetime import datetime
 
 from aiogram import Router, F, types
 from aiogram.fsm.context import FSMContext
-
-from keyboards.platform_keyb import platform_menu
-from keyboards.admin_keyb import access_keyboard
 from states.payment_states import PaymentStates
 
-from config import ADMIN_ID
-from database.requests.user_search import check_user_registration, check_user_payment
+from keyboards.admin_keyb import access_keyboard
+from keyboards.platform_keyb import platform_menu
 from handlers.start_hadlers.register_handlers import new_users
 
+from states.payment_states import PaymentStates
+from handlers.commands_handlers.commands_handlers import user_subscription
+from database.requests.user_search import check_user_registration, check_user_payment
 
 router = Router()
 
 async def send_user_information(message: types.Message, state: FSMContext, data, user_id, payment_photo):
 
+    type_ubscription = await user_subscription(user_id)
+
     # Сохраняем данные пользователя
     user_info = {
-        "name_user": data.get("name"),
+        "name_user": data.get("name_user"),
         "city_university": data.get("city_university"),
         "name_university": data.get("name_university"),
         "course": data.get("course"),
@@ -27,7 +30,7 @@ async def send_user_information(message: types.Message, state: FSMContext, data,
         "ID_user": user_id,
         "ID_message": message.message_id,
         "photo_payment": payment_photo,
-        "date_registration": datetime.now().date()  # - timedelta(days=100)
+        "date_registration": datetime.now().date()
     }
 
     # Сохраняем user_id в состояние
@@ -35,7 +38,7 @@ async def send_user_information(message: types.Message, state: FSMContext, data,
 
     # Формируем текст для отправки админу
     user_info_text = (
-        f"Имя: {data.get('name')}\n\n"
+        f"Имя: {data.get('name_user')}\n\n"
         f"Город университета: {data.get('city_university')}\n\n"
         f"Название университета: {data.get('name_university')}\n\n"
         f"Курс: {data.get('course')}\n\n"
@@ -43,6 +46,7 @@ async def send_user_information(message: types.Message, state: FSMContext, data,
         f"Телеграм: {'@' + message.from_user.username if message.from_user.username else 'Не указан'}\n\n"
         f"ID сообщения: {message.message_id}\n\n"
         f"ID пользователя: {user_id}\n\n"
+        f"Тип подписки: <{type_ubscription[0]}>\n\n"
     )
         
     # Отправляем информацию админу

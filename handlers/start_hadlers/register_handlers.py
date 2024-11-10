@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from aiogram import Router, F
 from aiogram.types import Message
@@ -7,7 +7,8 @@ from aiogram.fsm.context import FSMContext
 from config import ADMIN_ID
 from keyboards.admin_keyb import access_keyboard
 from states.registration_states import RegistrationStates
-from database.requests.user_search import check_user_registration
+
+from database.requests.user_search import check_user_registration, count_users
 
 # Хранение данных новых пользователей
 new_users = []
@@ -86,7 +87,7 @@ async def finish_registration(message: Message, state: FSMContext):
         "ID_message": message.message_id,
         "photo_payment": payment_photo,
         "referrer_id": referrer_id,
-        "date_registration": datetime.now().date()
+        "date_registration": datetime.now().date() - timedelta(days=100)
     }
 
     # Формируем текст для отправки админу
@@ -100,6 +101,7 @@ async def finish_registration(message: Message, state: FSMContext):
         f"ID сообщения: {message.message_id}\n\n"
         f"ID пользователя: {user_id}\n\n"
         f"ID реферера: {referrer_id or 'Отсутствует'}\n\n"
+        f"Количество пользователей: {await count_users()}\n\n"
     )
 
     # Отправляем информацию админу

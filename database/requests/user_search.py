@@ -28,3 +28,9 @@ async def count_referrals(referrer_id):
         await cursor.close()
         
     return int(result[0]) if result else 0
+
+async def count_users():
+    async with aiosqlite.connect('database/data/subscription_status.db') as db:
+        async with db.execute('''SELECT COUNT(id) FROM subscription_status''') as cursor:
+            count_users = await cursor.fetchone()
+            return count_users[0] if count_users else 0
