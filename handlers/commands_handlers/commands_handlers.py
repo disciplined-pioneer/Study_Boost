@@ -1,7 +1,7 @@
 import aiosqlite
 from datetime import datetime
 
-# вывод первых 10 пользователей в рейтинге
+# Вывод первых 10 пользователей в рейтинге
 async def get_top_10_users():
 
     # Определяем текущий месяц и год
@@ -78,3 +78,16 @@ async def fetch_user_data(user_id):
             else:
                 return None  # Пользователь не найден
 
+# Проверяем наличие подписки в таблице subscription_status
+async def user_subscription(user_id):
+    async with aiosqlite.connect('database/data/subscription_status.db') as db:
+        async with db.execute('SELECT status FROM subscription_status WHERE ID_user = ?', (user_id,)) as cursor:
+            subscription_data = await cursor.fetchone()
+            return subscription_data
+
+# Проверяем наличие информации об оплате в таблице payments
+async def payment_information(user_id):
+    async with aiosqlite.connect('database/data/payments.db') as db:
+        async with db.execute('SELECT payment_date, expiration_date FROM payments WHERE ID_user = ?', (user_id,)) as cursor:
+            payment_data = await cursor.fetchone()
+            return payment_data

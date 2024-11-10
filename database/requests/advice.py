@@ -14,6 +14,7 @@ async def get_user_name(ID_user: int):
         else:
             return None  # Если пользователь не найден
 
+# Генерация случайного совета
 async def get_random_advice(advice_type: str):
     database_path = 'database/data/users_advice.db'
     async with aiosqlite.connect(database_path) as db:

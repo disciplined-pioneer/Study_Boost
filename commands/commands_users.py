@@ -1,10 +1,10 @@
+from datetime import datetime
+
 from aiogram import Router
 from aiogram.types import Message
 
 from database.requests.user_search import count_referrals
-from handlers.commands_handlers.commands_handlers import user_rating
-from handlers.commands_handlers.commands_handlers import fetch_user_data
-from handlers.commands_handlers.commands_handlers import get_top_10_users
+from handlers.commands_handlers.commands_handlers import user_rating, fetch_user_data, get_top_10_users, user_subscription, payment_information
 
 router = Router()
 
@@ -97,3 +97,40 @@ async def referral_handler(message: Message):
         f"2️⃣ Если вы приведёте <b>10 пользователей</b>, подписка для вас станет <b>бесплатной НАВСЕГДА</b> 🆓\n\n"
         "💡 <i>Приглашайте друзей и повышайте свой рейтинг, чтобы открыть все преимущества!</i>"
     , parse_mode="HTML")
+
+# Вывод инфомрмации о подписке
+@router.message(lambda message: message.text == '/subscription_status')
+async def subscription_status(message: Message):
+
+    # Определеяем тип подписки пользователя
+    user_id = message.from_user.id
+    subscription_data = await user_subscription(user_id)
+    
+    # Если подписка не найдена
+    if not subscription_data:
+        await message.answer("Вы не были найден в базе данных. Пожалуйста, пройдите регистрацию")
+        return
+
+    # Получаем статус подписки
+    subscription_status = subscription_data[0]
+    payment_data = await payment_information(user_id)
+
+    # Если информация об оплате не найдена
+    if not payment_data:
+        await message.answer("Информация о вашей оплате не найдена. Пожалуйста, свяжитесь с поддержкой")
+        return
+
+    # Получаем дату оплаты и окончания подписки
+    payment_date = datetime.strptime(payment_data[0], '%Y-%m-%d').date()
+    expiration_date = datetime.strptime(payment_data[1], '%Y-%m-%d').date()
+    days_left = (expiration_date - datetime.now().date()).days
+
+    # Формируем сообщение для пользователя
+    response_message = (
+        f"🔔 <b>Статус подписки:</b> {subscription_status}\n"
+        f"💵 <b>Дата оплаты:</b> {payment_date.strftime('%d.%m.%Y')}\n"
+        f"📅 <b>Дата окончания:</b> {expiration_date.strftime('%d.%m.%Y')}\n"
+        f"⏳ <b>Осталось дней до окончания:</b> {days_left} дней"
+    )
+
+    await message.answer(response_message, parse_mode='HTML')
