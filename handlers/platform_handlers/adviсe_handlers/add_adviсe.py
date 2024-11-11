@@ -4,7 +4,7 @@ from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 
-from states.adviсe_states import AdviсeStates
+from states.adviсe_state import AdviсeStates
 
 from keyboards.advice_keyb import category_keyboard
 

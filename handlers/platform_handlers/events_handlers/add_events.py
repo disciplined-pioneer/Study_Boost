@@ -4,7 +4,7 @@ from aiogram import Router, F
 from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 
-from states.events_states import EventsStates
+from states.events_state import EventsStates
 
 from database.handlers.database_handler import add_event
 from database.requests.user_access import can_use_feature

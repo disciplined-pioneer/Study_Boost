@@ -130,6 +130,7 @@ async def add_event(ID_user: int, date_publication: date, place: str, event_date
         
         await db.commit()
 
+
 # Добавление помощи и предложений
 async def add_help_suggestion(ID_user: int, suggestion_date: date, suggestion_type: str, content: str):
     database_path = 'database/data/help_suggestions.db'

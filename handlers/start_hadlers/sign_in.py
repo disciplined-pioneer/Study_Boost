@@ -3,13 +3,13 @@ from datetime import datetime
 
 from aiogram import Router, F, types
 from aiogram.fsm.context import FSMContext
-from states.payment_states import PaymentStates
+from states.payment_state import PaymentStates
 
 from keyboards.admin_keyb import access_keyboard
 from keyboards.platform_keyb import platform_menu
 from handlers.start_hadlers.register_handlers import new_users
 
-from states.payment_states import PaymentStates
+from states.payment_state import PaymentStates
 from handlers.commands_handlers.commands_handlers import user_subscription
 from database.requests.user_search import check_user_registration, check_user_payment
 

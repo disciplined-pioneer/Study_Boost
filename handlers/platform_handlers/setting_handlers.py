@@ -18,6 +18,7 @@ async def commands_handler(message: Message):
         "<b>/my_referal</b> - Просмотр количества приглашённых вами друзей и описание ваших бонусов.\n\n"
         "<b>/top_users</b> - Список Топ-10 пользователей с наивысшим рейтингом.\n\n"
         "<b>/subscription_status</b> - Информация о типе Вашей подписки.\n\n"
+        "</b>/cancellation</b> - Отмена любого состояния.\n\n"
     )
     await message.answer(commands_text, parse_mode="HTML")
 

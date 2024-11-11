@@ -1,5 +1,8 @@
 from aiogram import Router, F
 from aiogram.types import Message
+from aiogram.fsm.context import FSMContext
+
+from states.help_suggestion_state import HelpSuggestionStates
 
 router = Router()
 
@@ -33,5 +36,20 @@ async def creator_handler(message: Message):
     await message.answer_photo(photo=photo_id, caption=text, parse_mode='Markdown')
 
 @router.message(F.text == 'Помощь ❓')
-async def help_handler(message: Message):
-    await message.answer('Просим отправить вопрос, по которому пользователь хотел обратиться')
+async def help_handler(message: Message, state: FSMContext):
+
+    # Переходим в состояние "content", где пользователь будет вводить свой запрос
+    await state.set_state(HelpSuggestionStates.content)
+    await message.answer('Пожалуйста, опишите проблему, с которой вы столкнулись⚠️ \n\nНаш администратор свяжется с вами для уточнения и решения вашего вопроса!')
+
+@router.message(HelpSuggestionStates.content)
+async def help_content_handler(message: Message, state: FSMContext):
+    user_question = message.text
+    if user_question != '/cancellation':
+        await state.update_data(question=user_question)
+
+        await message.answer(f'Вы написали: {user_question}. Мы обработаем ваш запрос.')
+        await state.clear()
+    else:
+        await state.clear()
+        await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊')
