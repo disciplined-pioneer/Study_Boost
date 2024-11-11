@@ -118,7 +118,7 @@ async def add_user_advice(ID_user, date_publication, content, type_advice, like_
             return 'Произошла ошибка при добавлении совета пользователя!'
 
 
-# Добавление материалов
+# Добавление мероприятий
 async def add_event(ID_user: int, date_publication: date, place: str, event_date: date, event_time: time, description: str):
     database_path = 'database/data/events.db'
     
@@ -127,5 +127,17 @@ async def add_event(ID_user: int, date_publication: date, place: str, event_date
             INSERT INTO events (ID_user, date_publication, place, date, time, description)
             VALUES (?, ?, ?, ?, ?, ?)
         ''', (ID_user, date_publication, place, event_date, event_time, description))
+        
+        await db.commit()
+
+# Добавление помощи и предложений
+async def add_help_suggestion(ID_user: int, suggestion_date: date, suggestion_type: str, content: str):
+    database_path = 'database/data/help_suggestions.db'
+    
+    async with aiosqlite.connect(database_path) as db:
+        await db.execute(''' 
+            INSERT INTO events (ID_user, date, type, content)
+            VALUES (?, ?, ?, ?)
+        ''', (ID_user, suggestion_date, suggestion_type, content))
         
         await db.commit()
