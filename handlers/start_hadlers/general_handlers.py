@@ -4,9 +4,7 @@ from aiogram import Router, F
 from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 
-from NI_assistants.sentiment_text import analyze_sentiment
-
-from states.help_suggestion_state import HelpSuggestionStates
+from states.help_suggestion_state import HelpStates
 from database.handlers.database_handler import add_help_suggestion
 
 
@@ -45,10 +43,10 @@ async def creator_handler(message: Message):
 async def help_handler(message: Message, state: FSMContext):
 
     # Переходим в состояние "content", где пользователь будет вводить свой запрос
-    await state.set_state(HelpSuggestionStates.content)
+    await state.set_state(HelpStates.content)
     await message.answer('Пожалуйста, опишите проблему, с которой вы столкнулись⚠️ \n\nНаш администратор свяжется с вами для уточнения и решения вашего вопроса!')
 
-@router.message(HelpSuggestionStates.content)
+@router.message(HelpStates.content)
 async def help_content_handler(message: Message, state: FSMContext):
     user_id = message.from_user.id
     user_question = message.text
