@@ -108,7 +108,8 @@ async def subscription_choice(callback: CallbackQuery, bot: Bot):
     referrer_id = user_info.get('referrer_id')
     if referrer_id != 'None':
         await notify_referrer(bot, referrer_id, user_id, now_date)
-        await add_user_rating_history(advice_id='None', material_id='None', id_user=user_id, granted_by=referrer_id, accrual_date=now_date, action_type="new_referral", rating_value='10')
+        await add_user_rating_history(advice_id='None', material_id='None', id_user=user_id,
+                                      granted_by=referrer_id, accrual_date=now_date, action_type="new_referral", rating_value='10')
         await notify_user(bot, user_id, subscription_type, bonus_awarded=True)
     else:
         await notify_user(bot, user_id, subscription_type, bonus_awarded=True)

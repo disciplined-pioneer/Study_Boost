@@ -1,8 +1,14 @@
+from datetime import datetime
+
 from aiogram import Router, F
 from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 
+from NI_assistants.sentiment_text import analyze_sentiment
+
 from states.help_suggestion_state import HelpSuggestionStates
+from database.handlers.database_handler import add_help_suggestion
+
 
 router = Router()
 
@@ -44,11 +50,17 @@ async def help_handler(message: Message, state: FSMContext):
 
 @router.message(HelpSuggestionStates.content)
 async def help_content_handler(message: Message, state: FSMContext):
+    user_id = message.from_user.id
     user_question = message.text
     if user_question != '/cancellation':
         await state.update_data(question=user_question)
-
-        await message.answer(f'Вы написали: {user_question}. Мы обработаем ваш запрос.')
+        await add_help_suggestion(ID_user=user_id,
+                                    suggestion_date=datetime.now().date(),
+                                    suggestion_type='help',
+                                    content=user_question)
+        await message.answer(
+            f'Спасибо! Мы обязательно предоставим вам помощь в использовании платформы. Пожалуйста, ожидайте нашего ответа! 🙂'
+        )
         await state.clear()
     else:
         await state.clear()
