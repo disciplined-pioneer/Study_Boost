@@ -24,7 +24,6 @@ async def send_db_files(message: types.Message):
         "<b>/count_users</b> - Количество всех пользователей в базе данных\n\n"
         "<b>/suggestions_users</b> - Вывод предложений от пользователей\n\n"
         "<b>/help_users</b> - Вывод от запросов помощи от пользователей\n\n"
-        
         )
         await message.answer(commands_text, parse_mode="HTML")
 
@@ -67,13 +66,11 @@ async def print_count_users(message: types.Message):
     else:
         await message.answer("Доступ запрещён ❌\nЧтобы использовать эту команду, Вам необходимо обладать правами админа")
 
-# Вывод информации о "Помощь" и "Предложения" за последние 3 дня
-@router.message(lambda message: message.text == '/help_users')
-async def help_events(message: types.Message):
-    result = await recent_events('help')
-    await message.answer(result, parse_mode="HTML")
+# Универсальный вывод информации о событиях "Помощь" и "Предложения" за последние 3 дня
+@router.message(lambda message: message.text in ['/help_users', '/suggestions_users'])
+async def events_handler(message: types.Message):
 
-@router.message(lambda message: message.text == '/suggestions_users')
-async def suggestions_events(message: types.Message):
-    result = await recent_events('suggestions')
+    # Определяем тип события по команде
+    event_type = 'help' if message.text == '/help_users' else 'suggestions'
+    result = await recent_events(event_type)
     await message.answer(result, parse_mode="HTML")
