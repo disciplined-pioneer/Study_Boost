@@ -30,24 +30,33 @@ async def start_add(message: Message, state: FSMContext):
 @router.callback_query(lambda c: c.data in ['study', 'health', 'social', 'work'])
 async def category_selected(callback: CallbackQuery, state: FSMContext):
 
-    # Проверяем, в каком состоянии находимся
-    current_state = await state.get_state()
-    if current_state != AdviсeStates.category_advice:
+    user_id = callback.from_user.id
+    can_use, response_message = await can_use_feature(user_id)
 
-        # Сохранение выбранной категории в состояние
-        selected_category = callback.data
-        await state.update_data(category_advice=selected_category)
+    if can_use:
 
-        # Ответ пользователю и завершение обработки
-        await callback.message.reply("Пожалуйста, введите текст вашего совета:")
-        await callback.answer()
-        await state.set_state(AdviсeStates.category_advice)
+        # Проверяем, в каком состоянии находимся
+        current_state = await state.get_state()
+        if current_state != AdviсeStates.category_advice:
+
+            # Сохранение выбранной категории в состояние
+            selected_category = callback.data
+            await state.update_data(category_advice=selected_category)
+
+            # Ответ пользователю и завершение обработки
+            await callback.message.reply("Пожалуйста, введите текст вашего совета:")
+            await callback.answer()
+            await state.set_state(AdviсeStates.category_advice)
+        else:
+            await callback.answer("Сейчас нельзя выбрать категорию, завершите текущее действие.")
+
     else:
-        await callback.answer("Сейчас нельзя выбрать категорию, завершите текущее действие.")
+        await callback.answer(response_message)
 
 # Обработчик для текста совета
 @router.message(F.text, AdviсeStates.category_advice)
 async def process_advice(message: Message, state: FSMContext):
+    
     data = await state.get_data()  # Получаем данные состояния
     user_id = message.from_user.id
 

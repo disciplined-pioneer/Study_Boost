@@ -32,37 +32,57 @@ async def start_registration(message: Message, state: FSMContext):
 # Город университета
 @router.message(F.text, RegistrationStates.name)
 async def process_city_university(message: Message, state: FSMContext):
-    await state.update_data(name=message.text)
-    await message.answer("Введите город, в котором расположено ваше учебное заведение: ")
-    await state.set_state(RegistrationStates.city_university)
+    if message.text != '/cancellation':
+        await state.update_data(name=message.text)
+        await message.answer("Введите город, в котором расположено ваше учебное заведение: ")
+        await state.set_state(RegistrationStates.city_university)
+    else:
+        await state.clear()
+        await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊')
 
 # Название университета
 @router.message(F.text, RegistrationStates.city_university)
 async def process_name_university(message: Message, state: FSMContext):
-    await state.update_data(city_university=message.text)
-    await message.answer("Укажите полное название вашего учебного заведения: ")
-    await state.set_state(RegistrationStates.name_university)
+    if message.text != '/cancellation':
+        await state.update_data(city_university=message.text)
+        await message.answer("Укажите полное название вашего учебного заведения: ")
+        await state.set_state(RegistrationStates.name_university)
+    else:
+        await state.clear()
+        await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊')
 
 # Название факультета
 @router.message(F.text, RegistrationStates.name_university)
 async def process_faculty(message: Message, state: FSMContext):
-    await state.update_data(name_university=message.text)
-    await message.answer("Введите название вашего факультета: ")
-    await state.set_state(RegistrationStates.faculty)
+    if message.text != '/cancellation':
+        await state.update_data(name_university=message.text)
+        await message.answer("Введите название вашего факультета: ")
+        await state.set_state(RegistrationStates.faculty)
+    else:
+        await state.clear()
+        await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊')
 
 # Номер курса
 @router.message(F.text, RegistrationStates.faculty)
 async def process_course(message: Message, state: FSMContext):
-    await state.update_data(faculty=message.text)
-    await message.answer("На каком курсе вы обучаетесь? Пожалуйста, укажите номер курса: ")
-    await state.set_state(RegistrationStates.course)
+    if message.text != '/cancellation':
+        await state.update_data(faculty=message.text)
+        await message.answer("На каком курсе вы обучаетесь? Пожалуйста, укажите номер курса: ")
+        await state.set_state(RegistrationStates.course)
+    else:
+        await state.clear()
+        await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊')
 
 # Фото оплаты
 @router.message(F.text, RegistrationStates.course)
 async def process_payment_photo(message: Message, state: FSMContext):
-    await state.update_data(course=message.text)
-    await message.answer("Пожалуйста, отправьте фото, подтверждающее оплату: ")
-    await state.set_state(RegistrationStates.payment_photo)
+    if message.text != '/cancellation':
+        await state.update_data(course=message.text)
+        await message.answer("Пожалуйста, отправьте фото, подтверждающее оплату: ")
+        await state.set_state(RegistrationStates.payment_photo)
+    else:
+        await state.clear()
+        await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊')
 
 # Завершение регистрации и добавление пользователя в список
 @router.message(F.photo, RegistrationStates.payment_photo)
@@ -87,7 +107,7 @@ async def finish_registration(message: Message, state: FSMContext):
         "ID_message": message.message_id,
         "photo_payment": payment_photo,
         "referrer_id": referrer_id,
-        "date_registration": datetime.now().date() #- timedelta(days=100)
+        "date_registration": datetime.now().date() - timedelta(days=100)
     }
 
     # Формируем текст для отправки админу
@@ -100,7 +120,7 @@ async def finish_registration(message: Message, state: FSMContext):
         f"Телеграм: {'@' + message.from_user.username if message.from_user.username else 'Не указан'}\n\n"
         f"ID сообщения: {message.message_id}\n\n"
         f"ID пользователя: {user_id}\n\n"
-        f"ID реферера: {referrer_id or 'Отсутствует'}\n\n"
+        f"ID реферера: {referrer_id or 'None'}\n\n"
         f"Количество пользователей: {await count_users()}\n\n"
     )
 
@@ -120,3 +140,4 @@ async def finish_registration(message: Message, state: FSMContext):
         'После этого вы получите уведомление. Желаем вам отличного дня!'
     )
     await state.clear()
+

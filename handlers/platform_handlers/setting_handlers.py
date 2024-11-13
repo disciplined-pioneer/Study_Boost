@@ -32,10 +32,16 @@ async def commands_handler(message: Message):
 
 @router.message(F.text == 'Предложения ➕')
 async def suggestions_handler(message: Message, state: FSMContext):
-    
-    # Переходим в состояние "content", где пользователь будет вводить свой запрос
-    await state.set_state(SuggestionsStates.content)
-    await message.answer('Пожалуйста, поделитесь вашим предложением или идеей💡 \n\nВаши мысли важны для нас, и мы обязательно рассмотрим их для улучшения нашего сервиса!')
+
+    user_id = message.from_user.id
+    can_use, response_message = await can_use_feature(user_id)
+
+    if can_use:
+        # Переходим в состояние "content", где пользователь будет вводить свой запрос
+        await state.set_state(SuggestionsStates.content)
+        await message.answer('Пожалуйста, поделитесь вашим предложением или идеей💡 \n\nВаши мысли важны для нас, и мы обязательно рассмотрим их для улучшения нашего сервиса!')
+    else:
+        await message.answer(response_message)
 
 @router.message(SuggestionsStates.content)
 async def suggestions_content_handler(message: Message, state: FSMContext):

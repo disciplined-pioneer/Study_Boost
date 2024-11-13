@@ -112,7 +112,7 @@ async def subscription_choice(callback: CallbackQuery, bot: Bot):
                                       granted_by=referrer_id, accrual_date=now_date, action_type="new_referral", rating_value='10')
         await notify_user(bot, user_id, subscription_type, bonus_awarded=True)
     else:
-        await notify_user(bot, user_id, subscription_type, bonus_awarded=True)
+        await notify_user(bot, user_id, subscription_type, bonus_awarded=False)
 
     # Подтверждение администратору
     await callback.message.answer(f"Вы предоставили доступ пользователю с ID: {user_id} ✅")
