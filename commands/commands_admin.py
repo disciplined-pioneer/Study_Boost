@@ -22,6 +22,9 @@ async def send_db_files(message: types.Message):
         "<b>/admin_commands</b> - Вывод всех возможных команд.\n\n"
         "<b>/send_files</b> - Выгрузка всей база данных.\n\n"
         "<b>/count_users</b> - Количество всех пользователей в базе данных\n\n"
+        "<b>/suggestions_users</b> - Вывод предложений от пользователей\n\n"
+        "<b>/help_users</b> - Вывод от запросов помощи от пользователей\n\n"
+        
         )
         await message.answer(commands_text, parse_mode="HTML")
 
@@ -65,12 +68,12 @@ async def print_count_users(message: types.Message):
         await message.answer("Доступ запрещён ❌\nЧтобы использовать эту команду, Вам необходимо обладать правами админа")
 
 # Вывод информации о "Помощь" и "Предложения" за последние 3 дня
-@router.message(lambda message: message.text == '/help_events')
+@router.message(lambda message: message.text == '/help_users')
 async def help_events(message: types.Message):
     result = await recent_events('help')
     await message.answer(result, parse_mode="HTML")
 
-@router.message(lambda message: message.text == '/suggestions_events')
+@router.message(lambda message: message.text == '/suggestions_users')
 async def suggestions_events(message: types.Message):
     result = await recent_events('suggestions')
     await message.answer(result, parse_mode="HTML")
