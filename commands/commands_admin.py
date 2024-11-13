@@ -7,6 +7,8 @@ from aiogram.types import FSInputFile
 
 from database.requests.user_search import count_users
 
+from handlers.commands_handlers.commands_handlers import recent_events
+
 router = Router()
 
 # Вывод всей БД
@@ -61,3 +63,14 @@ async def print_count_users(message: types.Message):
         await message.answer(f"Количество пользователей на данный момент составляет: {result}")
     else:
         await message.answer("Доступ запрещён ❌\nЧтобы использовать эту команду, Вам необходимо обладать правами админа")
+
+# Вывод информации о "Помощь" и "Предложения" за последние 3 дня
+@router.message(lambda message: message.text == '/help_events')
+async def help_events(message: types.Message):
+    result = await recent_events('help')
+    await message.answer(result, parse_mode="HTML")
+
+@router.message(lambda message: message.text == '/suggestions_events')
+async def suggestions_events(message: types.Message):
+    result = await recent_events('suggestions')
+    await message.answer(result, parse_mode="HTML")

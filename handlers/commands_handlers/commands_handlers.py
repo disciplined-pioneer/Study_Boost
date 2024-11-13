@@ -1,5 +1,5 @@
 import aiosqlite
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Вывод первых 10 пользователей в рейтинге
 async def get_top_10_users():
@@ -91,3 +91,44 @@ async def payment_information(user_id):
         async with db.execute('SELECT payment_date, expiration_date FROM payments WHERE ID_user = ?', (user_id,)) as cursor:
             payment_data = await cursor.fetchone()
             return payment_data
+
+# Вывод информации к кнопок за последние 3 дня 
+async def recent_events(event_type: str = None):
+    # Путь к базе данных
+    database_path = 'database/data/help_suggestions.db'
+    
+    # Проверяем, задан ли event_type
+    if not event_type:
+        return "❗️<b>Не указан тип поиска.</b> Пожалуйста, укажите тип."
+
+    # Подсчитываем дату три дня назад от текущего дня
+    three_days_ago = datetime.now().date() - timedelta(days=3)
+    
+    async with aiosqlite.connect(database_path) as db:
+        # Запрос для поиска записей по типу и дате
+        cursor = await db.execute('''
+            SELECT date, type, content FROM events 
+            WHERE type = ? AND date >= ?
+            ORDER BY date DESC
+        ''', (event_type, three_days_ago))
+
+        # Получаем все записи
+        records = await cursor.fetchall()
+        await cursor.close()
+
+        # Проверяем, есть ли записи
+        if not records:
+            return "ℹ️ <b>Нет записей</b> за последние три дня с указанным типом"
+
+        # Формируем строку для отправки в бота
+        result = "<b>🔍 Найденные запросы за последние три дня:</b>\n\n"
+        for record in records:
+            date, type_, content = record
+            result += (
+                f"📅 <b>Дата:</b> <i>{date}</i>\n"
+                f"📌 <b>Тип:</b> <i>{type_}</i>\n"
+                f"📝 <b>Контент:</b> <i>{content}</i>\n"
+                "──────────── \n\n"
+            )
+        
+        return result
