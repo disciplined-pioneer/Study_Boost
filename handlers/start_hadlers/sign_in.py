@@ -29,6 +29,7 @@ async def send_user_information(message: types.Message, state: FSMContext, data,
         "telegram": f"@{message.from_user.username}" if message.from_user.username else "Не указан",
         "ID_user": user_id,
         "ID_message": message.message_id,
+        'referrer_id' : data.get("referrer_id"),
         "photo_payment": payment_photo,
         "date_registration": datetime.now().date()
     }
@@ -46,6 +47,7 @@ async def send_user_information(message: types.Message, state: FSMContext, data,
         f"Телеграм: {'@' + message.from_user.username if message.from_user.username else 'Не указан'}\n\n"
         f"ID сообщения: {message.message_id}\n\n"
         f"ID пользователя: {user_id}\n\n"
+        f'ID реферала: {data.get("referrer_id")}\n\n'
         f"Тип подписки: <{type_ubscription[0]}>\n\n"
     )
         
@@ -62,6 +64,7 @@ async def send_user_information(message: types.Message, state: FSMContext, data,
 
 @router.message(F.photo, PaymentStates.payment_photo)  # Используем фильтр для проверки типа контента
 async def receive_payment_photo(message: types.Message, state: FSMContext):
+
     # Получаем ID последней фотографии
     photo_id = message.photo[-1].file_id
     
@@ -84,6 +87,7 @@ async def login_handler(message: types.Message, state: FSMContext):
     result, user_info = await check_user_registration(user_id)
     
     if result:
+
         # Проверяем, действует ли ещё подписка
         user_payment = await check_user_payment(user_id)
         
