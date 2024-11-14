@@ -71,6 +71,10 @@ async def print_count_users(message: types.Message):
 async def events_handler(message: types.Message):
 
     # Определяем тип события по команде
-    event_type = 'help' if message.text == '/help_users' else 'suggestions'
-    result = await recent_events(event_type)
-    await message.answer(result, parse_mode="HTML")
+    user_id = str(message.from_user.id)
+    if user_id == ADMIN_ID:
+        event_type = 'help' if message.text == '/help_users' else 'suggestions'
+        result = await recent_events(event_type)
+        await message.answer(result, parse_mode="HTML")
+    else:
+        await message.answer("Доступ запрещён ❌\nЧтобы использовать эту команду, Вам необходимо обладать правами админа")

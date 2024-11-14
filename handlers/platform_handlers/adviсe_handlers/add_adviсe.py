@@ -30,28 +30,33 @@ async def start_add(message: Message, state: FSMContext):
 @router.callback_query(lambda c: c.data in ['study', 'health', 'social', 'work'])
 async def category_selected(callback: CallbackQuery, state: FSMContext):
 
-    user_id = callback.from_user.id
-    can_use, response_message = await can_use_feature(user_id)
+    if callback.text != '/cancellation':
 
-    if can_use:
+        user_id = callback.from_user.id
+        can_use, response_message = await can_use_feature(user_id)
 
-        # Проверяем, в каком состоянии находимся
-        current_state = await state.get_state()
-        if current_state != AdviсeStates.category_advice:
+        if can_use:
 
-            # Сохранение выбранной категории в состояние
-            selected_category = callback.data
-            await state.update_data(category_advice=selected_category)
+            # Проверяем, в каком состоянии находимся
+            current_state = await state.get_state()
+            if current_state != AdviсeStates.category_advice:
 
-            # Ответ пользователю и завершение обработки
-            await callback.message.reply("Пожалуйста, введите текст вашего совета:")
-            await callback.answer()
-            await state.set_state(AdviсeStates.category_advice)
+                # Сохранение выбранной категории в состояние
+                selected_category = callback.data
+                await state.update_data(category_advice=selected_category)
+
+                # Ответ пользователю и завершение обработки
+                await callback.message.reply("Пожалуйста, введите текст вашего совета:")
+                await callback.answer()
+                await state.set_state(AdviсeStates.category_advice)
+            else:
+                await callback.answer("Сейчас нельзя выбрать категорию, завершите текущее действие.")
+
         else:
-            await callback.answer("Сейчас нельзя выбрать категорию, завершите текущее действие.")
-
+            await callback.answer(response_message)
     else:
-        await callback.answer(response_message)
+        await state.clear()
+        await callback.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊')
 
 # Обработчик для текста совета
 @router.message(F.text, AdviсeStates.category_advice)
