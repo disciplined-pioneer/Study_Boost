@@ -3,7 +3,8 @@ from aiogram import Router, F
 
 from keyboards.advice_keyb import advice_menu
 from keyboards.events_keyb import events_menu
-from keyboards.platform_keyb import platform_menu, settings_menu
+from keyboards.platform_keyb import settings_menu
+from keyboards.material_keyb import material_menu
 
 from database.requests.user_access import can_use_feature
 
@@ -27,7 +28,7 @@ async def materials_handler(message: types.Message):
     can_use, response_message = await can_use_feature(user_id)
 
     if can_use:
-        await message.answer(f'Выводим информацию, связанную с материалами', reply_markup=platform_menu)
+        await message.answer(f'Пожалуйста, выберите одну их кнопок: ', reply_markup=material_menu)
     else:
         await message.answer(response_message)
 

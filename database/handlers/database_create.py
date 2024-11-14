@@ -114,6 +114,29 @@ async def create_events_table():
         ''')
         await db.commit()
 
+# Материалы для студентов
+async def create_materials():
+    database_path = 'database/data/help_suggestions.db'
+    os.makedirs(os.path.dirname(database_path), exist_ok=True)
+    
+    async with aiosqlite.connect(database_path) as db:
+        await db.execute(''' 
+            CREATE TABLE IF NOT EXISTS events (
+                material_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                ID_user INTEGER,
+                date_publication TEXT,
+                faculty TEXT,
+                course TEXT,
+                type_material TEXT,
+                topic TEXT,
+                description_material TEXT,
+                photos_id TEXT,
+                like_advice TEXT,
+                dislike_advice TEXT
+            )
+        ''')
+        await db.commit()
+
 # Помощь и предложения студентов
 async def create_help_suggestions_table():
     database_path = 'database/data/help_suggestions.db'
@@ -143,11 +166,10 @@ async def create_all_databases():
     # Рейтинг
     await create_users_rating_history()
 
-    # Советы
+    # Советы/Мероприятия/Материалы
     await create_users_advice()
-
-    # Мероприятия
     await create_events_table()
+    await create_materials()
 
     # Помощь и советы
     await create_help_suggestions_table()
