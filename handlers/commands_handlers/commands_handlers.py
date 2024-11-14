@@ -107,7 +107,8 @@ async def recent_events(event_type: str = None):
     async with aiosqlite.connect(database_path) as db:
         # Запрос для поиска записей по типу и дате
         cursor = await db.execute('''
-            SELECT date, type, content FROM events 
+            SELECT ID_user, date, type, content
+            FROM events 
             WHERE type = ? AND date >= ?
             ORDER BY date DESC
         ''', (event_type, three_days_ago))
@@ -123,12 +124,14 @@ async def recent_events(event_type: str = None):
         # Формируем строку для отправки в бота
         result = "<b>🔍 Найденные запросы за последние три дня:</b>\n\n"
         for record in records:
-            date, type_, content = record
+            ID_user, date, type_, content = record
+            line = "─" * 30 + '\n\n'
             result += (
+                f"👤 <b>ID пользователя:</b> <i>{ID_user}</i>\n"
                 f"📅 <b>Дата:</b> <i>{date}</i>\n"
                 f"📌 <b>Тип:</b> <i>{type_}</i>\n"
                 f"📝 <b>Контент:</b> <i>{content}</i>\n"
-                "──────────── \n\n"
+                f'{line}'
             )
         
         return result
