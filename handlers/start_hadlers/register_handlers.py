@@ -1,11 +1,14 @@
+from config import ADMIN_ID
 from datetime import datetime, timedelta
 
 from aiogram import Router, F
 from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 
-from config import ADMIN_ID
 from keyboards.admin_keyb import access_keyboard
+from keyboards.cancellation_states import cancel_state
+from keyboards.registration_keyb import registration_menu
+
 from states.registration_state import RegistrationStates
 
 from database.requests.user_search import check_user_registration, count_users
@@ -20,73 +23,83 @@ async def registration_handler(message: Message, state: FSMContext):
     user_id = message.from_user.id
     result, _ = await check_user_registration(user_id)
     if result:
-        await message.answer('УПС! Вы уже зарегистрированы! Пожалуйста, войдите в платформу, нажав на кнопку "Войти в систему 🚪"')
+        await message.answer('УПС! Вы уже зарегистрированы! Пожалуйста, войдите в платформу, нажав на кнопку "Войти в систему 🚪"', reply_markup=registration_menu)
     else:
         await start_registration(message, state)
 
 # Имя пользователя
 async def start_registration(message: Message, state: FSMContext):
-    await message.answer("Пожалуйста, укажите ваше имя: ")
+    await message.answer("Пожалуйста, укажите ваше имя: ", reply_markup=cancel_state)
     await state.set_state(RegistrationStates.name)
 
 # Город университета
 @router.message(F.text, RegistrationStates.name)
 async def process_city_university(message: Message, state: FSMContext):
-    if message.text != '/cancellation':
+    if message.text != '/cancellation' and message.text != 'Отменить состояние':
         await state.update_data(name=message.text)
         await message.answer("Введите город, в котором расположено ваше учебное заведение: ")
         await state.set_state(RegistrationStates.city_university)
     else:
         await state.clear()
-        await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊')
+        await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊', reply_markup=registration_menu)
 
 # Название университета
 @router.message(F.text, RegistrationStates.city_university)
 async def process_name_university(message: Message, state: FSMContext):
-    if message.text != '/cancellation':
+    if message.text != '/cancellation' and message.text != 'Отменить состояние':
         await state.update_data(city_university=message.text)
         await message.answer("Укажите полное название вашего учебного заведения: ")
         await state.set_state(RegistrationStates.name_university)
     else:
         await state.clear()
-        await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊')
+        await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊', reply_markup=registration_menu)
 
 # Название факультета
 @router.message(F.text, RegistrationStates.name_university)
 async def process_faculty(message: Message, state: FSMContext):
-    if message.text != '/cancellation':
+    if message.text != '/cancellation' and message.text != 'Отменить состояние':
         await state.update_data(name_university=message.text)
         await message.answer("Введите название вашего факультета: ")
         await state.set_state(RegistrationStates.faculty)
     else:
         await state.clear()
-        await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊')
+        await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊', reply_markup=registration_menu)
 
 # Номер курса
 @router.message(F.text, RegistrationStates.faculty)
 async def process_course(message: Message, state: FSMContext):
-    if message.text != '/cancellation':
+    if message.text != '/cancellation' and message.text != 'Отменить состояние':
         await state.update_data(faculty=message.text)
         await message.answer("На каком курсе вы обучаетесь? Пожалуйста, укажите номер курса: ")
         await state.set_state(RegistrationStates.course)
     else:
         await state.clear()
-        await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊')
+        await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊', reply_markup=registration_menu)
 
 # Фото оплаты
 @router.message(F.text, RegistrationStates.course)
 async def process_payment_photo(message: Message, state: FSMContext):
-    if message.text != '/cancellation':
+    if message.text != '/cancellation' and message.text != 'Отменить состояние':
         await state.update_data(course=message.text)
         await message.answer("Пожалуйста, отправьте фото, подтверждающее оплату: ")
         await state.set_state(RegistrationStates.payment_photo)
     else:
         await state.clear()
-        await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊')
+        await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊', reply_markup=registration_menu)
+
+@router.message(F.text, RegistrationStates.payment_photo)
+async def cancel_registration(message: Message, state: FSMContext):
+    
+    # Проверка на отмену состояния
+    if message.text in ['/cancellation', 'Отменить состояние']:
+        await state.clear()  # Очищаем состояние
+        await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊', reply_markup=registration_menu)
+        return
 
 # Завершение регистрации и добавление пользователя в список
 @router.message(F.photo, RegistrationStates.payment_photo)
 async def finish_registration(message: Message, state: FSMContext):
+
     global new_users
     data = await state.get_data()
     user_id = message.from_user.id
@@ -140,4 +153,3 @@ async def finish_registration(message: Message, state: FSMContext):
         'После этого вы получите уведомление. Желаем вам отличного дня!'
     )
     await state.clear()
-
