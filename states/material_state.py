@@ -6,4 +6,4 @@ class MaterialStates(StatesGroup):
     type_material = State()
     topic = State()
     description_material = State()
-    photos_id = State()
+    files_id = State()

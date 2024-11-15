@@ -2,7 +2,8 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
 complete_process = ReplyKeyboardMarkup(
     keyboard=[
-        [KeyboardButton(text='Завершить ❌')]
+        [KeyboardButton(text='Завершить ❌')],
+        [KeyboardButton(text='Отменить состояние')]
     ],
     resize_keyboard=True  # Сделаем клавиатуру компактной
 )
