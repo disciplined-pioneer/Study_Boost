@@ -20,7 +20,7 @@ async def get_main_keyboard():
 # Обработчик для кнопки "Добавить материал ➕"
 @router.message(F.text == 'Добавить материал ➕')
 async def add_material(message: types.Message, state: FSMContext):
-    await message.answer("Вы выбрали добавление материала. Пожалуйста, укажите факультет. Пример: Факультет информационных технологий.")
+    await message.answer("Вы выбрали добавление материала. Пожалуйста, укажите факультет. Пример: Факультет информационных технологий.", reply_markup=cancel_state)
     await state.set_state(MaterialStates.faculty)
 
 # Обработчик для ввода факультета
@@ -85,7 +85,6 @@ async def process_photo(message: types.Message, state: FSMContext):
 
 # Обработчик для завершения процесса
 @router.message(F.text == "Завершить ❌")
-
 async def finish_process(message: types.Message, state: FSMContext):
     user_id = str(message.from_user.id)
     data = await state.get_data()
