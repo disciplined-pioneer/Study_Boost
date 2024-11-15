@@ -5,8 +5,8 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 
 from states.adviсe_state import AdviсeStates
-
-from keyboards.advice_keyb import category_keyboard
+from keyboards.cancellation_states import cancel_state
+from keyboards.advice_keyb import category_keyboard, advice_menu
 
 from database.requests.advice import get_last_advice_id
 from database.requests.user_access import can_use_feature
@@ -30,81 +30,80 @@ async def start_add(message: Message, state: FSMContext):
 @router.callback_query(lambda c: c.data in ['study', 'health', 'social', 'work'])
 async def category_selected(callback: CallbackQuery, state: FSMContext):
 
-    if callback.text != '/cancellation':
+    if callback.data != '/cancellation' and callback.data != 'Отменить состояние':
 
         user_id = callback.from_user.id
         can_use, response_message = await can_use_feature(user_id)
 
         if can_use:
 
-            # Проверяем, в каком состоянии находимся
-            current_state = await state.get_state()
-            if current_state != AdviсeStates.category_advice:
+            # Сохранение выбранной категории в состояние
+            selected_category = callback.data
+            await state.update_data(category_advice=selected_category)
 
-                # Сохранение выбранной категории в состояние
-                selected_category = callback.data
-                await state.update_data(category_advice=selected_category)
-
-                # Ответ пользователю и завершение обработки
-                await callback.message.reply("Пожалуйста, введите текст вашего совета:")
-                await callback.answer()
-                await state.set_state(AdviсeStates.category_advice)
-            else:
-                await callback.answer("Сейчас нельзя выбрать категорию, завершите текущее действие.")
+            # Ответ пользователю и завершение обработки
+            await callback.message.reply("Пожалуйста, введите текст вашего совета:", reply_markup=cancel_state)
+            await callback.answer()
+            await state.set_state(AdviсeStates.category_advice)
 
         else:
             await callback.answer(response_message)
     else:
         await state.clear()
-        await callback.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊')
+        await callback.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊', reply_markup=advice_menu)
 
 # Обработчик для текста совета
 @router.message(F.text, AdviсeStates.category_advice)
 async def process_advice(message: Message, state: FSMContext):
+
+    if message.text != '/cancellation' and message.text != 'Отменить состояние':
     
-    data = await state.get_data()  # Получаем данные состояния
-    user_id = message.from_user.id
+        data = await state.get_data()  # Получаем данные состояния
+        user_id = message.from_user.id
 
-    # Добавляем оставшиеся данные
-    await state.update_data(date_publication=datetime.now().date())
-    await state.update_data(ID_user=user_id)
-    await state.update_data(content=message.text)
+        # Добавляем оставшиеся данные
+        await state.update_data(date_publication=datetime.now().date())
+        await state.update_data(ID_user=user_id)
+        await state.update_data(content=message.text)
 
-    # Проверка качества текста
-    sentiment_score = await analyze_sentiment(message.text)
-    if sentiment_score <= -0.01:
-        await message.answer("Ваш текст содержит негативные выражения. Пожалуйста, попробуйте переформулировать свой совет")
-        await state.clear()  # Завершаем состояние
-        return
+        # Проверка качества текста
+        sentiment_score = await analyze_sentiment(message.text)
+        if sentiment_score <= -0.01:
+            await message.answer("Ваш текст содержит негативные выражения. Пожалуйста, попробуйте переформулировать свой совет", reply_markup=advice_menu)
+            await state.clear()  # Завершаем состояние
+            return
 
-    # Сохраняем данные в БД и получаем ID добавленного совета
-    data = await state.get_data()
-    user_advice_response = await add_user_advice(
-        ID_user=data.get('ID_user'),
-        date_publication=data.get('date_publication'),
-        content=data.get('content'),
-        type_advice=data.get('category_advice'),
-        like_advice='0',
-        dislike_advice='0'
-    )
-
-    if user_advice_response == "Совет пользователя успешно добавлен!":
-        
-        # Получаем advice_id последнего добавленного совета
-        advice_id = await get_last_advice_id()
-
-        date = datetime.now().date()
-        await add_user_rating_history(
-            advice_id=advice_id,
-            material_id='None',
-            id_user=user_id,
-            granted_by=user_id,
-            accrual_date=date,
-            action_type="add_advice",
-            rating_value='0.5'
+        # Сохраняем данные в БД и получаем ID добавленного совета
+        data = await state.get_data()
+        user_advice_response = await add_user_advice(
+            ID_user=data.get('ID_user'),
+            date_publication=data.get('date_publication'),
+            content=data.get('content'),
+            type_advice=data.get('category_advice'),
+            like_advice='0',
+            dislike_advice='0'
         )
-        await message.answer(f"Спасибо за ваш вклад! Ваш совет был добавлен, и вы получили +0.5 баллов к вашему рейтингу. Каждый совет имеет значение!")
+
+        if user_advice_response == "Совет пользователя успешно добавлен!":
+            
+            # Получаем advice_id последнего добавленного совета
+            advice_id = await get_last_advice_id()
+
+            date = datetime.now().date()
+            await add_user_rating_history(
+                advice_id=advice_id,
+                material_id='None',
+                id_user=user_id,
+                granted_by=user_id,
+                accrual_date=date,
+                action_type="add_advice",
+                rating_value='0.5'
+            )
+            await message.answer(f"Спасибо за ваш вклад! Ваш совет был добавлен, и вы получили +0.5 баллов к вашему рейтингу. Каждый совет имеет значение!", reply_markup=advice_menu)
+        else:
+            await message.answer(f"УПС, произошла ошибка: {user_advice_response}", reply_markup=advice_menu)
+            
+        await state.clear()  # Завершаем состояние
     else:
-        await message.answer(f"УПС, произошла ошибка: {user_advice_response}")
-        
-    await state.clear()  # Завершаем состояние
+        await state.clear()
+        await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊', reply_markup=advice_menu)

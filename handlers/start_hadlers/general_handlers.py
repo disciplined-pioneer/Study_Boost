@@ -45,7 +45,7 @@ async def creator_handler(message: Message):
     )
 
     # ID фотографии
-    photo_id = 'AgACAgIAAxkBAAIIg2b6x72lvUPWCK_udjCgFdxTAAHamQAC2usxG3jT2UuwWltlE_cjTgEAAwIAA3kAAzYE'  # замените на фактический ID фотографии
+    photo_id = 'AgACAgIAAxkBAAIIg2b6x72lvUPWCK_udjCgFdxTAAHamQAC2usxG3jT2UuwWltlE_cjTgEAAwIAA3kAAzYE'
 
     await message.answer_photo(photo=photo_id, caption=text, parse_mode='Markdown')
 

@@ -1,7 +1,6 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-# Меню для советов
 advice_menu = ReplyKeyboardMarkup(
     keyboard=[
         [KeyboardButton(text='Просмотреть категории 🗂')],

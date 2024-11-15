@@ -96,10 +96,11 @@ async def process_rating_callback(callback_query: CallbackQuery):
             await callback_query.bot.send_message(
                 chat_id=user_id,
                 text = (
-                    f"🎉 <b>Вы получили {'👍 лайк' if action_type == 'like' else '👎 дизлайк'} от пользователя ID: {callback_query.from_user.id}!</b>\n\n"
+                    f"🎉<b>Вы получили {'👍 лайк' if action_type == 'like' else '👎 дизлайк'} от пользователя ID: {callback_query.from_user.id}!</b>\n\n"
                     f"{'📈 Ваш рейтинг повысился на 1 балл!' if action_type == 'like' else '📉 Ваш рейтинг понизился на 1 балл'}\n\n"
                     "Спасибо за вклад в сообщество и продолжайте делиться советами! 🚀"
-                )
+                ),
+                parse_mode="HTML"
             )
         else:
             await callback_query.answer(f"Вы уже оставляли свой отзыв для этого совета!")
