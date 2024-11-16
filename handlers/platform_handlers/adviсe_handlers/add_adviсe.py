@@ -56,7 +56,7 @@ async def category_selected(callback: CallbackQuery, state: FSMContext):
 @router.message(F.text, AdviсeStates.category_advice)
 async def process_advice(message: Message, state: FSMContext):
 
-    if message.text not in ['/cancellation', 'Отменить состояние']:
+    if message.text not in ['/cancellation', 'Отменить состояние ❌']:
     
         data = await state.get_data()  # Получаем данные состояния
         user_id = message.from_user.id
@@ -70,7 +70,6 @@ async def process_advice(message: Message, state: FSMContext):
         sentiment_score = await analyze_sentiment(message.text)
         if sentiment_score <= -0.01:
             await message.answer("Ваш текст содержит негативные выражения. Пожалуйста, попробуйте переформулировать свой совет", reply_markup=advice_menu)
-            await state.clear()  # Завершаем состояние
             return
 
         # Сохраняем данные в БД и получаем ID добавленного совета
@@ -102,7 +101,6 @@ async def process_advice(message: Message, state: FSMContext):
             await message.answer(f"Спасибо за ваш вклад! Ваш совет был добавлен, и вы получили +0.5 баллов к вашему рейтингу. Каждый совет имеет значение!", reply_markup=advice_menu)
         else:
             await message.answer(f"УПС, произошла ошибка: {user_advice_response}", reply_markup=advice_menu)
-            
         await state.clear()  # Завершаем состояние
     else:
         await state.clear()

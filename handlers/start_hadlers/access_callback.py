@@ -87,11 +87,15 @@ async def subscription_choice(callback: CallbackQuery, bot: Bot):
     if not user_info:
         await callback.message.answer("Пользователь для данной подписки не найден.")
         return
-
+    
+    if user_info['referrer_id'] is None:
+        user_info['referrer_id'] = 'None'
+    
     # Обновляем подписку и записываем в БД
     subscription_type = callback.data.replace('subscription_', '').replace('_', ' ').title()
     user_id = user_info["ID_user"]
     user_info['subscription_type'] = subscription_type
+    
     await register_user(user_info)
     await add_subscription_status(user_id, subscription_type)
 

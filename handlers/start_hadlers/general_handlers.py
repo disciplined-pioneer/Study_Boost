@@ -4,6 +4,9 @@ from aiogram import Router, F
 from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 
+from keyboards.cancellation_states import cancel_state
+from keyboards.registration_keyb import registration_menu
+
 from states.help_suggestion_state import HelpStates
 from database.handlers.database_handler import add_help_suggestion
 
@@ -19,8 +22,7 @@ async def login_handler(message: Message):
         "💎 <b>Premium:</b> <i>пожизненная стоимость в 25 ₽ для первых 50 пользователей</i> 🔥\n\n"
         "🔓 <b>Unlimited:</b> пожизненная подписка, которую можно получить, если по вашей реферальной ссылке перейдут и зарегистрируются <b>10 человек</b>!\n\n"
         "Для оформления подписки, пожалуйста, зарегистрируйтесь и переведите соответствующую сумму на:\n\n"
-        "<b>Карта 🍀</b>: \"9104 0160 3996 20160\"\n"
-        "<b>Переводила 📞</b>: \"+373-77-544-985 ( Максим Ш. )\"\n\n",
+        "<b>Карта 🍀</b>: \"9104 0160 3996 20160\"\n",
         parse_mode="HTML"
     )
 
@@ -46,7 +48,6 @@ async def creator_handler(message: Message):
 
     # ID фотографии
     photo_id = 'AgACAgIAAxkBAAIIg2b6x72lvUPWCK_udjCgFdxTAAHamQAC2usxG3jT2UuwWltlE_cjTgEAAwIAA3kAAzYE'
-
     await message.answer_photo(photo=photo_id, caption=text, parse_mode='Markdown')
 
 @router.message(F.text == 'Помощь ❓')
@@ -54,22 +55,23 @@ async def help_handler(message: Message, state: FSMContext):
 
     # Переходим в состояние "content", где пользователь будет вводить свой запрос
     await state.set_state(HelpStates.content)
-    await message.answer('Пожалуйста, опишите проблему, с которой вы столкнулись⚠️ \n\nНаш администратор свяжется с вами для уточнения и решения вашего вопроса!')
+    await message.answer('Пожалуйста, опишите проблему, с которой вы столкнулись⚠️ \n\nНаш администратор свяжется с вами для уточнения и решения вашего вопроса!',
+                reply_markup=cancel_state)
 
 @router.message(HelpStates.content)
 async def help_content_handler(message: Message, state: FSMContext):
+
     user_id = message.from_user.id
     user_question = message.text
-    if user_question != '/cancellation':
+
+    if user_question not in ['/cancellation', 'Отменить состояние ❌']:
         await state.update_data(question=user_question)
         await add_help_suggestion(ID_user=user_id,
-                                    suggestion_date=datetime.now().date(),
-                                    suggestion_type='help',
-                                    content=user_question)
-        await message.answer(
-            f'Спасибо! Мы обязательно предоставим вам помощь в использовании платформы. Пожалуйста, ожидайте нашего ответа! 🙂'
-        )
+                                 suggestion_date=datetime.now().date(),
+                                 suggestion_type='help',
+                                 content=user_question)
+        await message.answer(f'Спасибо! Мы обязательно предоставим вам помощь в использовании платформы. Пожалуйста, ожидайте нашего ответа! 🙂', reply_markup=registration_menu)
         await state.clear()
     else:
         await state.clear()
-        await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊')
+        await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊', reply_markup=registration_menu)

@@ -1,5 +1,5 @@
-from aiogram import types, F
 from aiogram import Router
+from aiogram import types, F
 from keyboards.events_keyb import events_menu
 
 from database.requests.events import get_events_by_period

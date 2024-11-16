@@ -8,6 +8,8 @@ from aiogram.fsm.context import FSMContext
 from states.help_suggestion_state import SuggestionsStates
 
 from keyboards.platform_keyb import platform_menu
+from keyboards.cancellation_states import cancel_state
+
 from database.requests.user_access import can_use_feature
 from database.handlers.database_handler import add_help_suggestion
 
@@ -39,22 +41,23 @@ async def suggestions_handler(message: Message, state: FSMContext):
     if can_use:
         # Переходим в состояние "content", где пользователь будет вводить свой запрос
         await state.set_state(SuggestionsStates.content)
-        await message.answer('Пожалуйста, поделитесь вашим предложением или идеей💡 \n\nВаши мысли важны для нас, и мы обязательно рассмотрим их для улучшения нашего сервиса!')
+        await message.answer('Пожалуйста, поделитесь вашим предложением или идеей💡 \n\nВаши мысли важны для нас, и мы обязательно рассмотрим их для улучшения нашего сервиса!', reply_markup=cancel_state)
     else:
         await message.answer(response_message)
 
 @router.message(SuggestionsStates.content)
 async def suggestions_content_handler(message: Message, state: FSMContext):
+
     user_id = message.from_user.id
     user_question = message.text
-    if user_question != '/cancellation':
+
+    if message.text not in ['/cancellation', 'Отменить состояние ❌']:
         await state.update_data(question=user_question)
 
         # Проверка качества текста
         sentiment_score = await analyze_sentiment(message.text)
         if sentiment_score <= -0.01:
-            await message.answer("Ваш текст содержит негативные выражения. Пожалуйста, попробуйте переформулировать свой текст")
-            await state.clear()  # Завершаем состояние
+            await message.answer("Ваш текст содержит негативные выражения. Пожалуйста, попробуйте переформулировать свой текст", reply_markup=cancel_state)
             return
         else:
             await add_help_suggestion(ID_user=user_id,
@@ -62,12 +65,11 @@ async def suggestions_content_handler(message: Message, state: FSMContext):
                                     suggestion_type='suggestions',
                                     content=user_question)
             await message.answer(
-                f'Спасибо за ваш вклад! Мы обязательно рассмотрим Ваше предложение для улучшения платформы! 🙂'
-            )
+                f'Спасибо за ваш вклад! Мы обязательно рассмотрим Ваше предложение для улучшения платформы! 🙂', reply_markup=platform_menu)
             await state.clear()
     else:
         await state.clear()
-        await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊')
+        await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊', reply_markup=platform_menu)
 
 @router.message(F.text == "Назад 🔙")
 async def back_handler(message: types.Message):

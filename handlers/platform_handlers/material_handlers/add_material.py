@@ -9,7 +9,7 @@ from states.material_state import MaterialStates
 from NI_assistants.sentiment_text import analyze_sentiment
 from database.handlers.database_handler import add_material
 
-from keyboards.material_keyb import material_menu
+from keyboards.material_keyb import material_menu, type_material
 from keyboards.cancellation_states import complete_process, cancel_state
 
 router = Router()
@@ -24,7 +24,7 @@ async def process_add_material(message: types.Message, state: FSMContext):
 @router.message(MaterialStates.faculty)
 async def process_faculty(message: types.Message, state: FSMContext):
 
-    if message.text not in ['/cancellation', 'Отменить состояние']:
+    if message.text not in ['/cancellation', 'Отменить состояние ❌']:
         
         # Проверка качества текста
         faculty = message.text
@@ -44,7 +44,7 @@ async def process_faculty(message: types.Message, state: FSMContext):
 @router.message(MaterialStates.course)
 async def process_course(message: types.Message, state: FSMContext):
 
-    if message.text not in ['/cancellation', 'Отменить состояние']:
+    if message.text not in ['/cancellation', 'Отменить состояние ❌']:
 
         # Проверка качества текста
         course = message.text
@@ -67,7 +67,7 @@ async def process_course(message: types.Message, state: FSMContext):
 @router.message(MaterialStates.subject)
 async def process_subject(message: types.Message, state: FSMContext):
 
-    if message.text not in ['/cancellation', 'Отменить состояние']:
+    if message.text not in ['/cancellation', 'Отменить состояние ❌']:
 
         # Проверка качества текста
         subject = message.text
@@ -77,7 +77,7 @@ async def process_subject(message: types.Message, state: FSMContext):
             return
         
         await state.update_data(subject=subject)
-        await message.reply("Теперь укажите тип материала. Пример: Лекция, Лабораторная работа, Конспект.")
+        await message.reply("Теперь укажите тип материала. Пример: Лекция, Лабораторная работа, Конспект.", reply_markup=type_material)
         await state.set_state(MaterialStates.type_material)
     else:
         await state.clear()
@@ -90,7 +90,7 @@ async def process_subject(message: types.Message, state: FSMContext):
 @router.message(MaterialStates.type_material)
 async def process_type_material(message: types.Message, state: FSMContext):
 
-    if message.text not in ['/cancellation', 'Отменить состояние']:
+    if message.text not in ['/cancellation', 'Отменить состояние ❌']:
         
         # Проверка качества текста
         type_material = message.text
@@ -113,7 +113,7 @@ async def process_type_material(message: types.Message, state: FSMContext):
 @router.message(MaterialStates.topic)
 async def process_topic(message: types.Message, state: FSMContext):
 
-    if message.text not in ['/cancellation', 'Отменить состояние']:
+    if message.text not in ['/cancellation', 'Отменить состояние ❌']:
 
         # Проверка качества текста
         topic = message.text
@@ -135,7 +135,7 @@ async def process_topic(message: types.Message, state: FSMContext):
 # Обработчик для ввода описания материала
 @router.message(MaterialStates.description_material)
 async def process_description_material(message: types.Message, state: FSMContext):
-    if message.text not in ['/cancellation', 'Отменить состояние']:
+    if message.text not in ['/cancellation', 'Отменить состояние ❌']:
         
         # Проверка качества текста
         description_material = message.text
@@ -228,12 +228,12 @@ async def finish_process(message: types.Message, state: FSMContext):
 async def cancel_material(message: types.Message, state: FSMContext):
 
     # Завершение
-    if message.text == "Завершить ❌":
+    if message.text == "Завершить ✅":
         await finish_process(message, state)  # Вызываем функцию завершения процесса
         return
 
     # Проверка на отмену состояния
-    if message.text in ['/cancellation', 'Отменить состояние']:
+    if message.text in ['/cancellation', 'Отменить состояние ❌']:
         await state.clear()  # Очищаем состояние
         await message.reply(
             'Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊',

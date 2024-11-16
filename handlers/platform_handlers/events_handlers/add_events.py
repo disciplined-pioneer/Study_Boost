@@ -37,7 +37,7 @@ async def start_add_event(message: Message, state: FSMContext):
 @router.message(EventsStates.date)
 async def process_event_date(message: Message, state: FSMContext):
 
-    if message.text != '/cancellation' and message.text != 'Отменить состояние':
+    if message.text not in ['/cancellation', 'Отменить состояние ❌']:
         try:
             event_date = datetime.strptime(message.text, "%Y-%m-%d").date()
             await state.update_data(date=event_date)
@@ -50,8 +50,7 @@ async def process_event_date(message: Message, state: FSMContext):
             )
             await state.set_state(EventsStates.place)
         except ValueError:
-            await message.reply("Неверный формат даты 🛑\nПопробуйте зарегистрировать мероприятие с начала", reply_markup=events_menu)
-            await state.clear()
+            await message.reply("Неверный формат даты 🛑\nПопробуйте снова", reply_markup=events_menu)
     else:
         await state.clear()
         await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊', reply_markup=events_menu)
@@ -60,7 +59,7 @@ async def process_event_date(message: Message, state: FSMContext):
 @router.message(EventsStates.place)
 async def process_place(message: Message, state: FSMContext):
 
-    if message.text != '/cancellation' and message.text != 'Отменить состояние':
+    if message.text not in ['/cancellation', 'Отменить состояние ❌']:
         place = message.text.strip()
         if place:
 
@@ -68,7 +67,6 @@ async def process_place(message: Message, state: FSMContext):
             sentiment_score = await analyze_sentiment(message.text)
             if sentiment_score <= -0.01:
                 await message.answer("Ваш текст содержит негативные выражения. Пожалуйста, попробуйте переформулировать свой текст", reply_markup=events_menu)
-                await state.clear()  # Завершаем состояние
                 return
             else:
                 await state.update_data(place=place)
@@ -80,8 +78,7 @@ async def process_place(message: Message, state: FSMContext):
                 )
                 await state.set_state(EventsStates.time)
         else:
-            await message.reply("Место не может быть пустым 🛑\nПопробуйте зарегистрировать мероприятие с начала", reply_markup=events_menu)
-            await state.clear()
+            await message.reply("Место не может быть пустым 🛑\nПопробуйте снова", reply_markup=events_menu)
     else:
         await state.clear()
         await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊', reply_markup=events_menu)
@@ -90,7 +87,7 @@ async def process_place(message: Message, state: FSMContext):
 @router.message(EventsStates.time)
 async def process_event_time(message: Message, state: FSMContext):
 
-    if message.text != '/cancellation' and message.text != 'Отменить состояние':
+    if message.text not in ['/cancellation', 'Отменить состояние ❌']:
         try:
             # Преобразуем время в строку для совместимости с SQLite
             event_time = datetime.strptime(message.text, "%H:%M").time().strftime("%H:%M")
@@ -109,8 +106,7 @@ async def process_event_time(message: Message, state: FSMContext):
 
             await state.set_state(EventsStates.description)
         except ValueError:
-            await message.reply("Неверный формат времени 🛑\nПопробуйте зарегистрировать мероприятие с начала", reply_markup=events_menu)
-            await state.clear()
+            await message.reply("Неверный формат времени 🛑\nПопробуйте снова", reply_markup=events_menu)
     else:
         await state.clear()
         await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊', reply_markup=events_menu)
@@ -119,7 +115,7 @@ async def process_event_time(message: Message, state: FSMContext):
 @router.message(EventsStates.description)
 async def process_description(message: Message, state: FSMContext):
 
-    if message.text != '/cancellation' and message.text != 'Отменить состояние':
+    if message.text not in ['/cancellation', 'Отменить состояние ❌']:
     
         description = message.text.strip()
         if description:
@@ -128,7 +124,6 @@ async def process_description(message: Message, state: FSMContext):
             sentiment_score = await analyze_sentiment(message.text)
             if sentiment_score <= -0.01:
                 await message.answer("Ваш текст содержит негативные выражения. Пожалуйста, попробуйте переформулировать свой текст", reply_markup=events_menu)
-                await state.clear()  # Завершаем состояние
                 return
             
             else:
@@ -152,8 +147,7 @@ async def process_description(message: Message, state: FSMContext):
                 )
                 await state.clear()
         else:
-            await message.reply("Описание не может быть пустым 🛑\nПопробуйте зарегистрировать мероприятие с начала", reply_markup=events_menu)
-            await state.clear()
+            await message.reply("Описание не может быть пустым 🛑\nПопробуйте снова", reply_markup=events_menu)
     else:
         await state.clear()
         await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊', reply_markup=events_menu)
