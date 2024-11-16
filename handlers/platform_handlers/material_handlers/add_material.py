@@ -1,9 +1,12 @@
-from aiogram import types
+from datetime import datetime
 
+from aiogram import types
 from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
 
 from states.material_state import MaterialStates
+
+from database.handlers.database_handler import add_material
 
 from keyboards.material_keyb import material_menu
 from keyboards.cancellation_states import complete_process, cancel_state
@@ -12,8 +15,8 @@ router = Router()
 
 # Обработчик для кнопки "Добавить материал ➕"
 @router.message(F.text == 'Добавить материал ➕')
-async def add_material(message: types.Message, state: FSMContext):
-    await message.answer("Вы выбрали добавление материала. Пожалуйста, укажите факультет. Пример: Факультет информационных технологий.", reply_markup=cancel_state)
+async def process_add_material(message: types.Message, state: FSMContext):
+    await message.answer("Вы выбрали добавление материала. Пожалуйста, укажите факультет. Пример: Информатика и вычислительная техника.", reply_markup=cancel_state)
     await state.set_state(MaterialStates.faculty)
 
 # Обработчик для ввода факультета
@@ -31,46 +34,70 @@ async def process_faculty(message: types.Message, state: FSMContext):
 # Обработчик для ввода курса
 @router.message(MaterialStates.course)
 async def process_course(message: types.Message, state: FSMContext):
-    if message.text != '/cancellation' and message.text != 'Отменить состояние':
+    if message.text not in ['/cancellation', 'Отменить состояние']:
         course = message.text
         await state.update_data(course=course)
-        await message.answer("Теперь укажите тип материала. Пример: Лекция, Конспект.")
+        await message.answer("Теперь укажите название предмета. Пример: Операционные системы.")
+        await state.set_state(MaterialStates.subject)
+    else:
+        await state.clear()
+        await message.answer(
+            'Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊',
+            reply_markup=material_menu
+        )
+
+# Обработчик для ввода названия предмета
+@router.message(MaterialStates.subject)
+async def process_subject(message: types.Message, state: FSMContext):
+    if message.text not in ['/cancellation', 'Отменить состояние']:
+        subject = message.text
+        await state.update_data(subject=subject)
+        await message.answer("Теперь укажите тип материала. Пример: Лекция, Лабораторная работа, Конспект.")
         await state.set_state(MaterialStates.type_material)
     else:
         await state.clear()
-        await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊', reply_markup=material_menu)
+        await message.answer(
+            'Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊',
+            reply_markup=material_menu
+        )
 
 # Обработчик для ввода типа материала
 @router.message(MaterialStates.type_material)
 async def process_type_material(message: types.Message, state: FSMContext):
-    if message.text != '/cancellation' and message.text != 'Отменить состояние':
+    if message.text not in ['/cancellation', 'Отменить состояние']:
         type_material = message.text
         await state.update_data(type_material=type_material)
-        await message.answer("Теперь укажите тему материала. Пример: Операционные системы.")
+        await message.answer("Теперь укажите тему материала. Пример: Основы программирования.")
         await state.set_state(MaterialStates.topic)
     else:
         await state.clear()
-        await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊', reply_markup=material_menu)
+        await message.answer(
+            'Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊',
+            reply_markup=material_menu
+        )
 
 # Обработчик для ввода темы
 @router.message(MaterialStates.topic)
 async def process_topic(message: types.Message, state: FSMContext):
-    if message.text != '/cancellation' and message.text != 'Отменить состояние':
+    if message.text not in ['/cancellation', 'Отменить состояние']:
         topic = message.text
         await state.update_data(topic=topic)
         await message.answer("Теперь опишите материал. Пример: В этой лекции рассматриваются основные понятия операционных систем.")
         await state.set_state(MaterialStates.description_material)
     else:
         await state.clear()
-        await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊', reply_markup=material_menu)
+        await message.answer(
+            'Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊',
+            reply_markup=material_menu
+        )
 
 # Обработчик для ввода описания материала
 @router.message(MaterialStates.description_material)
 async def process_description_material(message: types.Message, state: FSMContext):
-    if message.text != '/cancellation' and message.text != 'Отменить состояние':
+    if message.text not in ['/cancellation', 'Отменить состояние']:
         description_material = message.text
         await state.update_data(description_material=description_material)
-        await message.answer("Теперь отправьте фотографию материала. Пример: сканированная лекция или конспект.")
+        await message.answer("Теперь отправьте фотографию материала или документ. Пример: сканированная лекция, конспект или word документ и т.д.")
         await state.set_state(MaterialStates.files_id)
     else:
         await state.clear()
@@ -120,6 +147,21 @@ async def process_document(message: types.Message, state: FSMContext):
 # Обработчик для завершения процесса (теперь обычная асинхронная функция)
 async def finish_process(message: types.Message, state: FSMContext):
     data = await state.get_data()
+    print(data)
+
+    # Добавление данных в БД
+    await add_material(
+        ID_user=str(message.from_user.id),
+        date_publication=datetime.now().date(),
+        faculty=data.get('faculty'),
+        subject=data.get('subject'),
+        course=data.get('course'),
+        type_material=data.get('type_material'),
+        topic=data.get('topic'),
+        description_material=data.get('description_material'),
+        files_id=str(data.get('files'))
+    )
+
     files = data.get('files', [])  # Получаем общий список файлов
     if files:
         response = "Процесс завершён. Вот ваши данные:\n"

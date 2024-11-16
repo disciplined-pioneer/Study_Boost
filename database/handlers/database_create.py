@@ -116,7 +116,7 @@ async def create_events_table():
 
 # Материалы для студентов
 async def create_materials():
-    database_path = 'database/data/help_suggestions.db'
+    database_path = 'database/data/materials.db'
     os.makedirs(os.path.dirname(database_path), exist_ok=True)
     
     async with aiosqlite.connect(database_path) as db:
@@ -124,13 +124,14 @@ async def create_materials():
             CREATE TABLE IF NOT EXISTS events (
                 material_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 ID_user INTEGER,
-                date_publication TEXT,
+                date_publication DATE,
                 faculty TEXT,
                 course TEXT,
+                subject TEXT,
                 type_material TEXT,
                 topic TEXT,
                 description_material TEXT,
-                photos_id TEXT,
+                files_id TEXT,
                 like_advice TEXT,
                 dislike_advice TEXT
             )

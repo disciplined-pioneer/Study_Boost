@@ -28,7 +28,7 @@ async def materials_handler(message: types.Message):
     can_use, response_message = await can_use_feature(user_id)
 
     if can_use:
-        await message.answer(f'Пожалуйста, выберите одну их кнопок: ', reply_markup=material_menu)
+        await message.answer(f'Выберите одну из опций ниже: ', reply_markup=material_menu)
     else:
         await message.answer(response_message)
 

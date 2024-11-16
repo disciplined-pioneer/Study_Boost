@@ -117,7 +117,6 @@ async def add_user_advice(ID_user, date_publication, content, type_advice, like_
             print(f"Ошибка при добавлении совета пользователя: {e}")
             return 'Произошла ошибка при добавлении совета пользователя!'
 
-
 # Добавление мероприятий
 async def add_event(ID_user: int, date_publication: date, place: str, event_date: date, event_time: time, description: str):
     database_path = 'database/data/events.db'
@@ -127,6 +126,32 @@ async def add_event(ID_user: int, date_publication: date, place: str, event_date
             INSERT INTO events (ID_user, date_publication, place, date, time, description)
             VALUES (?, ?, ?, ?, ?, ?)
         ''', (ID_user, date_publication, place, event_date, event_time, description))
+        
+        await db.commit()
+
+# Добавление материалов
+async def add_material(ID_user: int, date_publication: date, faculty: str, course: str, subject: str, type_material: str, 
+                       topic: str, description_material: str, files_id: str, like_advice: str = "0", dislike_advice: str = "0"):
+    database_path = 'database/data/materials.db'
+    
+    async with aiosqlite.connect(database_path) as db:
+        await db.execute('''
+            INSERT INTO events (
+                ID_user, 
+                date_publication, 
+                faculty, 
+                course,
+                subject,
+                type_material,
+                topic, 
+                description_material, 
+                files_id, 
+                like_advice, 
+                dislike_advice
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (ID_user, date_publication, faculty, course, subject, type_material, 
+              topic, description_material, files_id, like_advice, dislike_advice))
         
         await db.commit()
 
