@@ -3,7 +3,7 @@ from datetime import datetime
 from aiogram import Router
 from aiogram.types import Message
 
-from keyboards.platform_keyb import platform_menu
+from keyboards.registration_keyb import registration_menu
 from database.requests.user_search import count_referrals
 from handlers.commands_handlers.commands_handlers import user_rating, fetch_user_data, get_top_10_users, user_subscription, payment_information
 
@@ -141,5 +141,5 @@ async def subscription_status(message: Message):
 async def cancellation_handler(message: Message):
     await message.answer(
             'Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊',
-            reply_markup=platform_menu
+            reply_markup=registration_menu
         )

@@ -30,7 +30,7 @@ async def start_add(message: Message, state: FSMContext):
 @router.callback_query(lambda c: c.data in ['study', 'health', 'social', 'work'])
 async def category_selected(callback: CallbackQuery, state: FSMContext):
 
-    if callback.data != '/cancellation' and callback.data != 'Отменить состояние':
+    if callback.data not in ['/cancellation', 'Отменить состояние']:
 
         user_id = callback.from_user.id
         can_use, response_message = await can_use_feature(user_id)
@@ -56,7 +56,7 @@ async def category_selected(callback: CallbackQuery, state: FSMContext):
 @router.message(F.text, AdviсeStates.category_advice)
 async def process_advice(message: Message, state: FSMContext):
 
-    if message.text != '/cancellation' and message.text != 'Отменить состояние':
+    if message.text not in ['/cancellation', 'Отменить состояние']:
     
         data = await state.get_data()  # Получаем данные состояния
         user_id = message.from_user.id

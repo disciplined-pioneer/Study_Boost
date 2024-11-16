@@ -6,6 +6,7 @@ from aiogram.fsm.context import FSMContext
 
 from states.material_state import MaterialStates
 
+from NI_assistants.sentiment_text import analyze_sentiment
 from database.handlers.database_handler import add_material
 
 from keyboards.material_keyb import material_menu
@@ -22,26 +23,42 @@ async def process_add_material(message: types.Message, state: FSMContext):
 # Обработчик для ввода факультета
 @router.message(MaterialStates.faculty)
 async def process_faculty(message: types.Message, state: FSMContext):
-    if message.text != '/cancellation' and message.text != 'Отменить состояние':
+
+    if message.text not in ['/cancellation', 'Отменить состояние']:
+        
+        # Проверка качества текста
         faculty = message.text
+        sentiment_score = await analyze_sentiment(faculty)
+        if sentiment_score <= -0.01:
+            await message.reply("Ваш текст содержит негативные выражения. Пожалуйста, попробуйте переформулировать свой текст")
+            return
+        
         await state.update_data(faculty=faculty)
-        await message.answer("Теперь укажите курс. Пример: 1 курс.")
+        await message.reply("Теперь укажите курс. Пример: 1 курс.")
         await state.set_state(MaterialStates.course)
     else:
         await state.clear()
-        await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊', reply_markup=material_menu)
+        await message.reply('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊', reply_markup=material_menu)
 
 # Обработчик для ввода курса
 @router.message(MaterialStates.course)
 async def process_course(message: types.Message, state: FSMContext):
+
     if message.text not in ['/cancellation', 'Отменить состояние']:
+
+        # Проверка качества текста
         course = message.text
+        sentiment_score = await analyze_sentiment(course)
+        if sentiment_score <= -0.01:
+            await message.reply("Ваш текст содержит негативные выражения. Пожалуйста, попробуйте переформулировать свой текст")
+            return
+        
         await state.update_data(course=course)
-        await message.answer("Теперь укажите название предмета. Пример: Операционные системы.")
+        await message.reply("Теперь укажите название предмета. Пример: Операционные системы.")
         await state.set_state(MaterialStates.subject)
     else:
         await state.clear()
-        await message.answer(
+        await message.reply(
             'Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊',
             reply_markup=material_menu
         )
@@ -49,14 +66,22 @@ async def process_course(message: types.Message, state: FSMContext):
 # Обработчик для ввода названия предмета
 @router.message(MaterialStates.subject)
 async def process_subject(message: types.Message, state: FSMContext):
+
     if message.text not in ['/cancellation', 'Отменить состояние']:
+
+        # Проверка качества текста
         subject = message.text
+        sentiment_score = await analyze_sentiment(subject)
+        if sentiment_score <= -0.01:
+            await message.reply("Ваш текст содержит негативные выражения. Пожалуйста, попробуйте переформулировать свой текст")
+            return
+        
         await state.update_data(subject=subject)
-        await message.answer("Теперь укажите тип материала. Пример: Лекция, Лабораторная работа, Конспект.")
+        await message.reply("Теперь укажите тип материала. Пример: Лекция, Лабораторная работа, Конспект.")
         await state.set_state(MaterialStates.type_material)
     else:
         await state.clear()
-        await message.answer(
+        await message.reply(
             'Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊',
             reply_markup=material_menu
         )
@@ -64,14 +89,22 @@ async def process_subject(message: types.Message, state: FSMContext):
 # Обработчик для ввода типа материала
 @router.message(MaterialStates.type_material)
 async def process_type_material(message: types.Message, state: FSMContext):
+
     if message.text not in ['/cancellation', 'Отменить состояние']:
+        
+        # Проверка качества текста
         type_material = message.text
+        sentiment_score = await analyze_sentiment(type_material)
+        if sentiment_score <= -0.01:
+            await message.reply("Ваш текст содержит негативные выражения. Пожалуйста, попробуйте переформулировать свой текст")
+            return
+        
         await state.update_data(type_material=type_material)
-        await message.answer("Теперь укажите тему материала. Пример: Основы программирования.")
+        await message.reply("Теперь укажите тему материала. Пример: Основы программирования.")
         await state.set_state(MaterialStates.topic)
     else:
         await state.clear()
-        await message.answer(
+        await message.reply(
             'Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊',
             reply_markup=material_menu
         )
@@ -79,14 +112,22 @@ async def process_type_material(message: types.Message, state: FSMContext):
 # Обработчик для ввода темы
 @router.message(MaterialStates.topic)
 async def process_topic(message: types.Message, state: FSMContext):
+
     if message.text not in ['/cancellation', 'Отменить состояние']:
+
+        # Проверка качества текста
         topic = message.text
+        sentiment_score = await analyze_sentiment(topic)
+        if sentiment_score <= -0.01:
+            await message.reply("Ваш текст содержит негативные выражения. Пожалуйста, попробуйте переформулировать свой текст")
+            return
+        
         await state.update_data(topic=topic)
-        await message.answer("Теперь опишите материал. Пример: В этой лекции рассматриваются основные понятия операционных систем.")
+        await message.reply("Теперь опишите материал. Пример: В этой лекции рассматриваются основные понятия операционных систем.")
         await state.set_state(MaterialStates.description_material)
     else:
         await state.clear()
-        await message.answer(
+        await message.reply(
             'Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊',
             reply_markup=material_menu
         )
@@ -95,13 +136,20 @@ async def process_topic(message: types.Message, state: FSMContext):
 @router.message(MaterialStates.description_material)
 async def process_description_material(message: types.Message, state: FSMContext):
     if message.text not in ['/cancellation', 'Отменить состояние']:
+        
+        # Проверка качества текста
         description_material = message.text
+        sentiment_score = await analyze_sentiment(description_material)
+        if sentiment_score <= -0.01:
+            await message.reply("Ваш текст содержит негативные выражения. Пожалуйста, попробуйте переформулировать свой текст")
+            return
+        
         await state.update_data(description_material=description_material)
-        await message.answer("Теперь отправьте фотографию материала или документ. Пример: сканированная лекция, конспект или word документ и т.д.")
+        await message.reply("Теперь отправьте фотографию материала или документ. Пример: сканированная лекция, конспект или word документ и т.д.")
         await state.set_state(MaterialStates.files_id)
     else:
         await state.clear()
-        await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊', reply_markup=material_menu)
+        await message.reply('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊', reply_markup=material_menu)
 
 
 # Обработчик для получения фотографий и добавления их в общее хранилище
@@ -119,7 +167,7 @@ async def process_photo(message: types.Message, state: FSMContext):
 
     # Обновляем данные состояния
     await state.update_data(files=files)
-    await message.answer(
+    await message.reply(
         "Фотография успешно добавлена! Вы можете отправить ещё фотографии, документы или завершить процесс.",
         reply_markup=complete_process
     )
@@ -139,7 +187,7 @@ async def process_document(message: types.Message, state: FSMContext):
 
     # Обновляем данные состояния
     await state.update_data(files=files)
-    await message.answer(
+    await message.reply(
         "Документ успешно добавлен! Вы можете отправить ещё документы, фотографии или завершить процесс.",
         reply_markup=complete_process
     )
@@ -147,7 +195,6 @@ async def process_document(message: types.Message, state: FSMContext):
 # Обработчик для завершения процесса (теперь обычная асинхронная функция)
 async def finish_process(message: types.Message, state: FSMContext):
     data = await state.get_data()
-    print(data)
 
     # Добавление данных в БД
     await add_material(
@@ -164,12 +211,13 @@ async def finish_process(message: types.Message, state: FSMContext):
 
     files = data.get('files', [])  # Получаем общий список файлов
     if files:
-        response = "Процесс завершён. Вот ваши данные:\n"
-        for file in files:
-            response += f"Тип: {file['type']}, ID: {file['file_id']}\n\n"  # Выводим тип и ID каждого файла
-        await message.answer(response, disable_web_page_preview=True)
+        await message.reply(
+                "✅ <b>Материал успешно добавлен!</b>\n\n",
+                parse_mode="HTML",
+                reply_markup=material_menu
+            )
     else:
-        await message.answer("Вы не отправили ни фотографий, ни документов.")
+        await message.reply("Вы не отправили ни фотографий, ни документов.")
 
     # Сброс состояния после завершения процесса
     await state.clear()
@@ -187,7 +235,7 @@ async def cancel_material(message: types.Message, state: FSMContext):
     # Проверка на отмену состояния
     if message.text in ['/cancellation', 'Отменить состояние']:
         await state.clear()  # Очищаем состояние
-        await message.answer(
+        await message.reply(
             'Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊',
             reply_markup=material_menu
         )
