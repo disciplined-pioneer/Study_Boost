@@ -103,7 +103,10 @@ async def process_rating_callback(callback_query: CallbackQuery):
                 parse_mode="HTML"
             )
         else:
-            await callback_query.answer(f"Вы уже оставляли свой отзыв для этого совета!")
+            if int(callback_query.from_user.id) != int(user_id):
+                await callback_query.answer(f"Вы уже оставляли свой отзыв для этого совета!")
+            else:
+                await callback_query.answer(f"Вы не можете оценить свой же совет!")
         
         if callback_query.message.reply_markup:
             await callback_query.message.edit_reply_markup()

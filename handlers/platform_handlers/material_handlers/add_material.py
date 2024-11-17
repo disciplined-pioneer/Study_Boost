@@ -1,3 +1,4 @@
+import time
 from datetime import datetime
 
 from aiogram import types
@@ -23,6 +24,12 @@ async def process_add_material(message: types.Message, state: FSMContext):
     can_use, response_message = await can_use_feature(user_id)
 
     if can_use:
+        await message.answer(
+        "❌ Чтобы завершить процесс добавления материала, нажмите кнопку *«Отменить состояние»*. \n\n",
+        reply_markup=cancel_state,
+        parse_mode="Markdown")
+        time.sleep(3)
+        
         await message.answer("Вы выбрали добавление материала. Пожалуйста, укажите факультет. Пример: Информатика и вычислительная техника.", reply_markup=cancel_state)
         await state.set_state(MaterialStates.faculty)
     else:
@@ -108,7 +115,7 @@ async def process_type_material(message: types.Message, state: FSMContext):
             return
         
         await state.update_data(type_material=type_material)
-        await message.reply("Теперь укажите тему материала. Пример: Основы программирования.")
+        await message.reply("Теперь укажите тему материала. Пример: Основы программирования.", reply_markup=cancel_state)
         await state.set_state(MaterialStates.topic)
     else:
         await state.clear()
