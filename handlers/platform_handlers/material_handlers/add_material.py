@@ -92,7 +92,7 @@ async def process_subject(message: types.Message, state: FSMContext):
             return
         
         await state.update_data(subject=subject)
-        await message.reply("Теперь укажите тип материала. Пример: Лекция, Лабораторная работа, Конспект.", reply_markup=type_material)
+        await message.reply("Теперь укажите тип материала, нажав на одну из кнопок ниже", reply_markup=type_material)
         await state.set_state(MaterialStates.type_material)
     else:
         await state.clear()
@@ -101,21 +101,33 @@ async def process_subject(message: types.Message, state: FSMContext):
             reply_markup=material_menu
         )
 
-# Обработчик для ввода типа материала
 @router.message(MaterialStates.type_material)
 async def process_type_material(message: types.Message, state: FSMContext):
-
     if message.text not in ['/cancellation', 'Отменить состояние ❌']:
+        # Преобразуем текст в код материала
+        material_mapping = {
+            'Лекция 📚': 'lecture',
+            'Домашняя работа 🏠': 'homework',
+            'Контрольная работа 📝': 'test',
+            'Лабораторная работа 🔬': 'laboratory_work'
+        }
+        material_code = material_mapping.get(message.text)
         
+        if not material_code:
+            await message.reply("Неверный выбор. Пожалуйста, выберите тип материала, используя кнопки ниже.")
+            return
+
         # Проверка качества текста
-        type_material = message.text
-        sentiment_score = await analyze_sentiment(type_material)
+        sentiment_score = await analyze_sentiment(material_code)
         if sentiment_score <= -0.01:
             await message.reply("Ваш текст содержит негативные выражения. Пожалуйста, попробуйте переформулировать свой текст")
             return
-        
-        await state.update_data(type_material=type_material)
-        await message.reply("Теперь укажите тему материала. Пример: Основы программирования.", reply_markup=cancel_state)
+
+        await state.update_data(type_material=material_code)
+        await message.reply(
+            "Теперь укажите тему материала. Пример: Основы программирования.",
+            reply_markup=cancel_state
+        )
         await state.set_state(MaterialStates.topic)
     else:
         await state.clear()
@@ -123,6 +135,7 @@ async def process_type_material(message: types.Message, state: FSMContext):
             'Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊',
             reply_markup=material_menu
         )
+
 
 # Обработчик для ввода темы
 @router.message(MaterialStates.topic)

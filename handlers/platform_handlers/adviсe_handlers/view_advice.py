@@ -11,6 +11,7 @@ from database.requests.advice import get_random_advice
 from database.requests.user_access import can_use_feature
 from database.requests.advice import check_rating_history
 from database.handlers.database_handler import add_user_rating_history
+
 from handlers.platform_handlers.adviсe_handlers.grade_handler import like_advice, dislike_advice
 
 router = Router()

@@ -16,7 +16,7 @@ from handlers.platform_handlers.adviсe_handlers.add_adviсe import router as ad
 from handlers.platform_handlers.adviсe_handlers.view_advice import router as view_advice_router  # Роутер для просмотра советов
 
 from handlers.platform_handlers.material_handlers.add_material import router as add_material_router  # Роутер для добавления материалов
-#from handlers.platform_handlers.material_handlers.view_material import router as view_material_router  # Роутер для просмотра материалов
+from handlers.platform_handlers.material_handlers.view_material import router as view_material_router  # Роутер для просмотра материалов
 
 from handlers.platform_handlers.events_handlers.add_events import router as add_events_router  # Роутер для добавления мероприятий
 from handlers.platform_handlers.events_handlers.view_events import router as view_events_router  # Роутер для просмотра мероприятий
@@ -50,7 +50,7 @@ async def main():
     dp.include_router(view_events_router)  # Включаем роутер для просмотра советов
 
     dp.include_router(add_material_router)  # Включаем роутер для добавления материалов
-    #dp.include_router(view_material_router)  # Включаем роутер для просмотра материалов
+    dp.include_router(view_material_router)  # Включаем роутер для просмотра материалов
 
     dp.include_router(users_router) # Включаем роутер для команд пользователей
     dp.include_router(admin_router) # Включаем роутер для команд админа
