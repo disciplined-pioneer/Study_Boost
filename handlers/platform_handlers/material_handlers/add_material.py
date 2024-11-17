@@ -28,7 +28,7 @@ async def process_add_material(message: types.Message, state: FSMContext):
         "❌ Чтобы завершить процесс добавления материала, нажмите кнопку *«Отменить состояние»*. \n\n",
         reply_markup=cancel_state,
         parse_mode="Markdown")
-        time.sleep(3)
+        time.sleep(1.5)
         
         await message.answer("Вы выбрали добавление материала. Пожалуйста, укажите факультет. Пример: Информатика и вычислительная техника.", reply_markup=cancel_state)
         await state.set_state(MaterialStates.faculty)
@@ -104,6 +104,7 @@ async def process_subject(message: types.Message, state: FSMContext):
 @router.message(MaterialStates.type_material)
 async def process_type_material(message: types.Message, state: FSMContext):
     if message.text not in ['/cancellation', 'Отменить состояние ❌']:
+        
         # Преобразуем текст в код материала
         material_mapping = {
             'Лекция 📚': 'lecture',

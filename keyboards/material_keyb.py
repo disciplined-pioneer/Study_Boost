@@ -15,7 +15,7 @@ type_material = ReplyKeyboardMarkup(
     keyboard=[
         [KeyboardButton(text='Лекция 📚')],
         [KeyboardButton(text='Домашняя работа 🏠')],
-        [KeyboardButton(text='Контральная работа 📝')],
+        [KeyboardButton(text='Контрольная работа 📝')],
         [KeyboardButton(text='Лабораторная работа 🔬')],
         [KeyboardButton(text='Отменить состояние ❌')]
     ],
@@ -31,3 +31,11 @@ view_type_material = InlineKeyboardMarkup(
     ]
 )
 
+search_materials = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [InlineKeyboardButton(text='По курсам 📚', callback_data='search_by_courses')],
+        [InlineKeyboardButton(text='По факультетам 🏫', callback_data='search_by_faculties')],
+        [InlineKeyboardButton(text='По предметам 📖', callback_data='search_by_subjects')],
+        [InlineKeyboardButton(text='По типу материала 📂', callback_data='search_by_material_type')],
+    ]
+)

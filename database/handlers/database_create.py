@@ -121,7 +121,7 @@ async def create_materials():
     
     async with aiosqlite.connect(database_path) as db:
         await db.execute(''' 
-            CREATE TABLE IF NOT EXISTS events (
+            CREATE TABLE IF NOT EXISTS materials (
                 material_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 ID_user INTEGER,
                 date_publication DATE,

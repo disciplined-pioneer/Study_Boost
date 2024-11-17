@@ -136,7 +136,7 @@ async def add_material(ID_user: int, date_publication: date, faculty: str, cours
     
     async with aiosqlite.connect(database_path) as db:
         await db.execute('''
-            INSERT INTO events (
+            INSERT INTO materials (
                 ID_user, 
                 date_publication, 
                 faculty, 
