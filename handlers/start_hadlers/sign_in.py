@@ -99,12 +99,9 @@ async def login_handler(message: types.Message, state: FSMContext):
             if expiration_date > now_date:
                 await message.answer(f'Добро пожаловать! Доступ к платформе открыт 😊', reply_markup=platform_menu)
             else:
+                await state.clear()
                 await message.answer(f'Ваша подписка не оплачена! Пожалуйста, отправьте фото с вашей оплатой: ')
-                
-                # Сохраняем информацию о пользователе в состояние
                 await state.update_data(user_info=user_info, user_id=user_id)
-                
-                # Устанавливаем состояние ожидания фотографии
                 await state.set_state(PaymentStates.payment_photo)
         else:
             await message.answer('Не найдены данные о платеже. Пожалуйста, свяжитесь с поддержкой.')

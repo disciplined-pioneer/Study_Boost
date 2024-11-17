@@ -1,3 +1,5 @@
+import time
+
 from config import ADMIN_ID
 from datetime import datetime, timedelta
 
@@ -29,7 +31,14 @@ async def registration_handler(message: Message, state: FSMContext):
 
 # Имя пользователя
 async def start_registration(message: Message, state: FSMContext):
-    await message.answer('Чтобы прекратить регистрацию нажмите кнопку: "Отменить состояние ❌"\nПожалуйста, укажите ваше имя: ', reply_markup=cancel_state)
+    await message.answer(
+        "❌ Чтобы завершить процесс регистрации, нажмите кнопку *«Отменить состояние»*. \n\n⚠️ Обратите внимание: при отмене состояния ваш реферальный ID будет утерян. Для повторной регистрации потребуется перейти по реферальной ссылке снова.",
+        reply_markup=cancel_state,
+        parse_mode="Markdown"
+    )
+
+    time.sleep(3)
+    await message.answer('Пожалуйста, укажите ваше имя: ', reply_markup=cancel_state)
     await state.set_state(RegistrationStates.name)
 
 # Город университета

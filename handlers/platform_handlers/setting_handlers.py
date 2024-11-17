@@ -5,6 +5,7 @@ from aiogram import Router, F
 from aiogram.types import Message
 
 from aiogram.fsm.context import FSMContext
+from states.help_suggestion_state import HelpStates
 from states.help_suggestion_state import SuggestionsStates
 
 from keyboards.platform_keyb import platform_menu
@@ -14,6 +15,7 @@ from database.requests.user_access import can_use_feature
 from database.handlers.database_handler import add_help_suggestion
 
 from NI_assistants.sentiment_text import analyze_sentiment
+
 
 router = Router()
 
@@ -67,6 +69,32 @@ async def suggestions_content_handler(message: Message, state: FSMContext):
             await message.answer(
                 f'Спасибо за ваш вклад! Мы обязательно рассмотрим Ваше предложение для улучшения платформы! 🙂', reply_markup=platform_menu)
             await state.clear()
+    else:
+        await state.clear()
+        await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊', reply_markup=platform_menu)
+
+@router.message(F.text == 'Помощь ❓')
+async def help_handler(message: Message, state: FSMContext):
+
+    # Переходим в состояние "content", где пользователь будет вводить свой запрос
+    await state.set_state(HelpStates.content)
+    await message.answer('Пожалуйста, опишите проблему, с которой вы столкнулись⚠️ \n\nНаш администратор свяжется с вами для уточнения и решения вашего вопроса!',
+                reply_markup=cancel_state)
+
+@router.message(HelpStates.content)
+async def help_content_handler(message: Message, state: FSMContext):
+
+    user_id = message.from_user.id
+    user_question = message.text
+
+    if user_question not in ['/cancellation', 'Отменить состояние ❌']:
+        await state.update_data(question=user_question)
+        await add_help_suggestion(ID_user=user_id,
+                                 suggestion_date=datetime.now().date(),
+                                 suggestion_type='help',
+                                 content=user_question)
+        await message.answer(f'Спасибо! Мы обязательно предоставим вам помощь в использовании платформы. Пожалуйста, ожидайте нашего ответа! 🙂', reply_markup=platform_menu)
+        await state.clear()
     else:
         await state.clear()
         await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊', reply_markup=platform_menu)

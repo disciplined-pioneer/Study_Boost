@@ -6,6 +6,7 @@ from aiogram.fsm.context import FSMContext
 
 from states.material_state import MaterialStates
 
+from database.requests.user_access import can_use_feature
 from NI_assistants.sentiment_text import analyze_sentiment
 from database.handlers.database_handler import add_material
 
@@ -17,8 +18,15 @@ router = Router()
 # Обработчик для кнопки "Добавить материал ➕"
 @router.message(F.text == 'Добавить материал ➕')
 async def process_add_material(message: types.Message, state: FSMContext):
-    await message.answer("Вы выбрали добавление материала. Пожалуйста, укажите факультет. Пример: Информатика и вычислительная техника.", reply_markup=cancel_state)
-    await state.set_state(MaterialStates.faculty)
+    
+    user_id = message.from_user.id
+    can_use, response_message = await can_use_feature(user_id)
+
+    if can_use:
+        await message.answer("Вы выбрали добавление материала. Пожалуйста, укажите факультет. Пример: Информатика и вычислительная техника.", reply_markup=cancel_state)
+        await state.set_state(MaterialStates.faculty)
+    else:
+        await message.answer(response_message)
 
 # Обработчик для ввода факультета
 @router.message(MaterialStates.faculty)
