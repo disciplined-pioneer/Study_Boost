@@ -11,9 +11,9 @@ dp = Dispatcher()
 
 # Симуляция данных из БД
 CATEGORIES = {
-    "SMM": ["Курс 1", "Курс 2", "Курс 3", "Курс 4", "Курс 5", "Курс 6"],
-    "SEO": ["Курс A", "Курс B", "Курс C", "Курс D", "Курс E", "Курс F"],
-    "Программирование": ["Курс X", "Курс Y", "Курс Z", "Курс W", "Курс Q", "Курс V"],
+    "course": ["1st Year", "2nd Year", "3rd Year", "4th Year", "5th Year"],
+    "faculty": ["Engineering", "Science", "Arts", "Medicine", "Law"],
+    "subject": ["Mathematics", "Physics", "History", "Biology", "Law"]
 }
 
 PAGE_SIZE = 5  # Количество курсов на странице

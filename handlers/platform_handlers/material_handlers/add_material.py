@@ -1,3 +1,4 @@
+import re
 import time
 from datetime import datetime
 
@@ -13,6 +14,9 @@ from database.handlers.database_handler import add_material
 
 from keyboards.material_keyb import material_menu, type_material
 from keyboards.cancellation_states import complete_process, cancel_state
+
+from database.requests.advice import get_last_advice_id
+from database.handlers.database_handler import add_user_rating_history
 
 router = Router()
 
@@ -30,7 +34,7 @@ async def process_add_material(message: types.Message, state: FSMContext):
         parse_mode="Markdown")
         time.sleep(1.5)
         
-        await message.answer("Вы выбрали добавление материала. Пожалуйста, укажите факультет. Пример: Информатика и вычислительная техника.", reply_markup=cancel_state)
+        await message.answer('Вы выбрали добавление материала. Пожалуйста, укажите факультет.\nПример: "Информатика и вычислительная техника"', reply_markup=cancel_state)
         await state.set_state(MaterialStates.faculty)
     else:
         await message.answer(response_message)
@@ -49,7 +53,7 @@ async def process_faculty(message: types.Message, state: FSMContext):
             return
         
         await state.update_data(faculty=faculty)
-        await message.reply("Теперь укажите курс. Пример: 1 курс.")
+        await message.reply('Теперь укажите курс.\nПример: "1 курс"')
         await state.set_state(MaterialStates.course)
     else:
         await state.clear()
@@ -58,18 +62,22 @@ async def process_faculty(message: types.Message, state: FSMContext):
 # Обработчик для ввода курса
 @router.message(MaterialStates.course)
 async def process_course(message: types.Message, state: FSMContext):
-
     if message.text not in ['/cancellation', 'Отменить состояние ❌']:
-
-        # Проверка качества текста
+        
+        # Проверка формата текста
         course = message.text
+        if not re.match(r"^[\w\s]+ курс$", course):
+            await message.reply('Неправильный формат ввода. Пожалуйста, введите курс в формате "{название курса} курс"')
+            return
+        
+        # Проверка качества текста
         sentiment_score = await analyze_sentiment(course)
         if sentiment_score <= -0.01:
             await message.reply("Ваш текст содержит негативные выражения. Пожалуйста, попробуйте переформулировать свой текст")
             return
         
         await state.update_data(course=course)
-        await message.reply("Теперь укажите название предмета. Пример: Операционные системы.")
+        await message.reply('Теперь укажите название предмета.\nПример: "Операционные системы"')
         await state.set_state(MaterialStates.subject)
     else:
         await state.clear()
@@ -126,7 +134,7 @@ async def process_type_material(message: types.Message, state: FSMContext):
 
         await state.update_data(type_material=material_code)
         await message.reply(
-            "Теперь укажите тему материала. Пример: Основы программирования.",
+            'Теперь укажите тему материала.\nПример: "Основы программирования"',
             reply_markup=cancel_state
         )
         await state.set_state(MaterialStates.topic)
@@ -152,7 +160,7 @@ async def process_topic(message: types.Message, state: FSMContext):
             return
         
         await state.update_data(topic=topic)
-        await message.reply("Теперь опишите материал. Пример: В этой лекции рассматриваются основные понятия операционных систем.")
+        await message.reply('"Теперь опишите материал.\nПример: "В этой лекции рассматриваются основные понятия операционных систем"')
         await state.set_state(MaterialStates.description_material)
     else:
         await state.clear()
@@ -174,7 +182,7 @@ async def process_description_material(message: types.Message, state: FSMContext
             return
         
         await state.update_data(description_material=description_material)
-        await message.reply("Теперь отправьте фотографию материала или документ. Пример: сканированная лекция, конспект или word документ и т.д.")
+        await message.reply("Теперь отправьте фотографию материала или документ")
         await state.set_state(MaterialStates.files_id)
     else:
         await state.clear()
@@ -240,11 +248,28 @@ async def finish_process(message: types.Message, state: FSMContext):
 
     files = data.get('files', [])  # Получаем общий список файлов
     if files:
+
+        # Получаем advice_id последнего добавленного материала
+        material_id = await get_last_advice_id()
+        user_id = message.from_user.id
+        date = datetime.now().date()
+        await add_user_rating_history(
+            advice_id='None',
+            material_id=material_id,
+            id_user=user_id,
+            granted_by=user_id,
+            accrual_date=date,
+            action_type="add_material",
+            rating_value='2'
+        )
+        
         await message.reply(
-                "✅ <b>Материал успешно добавлен!</b>\n\n",
-                parse_mode="HTML",
-                reply_markup=material_menu
-            )
+            "✅ <b>Спасибо за Ваш вклад! Материал успешно добавлен!</b>\n"
+            "🎉 Вам было начислено <b>+2 балла к рейтингу!</b>\n\n",
+            parse_mode="HTML",
+            reply_markup=material_menu
+        )
+
     else:
         await message.reply("Вы не отправили ни фотографий, ни документов.")
 
