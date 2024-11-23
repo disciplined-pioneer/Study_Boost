@@ -53,7 +53,7 @@ async def suggestions_content_handler(message: Message, state: FSMContext):
     user_id = message.from_user.id
     user_question = message.text
 
-    if message.text not in ['/cancellation', 'Отменить состояние ❌']:
+    if message.text not in ['/cancellation', 'Отменить ❌']:
         await state.update_data(question=user_question)
 
         # Проверка качества текста
@@ -87,7 +87,7 @@ async def help_content_handler(message: Message, state: FSMContext):
     user_id = message.from_user.id
     user_question = message.text
 
-    if user_question not in ['/cancellation', 'Отменить состояние ❌']:
+    if user_question not in ['/cancellation', 'Отменить ❌']:
         await state.update_data(question=user_question)
         await add_help_suggestion(ID_user=user_id,
                                  suggestion_date=datetime.now().date(),

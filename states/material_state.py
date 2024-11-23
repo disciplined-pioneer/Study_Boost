@@ -8,3 +8,7 @@ class MaterialStates(StatesGroup):
     topic = State()
     description_material = State()
     files_id = State()
+
+class View_materials(StatesGroup):
+    keyword = State()
+    topic = State()

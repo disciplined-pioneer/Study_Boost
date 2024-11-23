@@ -44,7 +44,7 @@ async def start_registration(message: Message, state: FSMContext):
 # Город университета
 @router.message(F.text, RegistrationStates.name)
 async def process_city_university(message: Message, state: FSMContext):
-    if message.text not in ['/cancellation', 'Отменить состояние ❌']:
+    if message.text not in ['/cancellation', 'Отменить ❌']:
         await state.update_data(name=message.text)
         await message.answer("Введите город, в котором расположено ваше учебное заведение: ")
         await state.set_state(RegistrationStates.city_university)
@@ -55,7 +55,7 @@ async def process_city_university(message: Message, state: FSMContext):
 # Название университета
 @router.message(F.text, RegistrationStates.city_university)
 async def process_name_university(message: Message, state: FSMContext):
-    if message.text not in ['/cancellation', 'Отменить состояние ❌']:
+    if message.text not in ['/cancellation', 'Отменить ❌']:
         await state.update_data(city_university=message.text)
         await message.answer("Укажите полное название вашего учебного заведения: ")
         await state.set_state(RegistrationStates.name_university)
@@ -66,7 +66,7 @@ async def process_name_university(message: Message, state: FSMContext):
 # Название факультета
 @router.message(F.text, RegistrationStates.name_university)
 async def process_faculty(message: Message, state: FSMContext):
-    if message.text not in ['/cancellation', 'Отменить состояние ❌']:
+    if message.text not in ['/cancellation', 'Отменить ❌']:
         await state.update_data(name_university=message.text)
         await message.answer("Введите название вашего факультета: ")
         await state.set_state(RegistrationStates.faculty)
@@ -77,7 +77,7 @@ async def process_faculty(message: Message, state: FSMContext):
 # Номер курса
 @router.message(F.text, RegistrationStates.faculty)
 async def process_course(message: Message, state: FSMContext):
-    if message.text not in ['/cancellation', 'Отменить состояние ❌']:
+    if message.text not in ['/cancellation', 'Отменить ❌']:
         await state.update_data(faculty=message.text)
         await message.answer("На каком курсе вы обучаетесь? Пожалуйста, укажите номер курса: ")
         await state.set_state(RegistrationStates.course)
@@ -88,7 +88,7 @@ async def process_course(message: Message, state: FSMContext):
 # Фото оплаты
 @router.message(F.text, RegistrationStates.course)
 async def process_payment_photo(message: Message, state: FSMContext):
-    if message.text not in ['/cancellation', 'Отменить состояние ❌']:
+    if message.text not in ['/cancellation', 'Отменить ❌']:
         await state.update_data(course=message.text)
         await message.answer("Пожалуйста, отправьте фото, подтверждающее оплату: ")
         await state.set_state(RegistrationStates.payment_photo)
@@ -100,7 +100,7 @@ async def process_payment_photo(message: Message, state: FSMContext):
 async def cancel_registration(message: Message, state: FSMContext):
     
     # Проверка на отмену состояния
-    if message.text in ['/cancellation', 'Отменить состояние ❌']:
+    if message.text in ['/cancellation', 'Отменить ❌']:
         await state.clear()  # Очищаем состояние
         await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊', reply_markup=registration_menu)
         return

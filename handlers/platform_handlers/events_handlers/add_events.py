@@ -37,7 +37,7 @@ async def start_add_event(message: Message, state: FSMContext):
 @router.message(EventsStates.date)
 async def process_event_date(message: Message, state: FSMContext):
 
-    if message.text not in ['/cancellation', 'Отменить состояние ❌']:
+    if message.text not in ['/cancellation', 'Отменить ❌']:
         try:
             event_date = datetime.strptime(message.text, "%Y-%m-%d").date()
             await state.update_data(date=event_date)
@@ -59,7 +59,7 @@ async def process_event_date(message: Message, state: FSMContext):
 @router.message(EventsStates.place)
 async def process_place(message: Message, state: FSMContext):
 
-    if message.text not in ['/cancellation', 'Отменить состояние ❌']:
+    if message.text not in ['/cancellation', 'Отменить ❌']:
         place = message.text.strip()
         if place:
 
@@ -87,7 +87,7 @@ async def process_place(message: Message, state: FSMContext):
 @router.message(EventsStates.time)
 async def process_event_time(message: Message, state: FSMContext):
 
-    if message.text not in ['/cancellation', 'Отменить состояние ❌']:
+    if message.text not in ['/cancellation', 'Отменить ❌']:
         try:
             # Преобразуем время в строку для совместимости с SQLite
             event_time = datetime.strptime(message.text, "%H:%M").time().strftime("%H:%M")
@@ -115,7 +115,7 @@ async def process_event_time(message: Message, state: FSMContext):
 @router.message(EventsStates.description)
 async def process_description(message: Message, state: FSMContext):
 
-    if message.text not in ['/cancellation', 'Отменить состояние ❌']:
+    if message.text not in ['/cancellation', 'Отменить ❌']:
     
         description = message.text.strip()
         if description:

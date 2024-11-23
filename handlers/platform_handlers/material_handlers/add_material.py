@@ -43,7 +43,7 @@ async def process_add_material(message: types.Message, state: FSMContext):
 @router.message(MaterialStates.faculty)
 async def process_faculty(message: types.Message, state: FSMContext):
 
-    if message.text not in ['/cancellation', 'Отменить состояние ❌']:
+    if message.text not in ['/cancellation', 'Отменить ❌']:
         
         # Проверка качества текста
         faculty = message.text
@@ -62,7 +62,7 @@ async def process_faculty(message: types.Message, state: FSMContext):
 # Обработчик для ввода курса
 @router.message(MaterialStates.course)
 async def process_course(message: types.Message, state: FSMContext):
-    if message.text not in ['/cancellation', 'Отменить состояние ❌']:
+    if message.text not in ['/cancellation', 'Отменить ❌']:
         
         # Проверка формата текста
         course = message.text
@@ -90,7 +90,7 @@ async def process_course(message: types.Message, state: FSMContext):
 @router.message(MaterialStates.subject)
 async def process_subject(message: types.Message, state: FSMContext):
 
-    if message.text not in ['/cancellation', 'Отменить состояние ❌']:
+    if message.text not in ['/cancellation', 'Отменить ❌']:
 
         # Проверка качества текста
         subject = message.text
@@ -111,7 +111,7 @@ async def process_subject(message: types.Message, state: FSMContext):
 
 @router.message(MaterialStates.type_material)
 async def process_type_material(message: types.Message, state: FSMContext):
-    if message.text not in ['/cancellation', 'Отменить состояние ❌']:
+    if message.text not in ['/cancellation', 'Отменить ❌']:
         
         # Преобразуем текст в код материала
         material_mapping = {
@@ -150,7 +150,7 @@ async def process_type_material(message: types.Message, state: FSMContext):
 @router.message(MaterialStates.topic)
 async def process_topic(message: types.Message, state: FSMContext):
 
-    if message.text not in ['/cancellation', 'Отменить состояние ❌']:
+    if message.text not in ['/cancellation', 'Отменить ❌']:
 
         # Проверка качества текста
         topic = message.text
@@ -172,7 +172,7 @@ async def process_topic(message: types.Message, state: FSMContext):
 # Обработчик для ввода описания материала
 @router.message(MaterialStates.description_material)
 async def process_description_material(message: types.Message, state: FSMContext):
-    if message.text not in ['/cancellation', 'Отменить состояние ❌']:
+    if message.text not in ['/cancellation', 'Отменить ❌']:
         
         # Проверка качества текста
         description_material = message.text
@@ -287,7 +287,7 @@ async def cancel_material(message: types.Message, state: FSMContext):
         return
 
     # Проверка на отмену состояния
-    if message.text in ['/cancellation', 'Отменить состояние ❌']:
+    if message.text in ['/cancellation', 'Отменить ❌']:
         await state.clear()  # Очищаем состояние
         await message.reply(
             'Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊',
