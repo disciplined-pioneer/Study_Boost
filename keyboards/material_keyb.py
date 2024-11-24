@@ -4,7 +4,6 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 material_menu = ReplyKeyboardMarkup(
     keyboard=[
         [KeyboardButton(text='Добавить материал ➕')],
-        [KeyboardButton(text='Просмотреть категории 📁')],
         [KeyboardButton(text='Поиск материалов 🔍')],
         [KeyboardButton(text='Назад 🔙')]
     ],
@@ -31,11 +30,8 @@ view_type_material = InlineKeyboardMarkup(
     ]
 )
 
-search_materials = InlineKeyboardMarkup(
+grade_material_keyboard = InlineKeyboardMarkup(
     inline_keyboard=[
-        [InlineKeyboardButton(text='По курсам 📚', callback_data='search_by_courses')],
-        [InlineKeyboardButton(text='По факультетам 🏫', callback_data='search_by_faculties')],
-        [InlineKeyboardButton(text='По предметам 📖', callback_data='search_by_subjects')],
-        [InlineKeyboardButton(text='По типу материала 📂', callback_data='search_by_material_type')],
+        [InlineKeyboardButton(text='👍', callback_data='like_material'), InlineKeyboardButton(text='👎', callback_data='dislike_material')]
     ]
 )

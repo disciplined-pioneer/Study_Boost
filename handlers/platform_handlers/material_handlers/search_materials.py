@@ -1,6 +1,8 @@
+import re
 import os
 import json
 import zipfile
+from datetime import datetime
 
 from aiogram.types import FSInputFile
 from aiogram import Router, F, types
@@ -8,12 +10,17 @@ from aiogram.fsm.context import FSMContext
 
 from keyboards.material_keyb import material_menu
 from keyboards.cancellation_states import cancel_state
+from keyboards.material_keyb import grade_material_keyboard
 
 from states.material_state import View_materials
 from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 
 from database.requests.user_access import can_use_feature
+from database.requests.advice import check_rating_history
+from database.handlers.database_handler import add_user_rating_history
+
 from handlers.platform_handlers.material_handlers.search_material_handlers import get_all_materials, get_file_id_material
+from handlers.platform_handlers.material_handlers.grade_handlers import like_material, dislike_material, get_user_id_by_material_id, get_material_feedback
 
 router = Router()
 
@@ -107,17 +114,22 @@ async def material_id(callback_query: CallbackQuery, state: FSMContext):
     )
 
     # Выводим информацию о выбранном материале
+    like_material, dislike_material = await get_material_feedback(int(material_id))
+    
     await callback_query.message.edit_text(
         f"🎓 <b>Факультет:</b> {element['faculty']}\n\n"
         f"📘 <b>Курс:</b> {element['course']}\n\n"
         f"📚 <b>Предмет:</b> {element['subject']}\n\n"
         f"📄 <b>Тип материала:</b> {element['type_material']}\n\n"
-        f"📌 <b>Тема:</b> {element['topic']}\n\n\n"
+        f"📌 <b>Тема:</b> {element['topic']}\n\n"
+        "◆━━━━━━━━━━━━━━━━━━━━━━━━━━◆\n\n"
         f"📝 <b>Описание:</b>\n{element['description_material']}\n\n"
-        "⬇️ Выберите действие ниже:",
+        f"🔹 Рейтинг материала: {like_material} 👍 | 👎 {dislike_material}\n\n"
+        "⬇️ <i>Выберите действие ниже:</i>",
         reply_markup=download_menu,
         parse_mode="HTML"
     )
+
     await state.update_data(topic=element['topic'])
 
 # Обработчик скачивания
@@ -152,10 +164,15 @@ async def download_material(callback_query: CallbackQuery, state: FSMContext):
     # Отправляем архив пользователю
     document = FSInputFile(zip_filename)
     caption_text = (
-        "Ваши материалы успешно обработаны 📂\n\n"
-        "Файлы сохранены в архиве. Спасибо за использование нашего сервиса!"
+        f"Ваши материалы успешно обработаны 📂\n\n"
+        f"Файлы сохранены в архиве под ID: {material_id}. Благодарим за использование нашего сервиса!\n"
+        "Не забудьте оценить материал — это поможет нам стать лучше. 😊"
     )
-    await callback_query.message.answer_document(document, caption=caption_text, reply_markup=material_menu)
+    await callback_query.message.answer_document(document, caption=caption_text, reply_markup=grade_material_keyboard)
+    await callback_query.message.answer(
+        "Выберите дальнейшее действие:",
+        reply_markup=material_menu 
+    )
     
     # Удаляем временные данные
     os.remove(zip_filename)
@@ -163,6 +180,67 @@ async def download_material(callback_query: CallbackQuery, state: FSMContext):
 
     await callback_query.answer()
     await state.clear()
+
+# Обработчик нажатия на кнопки для лайка и дизлайка
+@router.callback_query(lambda c: c.data in ['like_material', 'dislike_material'])
+async def process_rating_callback(callback_query: CallbackQuery):
+    user_id = callback_query.from_user.id
+    can_use, response_message = await can_use_feature(user_id)
+
+    if can_use:
+
+        action_type = callback_query.data  # Получаем тип действия: "like_material" или "dislike_material"
+        accrual_date = datetime.now().date()
+        rating_value = '2' if action_type == 'like_material' else '-2'  # Начисляем +2 за лайк и -2 за дизлайк
+
+        # Используем регулярное выражение для поиска ID и material_id
+        message_text = callback_query.message.caption
+        temp = re.search(r'ID:\s*(\d+)', message_text)
+        material_id = int(temp.group(1)) 
+
+        # Обрабатываем действие пользователя
+        user_material = await get_user_id_by_material_id(material_id)
+        result = await check_rating_history(material_id, callback_query.from_user.id, type='material_id')
+
+        if result:
+        
+            # Добавляем рейтинг пользователю, который опубликовал совет
+            await add_user_rating_history(
+                advice_id='None',
+                material_id=str(material_id),
+                id_user=user_material,
+                granted_by=callback_query.from_user.id,
+                accrual_date=accrual_date,
+                action_type=action_type + '_material',
+                rating_value=rating_value
+            )
+
+            # Добавлеяем лайк или дизлайк на совет
+            if action_type == "like_material":
+                await like_material(material_id)
+            if action_type == "dislike_material":
+                await dislike_material(material_id)
+
+            # Отправляем сообщение пользователю, который опубликовал совет
+            await callback_query.bot.send_message(
+                chat_id=user_material,
+                text = (
+                    f"🎉<b>Вы получили {'👍 лайк' if action_type == 'like_material' else '👎 дизлайк'} от пользователя ID: {callback_query.from_user.id}!</b>\n\n"
+                    f"{'📈 Ваш рейтинг повысился на 2 балла!' if action_type == 'like_material' else '📉 Ваш рейтинг понизился на 2 балла!'}\n\n"
+                    "Спасибо за вклад в сообщество и продолжайте делиться материалами! 🚀"
+                ),
+                parse_mode="HTML"
+            )
+        else:
+            if int(user_id) != int(user_material):
+                await callback_query.answer(f"Вы уже оставляли свой отзыв для этого материала!")
+            else:
+                await callback_query.answer(f"Вы не можете оценить свой же материал!")
+        
+        if callback_query.message.reply_markup:
+            await callback_query.message.edit_reply_markup()
+    else:
+        await callback_query.answer(response_message)
 
 # Обработчик кнопки "◀️ Назад"
 @router.callback_query(lambda c: c.data == "back")

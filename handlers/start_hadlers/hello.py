@@ -31,7 +31,6 @@ async def start_handler(message: Message, state: FSMContext):
     welcome_message = f"Добро пожаловать!{' Вы пришли по реферальной ссылке от пользователя с ID: ' + referrer_id if referrer_id != 'None' else ''}"
     await message.answer(welcome_message)
 
-
     # Отправляем документ с соглашением
     await message.bot.send_document(
         chat_id=message.from_user.id,

@@ -132,8 +132,8 @@ async def create_materials():
                 topic TEXT,
                 description_material TEXT,
                 files_id TEXT,
-                like_advice TEXT,
-                dislike_advice TEXT
+                like_material TEXT,
+                dislike_material TEXT
             )
         ''')
         await db.commit()

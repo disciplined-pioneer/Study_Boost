@@ -26,8 +26,8 @@ async def handle_period_buttons(message: types.Message):
         period = period_map[message.text]
         events_text = await get_events_by_period(period)
         
-        await message.answer(events_text, reply_markup=events_menu, parse_mode="HTML")
+        await message.reply(events_text, reply_markup=events_menu, parse_mode="HTML")
     
     else:
-        await message.answer(response_message)
+        await message.reply(response_message)
 

@@ -131,7 +131,7 @@ async def add_event(ID_user: int, date_publication: date, place: str, event_date
 
 # Добавление материалов
 async def add_material(ID_user: int, date_publication: date, faculty: str, course: str, subject: str, type_material: str, 
-                       topic: str, description_material: str, files_id: str, like_advice: str = "0", dislike_advice: str = "0"):
+                       topic: str, description_material: str, files_id: str, like_material: str = "0", dislike_material: str = "0"):
     database_path = 'database/data/materials.db'
     
     async with aiosqlite.connect(database_path) as db:
@@ -146,12 +146,12 @@ async def add_material(ID_user: int, date_publication: date, faculty: str, cours
                 topic, 
                 description_material, 
                 files_id, 
-                like_advice, 
-                dislike_advice
+                like_material, 
+                dislike_material
             )
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (ID_user, date_publication, faculty, course, subject, type_material, 
-              topic, description_material, files_id, like_advice, dislike_advice))
+              topic, description_material, files_id, like_material, dislike_material))
         
         await db.commit()
 

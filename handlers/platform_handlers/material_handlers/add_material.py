@@ -28,16 +28,16 @@ async def process_add_material(message: types.Message, state: FSMContext):
     can_use, response_message = await can_use_feature(user_id)
 
     if can_use:
-        await message.answer(
+        await message.reply(
         "❌ Чтобы завершить процесс добавления материала, нажмите кнопку *«Отменить состояние»*. \n\n",
         reply_markup=cancel_state,
         parse_mode="Markdown")
         time.sleep(1.5)
         
-        await message.answer('Вы выбрали добавление материала. Пожалуйста, укажите факультет.\nПример: "Информатика и вычислительная техника"', reply_markup=cancel_state)
+        await message.reply('Вы выбрали добавление материала. Пожалуйста, укажите факультет.\nПример: "Информатика и вычислительная техника"', reply_markup=cancel_state)
         await state.set_state(MaterialStates.faculty)
     else:
-        await message.answer(response_message)
+        await message.reply(response_message)
 
 # Обработчик для ввода факультета
 @router.message(MaterialStates.faculty)
@@ -243,7 +243,9 @@ async def finish_process(message: types.Message, state: FSMContext):
         type_material=data.get('type_material'),
         topic=data.get('topic'),
         description_material=data.get('description_material'),
-        files_id=str(data.get('files'))
+        files_id=str(data.get('files')),
+        like_material='0',
+        dislike_material='0'
     )
 
     files = data.get('files', [])  # Получаем общий список файлов

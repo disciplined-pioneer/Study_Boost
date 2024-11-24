@@ -5,6 +5,7 @@ from aiogram.types import Message
 
 from keyboards.registration_keyb import registration_menu
 from database.requests.user_search import count_referrals
+from database.requests.user_access import can_use_feature
 from handlers.commands_handlers.commands_handlers import user_rating, fetch_user_data, get_top_10_users, user_subscription, payment_information
 
 router = Router()
@@ -25,7 +26,7 @@ async def top_users(message: Message):
             text += f"{medal} <b>Место {i}:</b> Пользователь ID: {user_id} — Рейтинг: <b>{rating:.1f}</b>\n"
 
     # Отправляем сообщение
-    await message.answer(text, parse_mode="HTML")
+    await message.reply(text, parse_mode="HTML")
 
 # Вывод рейтинга пользователя
 @router.message(lambda message: message.text == '/my_rating')
@@ -45,7 +46,7 @@ async def my_rating(message: Message):
             "💪 Не упустите возможность заработать баллы! Участвуйте в активности!"
         )
 
-    await message.answer(response, parse_mode='HTML')
+    await message.reply(response, parse_mode='HTML')
 
 # Вывод информации о пользователе
 @router.message(lambda message: message.text == '/my_data')
@@ -68,22 +69,29 @@ async def my_data(message: Message):
     else:
         response_text = "❌ <b>Данные о пользователе не найдены.</b>"
 
-    await message.answer(response_text, parse_mode='HTML')
+    await message.reply(response_text, parse_mode='HTML')
 
 # Вывод реферальной ссылки
 @router.message(lambda message: message.text == '/referal_link')
 async def referral_handler(message: Message):
-    user_id = message.from_user.id  # Уникальный идентификатор пользователя
-    referral_link = f"https://t.me/StudyBoost_bot?start={user_id}"
     
-    await message.answer(
-        f"🔗 <b>Ваша персональная реферальная ссылка:</b>\n{referral_link}\n\n"
-        "💬 Отправьте эту ссылку своим друзьям! Если они перейдут по ней и начнут использовать бота, "
-        "вы получите следующие бонусы:\n\n"
-        "1️⃣ <b>+5 баллов к вашему рейтингу</b> за каждого нового реферала 📈\n"
-        "2️⃣ <b>Бесплатная подписка НАВСЕГДА</b> при достижении 10 рефералов 🆓\n\n"
-        "Станьте топ-пользователем и наслаждайтесь всеми преимуществами!"
-    , parse_mode="HTML")
+    user_id = message.from_user.id
+    can_use, response_message = await can_use_feature(user_id)
+
+    if can_use:
+        user_id = message.from_user.id  # Уникальный идентификатор пользователя
+        referral_link = f"https://t.me/StudyBoost_bot?start={user_id}"
+        
+        await message.reply(
+            f"🔗 <b>Ваша персональная реферальная ссылка:</b>\n{referral_link}\n\n"
+            "💬 Отправьте эту ссылку своим друзьям! Если они перейдут по ней и начнут использовать бота, "
+            "вы получите следующие бонусы:\n\n"
+            "1️⃣ <b>+5 баллов к вашему рейтингу</b> за каждого нового реферала 📈\n"
+            "2️⃣ <b>Бесплатная подписка НАВСЕГДА</b> при достижении 10 рефералов 🆓\n\n"
+            "Станьте топ-пользователем и наслаждайтесь всеми преимуществами!"
+        , parse_mode="HTML")
+    else:
+        await message.reply('Похоже, вы еще не зарегистрированы. Пройдите регистрацию, чтобы получить свою реферальную ссылку!')
 
 # Вывод количества рефералом пользователя
 @router.message(lambda message: message.text == '/my_referal')
@@ -91,7 +99,7 @@ async def referral_handler(message: Message):
     user_id = message.from_user.id
     referral_count = await count_referrals(user_id)  # Функция для подсчета рефералов
     
-    await message.answer(
+    await message.reply(
         f"👥 <b>Количество ваших рефералов на данный момент:</b> <u>{referral_count}</u>\n\n"
         "📢 <b>Преимущества реферальной программы:</b>\n\n"
         "1️⃣ За каждого нового реферала вы получаете <b>+5 баллов</b> к вашему рейтингу 📈\n"
@@ -109,7 +117,7 @@ async def subscription_status(message: Message):
     
     # Если подписка не найдена
     if not subscription_data:
-        await message.answer("Вы не были найден в базе данных. Пожалуйста, пройдите регистрацию")
+        await message.reply("Вы не были найден в базе данных. Пожалуйста, пройдите регистрацию")
         return
 
     # Получаем статус подписки
@@ -118,7 +126,7 @@ async def subscription_status(message: Message):
 
     # Если информация об оплате не найдена
     if not payment_data:
-        await message.answer("Информация о вашей оплате не найдена. Пожалуйста, свяжитесь с поддержкой")
+        await message.reply("Информация о вашей оплате не найдена. Пожалуйста, свяжитесь с поддержкой")
         return
 
     # Получаем дату оплаты и окончания подписки
@@ -134,12 +142,12 @@ async def subscription_status(message: Message):
         f"⏳ <b>Осталось дней до окончания:</b> {days_left} дней"
     )
 
-    await message.answer(response_message, parse_mode='HTML')
+    await message.reply(response_message, parse_mode='HTML')
 
 # Вывод реферальной ссылки
 @router.message(lambda message: message.text == '/cancellation')
 async def cancellation_handler(message: Message):
-    await message.answer(
+    await message.reply(
             'Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊',
             reply_markup=registration_menu
         )
