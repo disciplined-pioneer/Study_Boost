@@ -3,11 +3,11 @@ from datetime import datetime, timedelta
 from aiogram import Router, F, Bot
 from aiogram.types import CallbackQuery
 
-from keyboards.admin_keyb import subscription_menu
-from keyboards.platform_keyb import platform_menu
 from handlers.start_hadlers.register_handlers import new_users
+from keyboards.platform_keyb import platform_menu
+from keyboards.admin_keyb import subscription_menu, subscription_menu_two
 
-from database.requests.user_search import count_referrals
+from database.requests.user_search import count_referrals, count_users
 from database.handlers.database_handler import add_user_rating_history
 from database.handlers.database_handler import register_user, add_subscription_status, add_payment
 
@@ -21,7 +21,8 @@ async def access(callback: CallbackQuery, bot: Bot):
     message_id = callback.message.message_id
 
     # Редактируем текущее сообщение, заменяя только клавиатуру
-    await bot.edit_message_reply_markup(chat_id=admin_id, message_id=message_id, reply_markup=subscription_menu)
+    keyb = subscription_menu if await count_users() <= 55 else subscription_menu_two 
+    await bot.edit_message_reply_markup(chat_id=admin_id, message_id=message_id, reply_markup=keyb)
     await callback.answer()
 
 # Функция для получения информации о пользователе

@@ -1,3 +1,4 @@
+import time
 from datetime import datetime
 
 from aiogram import Router, F
@@ -21,6 +22,13 @@ async def start_add_event(message: Message, state: FSMContext):
     can_use, response_message = await can_use_feature(user_id)
     
     if can_use:
+
+        await message.reply(
+        "❌ Чтобы завершить процесс добавления мероприятия, нажмите кнопку *«Отменить ❌»*. \n\n",
+        reply_markup=events_menu,
+        parse_mode="Markdown")
+        time.sleep(1)
+
         await state.update_data(ID_user=user_id, date_publication=datetime.now().date())
         await message.reply(
             "📅 <b>Введите дату проведения мероприятия</b>\n\n"

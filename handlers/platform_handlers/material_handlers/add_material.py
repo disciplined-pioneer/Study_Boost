@@ -29,10 +29,10 @@ async def process_add_material(message: types.Message, state: FSMContext):
 
     if can_use:
         await message.reply(
-        "❌ Чтобы завершить процесс добавления материала, нажмите кнопку *«Отменить состояние»*. \n\n",
-        reply_markup=cancel_state,
+        "❌ Чтобы завершить процесс добавления материала, нажмите кнопку *«Отменить ❌»»*. \n\n",
+        reply_markup=material_menu,
         parse_mode="Markdown")
-        time.sleep(1.5)
+        time.sleep(1)
         
         await message.reply('Вы выбрали добавление материала. Пожалуйста, укажите факультет.\nПример: "Информатика и вычислительная техника"', reply_markup=cancel_state)
         await state.set_state(MaterialStates.faculty)

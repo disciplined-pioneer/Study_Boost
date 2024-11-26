@@ -1,3 +1,4 @@
+import time
 from datetime import datetime
 
 from aiogram import Router, F
@@ -37,13 +38,19 @@ async def category_selected(callback: CallbackQuery, state: FSMContext):
 
         if can_use:
 
+            await callback.answer()
+            await callback.message.reply(
+            "❌ Чтобы завершить процесс добавления совета, нажмите кнопку *«Отменить ❌»*. \n\n",
+            reply_markup=advice_menu,
+            parse_mode="Markdown")
+            time.sleep(1)
+
             # Сохранение выбранной категории в состояние
             selected_category = callback.data
             await state.update_data(category_advice=selected_category)
 
             # Ответ пользователю и завершение обработки
             await callback.message.reply("Пожалуйста, введите текст вашего совета:", reply_markup=cancel_state)
-            await callback.answer()
             await state.set_state(AdviсeStates.category_advice)
 
         else:

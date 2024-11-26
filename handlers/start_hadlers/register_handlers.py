@@ -36,7 +36,7 @@ async def start_registration(message: Message, state: FSMContext):
         parse_mode="Markdown"
     )
 
-    time.sleep(3)
+    time.sleep(1)
     await message.answer('Пожалуйста, укажите ваше имя: ', reply_markup=cancel_state)
     await state.set_state(RegistrationStates.name)
 

@@ -19,6 +19,16 @@ subscription_menu = InlineKeyboardMarkup(
     ]
 )
 
+subscription_menu_two = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [InlineKeyboardButton(text='Unlimited', callback_data='subscription_unlimited')],
+        [InlineKeyboardButton(text='Three-Month Subscription', callback_data='subscription_three_month')],
+        [InlineKeyboardButton(text='Basic Two-Month Subscription', callback_data='subscription_basic_two_month')],
+        [InlineKeyboardButton(text='Basic Monthly Subscription', callback_data='subscription_basic_month')],
+        [InlineKeyboardButton(text='Отказать в доступе ❌', callback_data='no_access')]
+    ]
+)
+
 # Клавиатура с причинами отказа
 deny_access_menu = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text="Некорректный формат данных", callback_data="deny_format")],
