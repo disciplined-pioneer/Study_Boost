@@ -11,10 +11,11 @@ from states.help_suggestion_state import SuggestionsStates
 from keyboards.platform_keyb import platform_menu
 from keyboards.cancellation_states import cancel_state
 
-from database.requests.user_access import can_use_feature
-from database.handlers.database_handler import add_help_suggestion
 
 from NI_assistants.sentiment_text import analyze_sentiment
+from database.requests.user_access import can_use_feature
+from database.requests.user_search import check_user_registration
+from database.handlers.database_handler import add_help_suggestion
 
 router = Router()
 
@@ -75,10 +76,19 @@ async def suggestions_content_handler(message: Message, state: FSMContext):
 @router.message(F.text == 'Помощь ❓')
 async def help_handler(message: Message, state: FSMContext):
 
-    # Переходим в состояние "content", где пользователь будет вводить свой запрос
-    await state.set_state(HelpStates.content)
-    await message.reply('Пожалуйста, опишите проблему, с которой вы столкнулись⚠️ \n\nНаш администратор свяжется с вами для уточнения и решения вашего вопроса!',
-                reply_markup=cancel_state)
+     # Проверка наличия пользователя в БД
+    user_id = message.from_user.id
+    result, _ = await check_user_registration(user_id)
+    
+    if result:
+
+        # Переходим в состояние "content", где пользователь будет вводить свой запрос
+        await state.set_state(HelpStates.content)
+        await message.reply('Пожалуйста, опишите проблему, с которой вы столкнулись⚠️ \n\nНаш администратор свяжется с вами для уточнения и решения вашего вопроса!',
+                    reply_markup=cancel_state)
+
+    else:
+        await message.reply('Вы не были зарегистрированы! Пожалуйста, зарегистрируйтесь и попробуйте снова, нажав на кнопку "Регистрация 📝"!')
 
 @router.message(HelpStates.content)
 async def help_content_handler(message: Message, state: FSMContext):

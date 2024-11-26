@@ -45,7 +45,7 @@ async def process_callback_advice(callback_query: CallbackQuery):
             await callback_query.message.answer("К сожалению, нет доступных советов по этой категории")
         else:
             await callback_query.message.answer(
-                f"Совет №{random_advice['advice_id']} от пользователя ID_{random_advice['ID_user']}: \n✍️ «{random_advice['content']}»\n\nРейтинг совета: {random_advice['like_advice']} 👍 | 👎 {random_advice['dislike_advice']}",
+                f"Совет №{random_advice['advice_id']} от пользователя ID_{random_advice['ID_user']}: \n\n✍️ «{random_advice['content']}»\n\nРейтинг совета: {random_advice['like_advice']} 👍 | 👎 {random_advice['dislike_advice']}",
                 reply_markup=grade_keyboard
             )
         await callback_query.answer()

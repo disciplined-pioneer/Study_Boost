@@ -27,7 +27,7 @@ async def instruction_handler(message: Message):
     # Отправляем документ
     await message.bot.send_document(
         chat_id=message.from_user.id,
-        document='BQACAgIAAxkBAAIQJWb-yNqpCOhKkViHeQp96c48vuHgAAKEaAAC1Tr5Sz35edJ2tLeBNgQ',
+        document='BQACAgIAAxkBAAJIFWdFmTZGtceue6YobNoRyuXtqzLkAAIrZwACH6MpSp7JeUtiwRbUNgQ',
         caption = f'Инструкция содержит подробное описание всех функций платформы, пошаговое руководство по регистрации и использованию бота, а также примеры обмена учебными материалами и заработка очков за активность',
     )
 
