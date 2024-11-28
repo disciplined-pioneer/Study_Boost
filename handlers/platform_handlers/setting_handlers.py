@@ -40,7 +40,8 @@ async def suggestions_handler(message: Message, state: FSMContext):
     user_id = message.from_user.id
     can_use, response_message = await can_use_feature(user_id)
 
-    if can_use:
+    if can_use > 0:
+
         # Переходим в состояние "content", где пользователь будет вводить свой запрос
         await state.set_state(SuggestionsStates.content)
         await message.reply('Пожалуйста, поделитесь вашим предложением или идеей💡 \n\nВаши мысли важны для нас, и мы обязательно рассмотрим их для улучшения нашего сервиса!', reply_markup=cancel_state)
@@ -76,19 +77,10 @@ async def suggestions_content_handler(message: Message, state: FSMContext):
 @router.message(F.text == 'Помощь ❓')
 async def help_handler(message: Message, state: FSMContext):
 
-     # Проверка наличия пользователя в БД
-    user_id = message.from_user.id
-    result, _ = await check_user_registration(user_id)
-    
-    if result:
-
-        # Переходим в состояние "content", где пользователь будет вводить свой запрос
-        await state.set_state(HelpStates.content)
-        await message.reply('Пожалуйста, опишите проблему, с которой вы столкнулись⚠️ \n\nНаш администратор свяжется с вами для уточнения и решения вашего вопроса!',
-                    reply_markup=cancel_state)
-
-    else:
-        await message.reply('Вы не были зарегистрированы! Пожалуйста, зарегистрируйтесь и попробуйте снова, нажав на кнопку "Регистрация 📝"!')
+    # Переходим в состояние "content", где пользователь будет вводить свой запрос
+    await state.set_state(HelpStates.content)
+    await message.reply('Пожалуйста, опишите проблему, с которой вы столкнулись⚠️ \n\nНаш администратор свяжется с вами для уточнения и решения вашего вопроса!',
+                reply_markup=cancel_state)
 
 @router.message(HelpStates.content)
 async def help_content_handler(message: Message, state: FSMContext):
@@ -111,10 +103,4 @@ async def help_content_handler(message: Message, state: FSMContext):
 @router.message(F.text == "Назад 🔙")
 async def back_handler(message: types.Message):
 
-    user_id = message.from_user.id
-    can_use, response_message = await can_use_feature(user_id)
-
-    if can_use:
-        await message.reply(f'Вы вернулись в главное меню 😊', reply_markup=platform_menu)
-    else:
-        await message.reply(response_message)
+    await message.reply(f'Вы вернулись в главное меню 😊', reply_markup=platform_menu)

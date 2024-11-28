@@ -22,7 +22,7 @@ async def start_add(message: Message, state: FSMContext):
     user_id = message.from_user.id
     can_use, response_message = await can_use_feature(user_id)
 
-    if can_use:
+    if can_use == 2:
         await message.reply("Пожалуйста, выберите категорию:", reply_markup=category_keyboard)
     else:
         await message.answer(response_message)
@@ -36,7 +36,7 @@ async def category_selected(callback: CallbackQuery, state: FSMContext):
         user_id = callback.from_user.id
         can_use, response_message = await can_use_feature(user_id)
 
-        if can_use:
+        if can_use == 2:
 
             await callback.answer()
             await callback.message.reply(
@@ -54,7 +54,7 @@ async def category_selected(callback: CallbackQuery, state: FSMContext):
             await state.set_state(AdviсeStates.category_advice)
 
         else:
-            await callback.answer(response_message)
+            await callback.message.answer(response_message)
     else:
         await state.clear()
         await callback.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊', reply_markup=advice_menu)

@@ -60,11 +60,6 @@ async def my_data(message: Message):
             f"\n<b>ID пользователя:</b> {user_info['ID_user']}\n"
             f"\n<b>Telegram:</b> {user_info['telegram']}\n"
             f"\n<b>ID Реферала:</b> {user_info['referrer_id'] or 'Нет'}\n"
-            f"\n<b>Имя:</b> {user_info['name_user']}\n"
-            f"\n<b>Город университета:</b> {user_info['city_university'] or 'Не указано'}\n"
-            f"\n<b>Название университета:</b> {user_info['name_university'] or 'Не указано'}\n"
-            f"\n<b>Факультет:</b> {user_info['faculty'] or 'Не указано'}\n"
-            f"\n<b>Курс:</b> {user_info['course'] or 'Не указано'}\n"
         )
     else:
         response_text = "❌ <b>Данные о пользователе не найдены.</b>"
@@ -78,7 +73,7 @@ async def referral_handler(message: Message):
     user_id = message.from_user.id
     can_use, response_message = await can_use_feature(user_id)
 
-    if can_use:
+    if can_use > 1:
         user_id = message.from_user.id  # Уникальный идентификатор пользователя
         referral_link = f"https://t.me/StudyBoost_bot?start={user_id}"
         
@@ -91,7 +86,7 @@ async def referral_handler(message: Message):
             "Станьте топ-пользователем и наслаждайтесь всеми преимуществами!"
         , parse_mode="HTML")
     else:
-        await message.reply('Похоже, вы еще не зарегистрированы. Пройдите регистрацию, чтобы получить свою реферальную ссылку!')
+        await message.reply(response_message)
 
 # Вывод количества рефералом пользователя
 @router.message(lambda message: message.text == '/my_referal')

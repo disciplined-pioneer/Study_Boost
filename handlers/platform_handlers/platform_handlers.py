@@ -5,51 +5,25 @@ from keyboards.advice_keyb import advice_menu
 from keyboards.events_keyb import events_menu
 from keyboards.platform_keyb import settings_menu
 from keyboards.material_keyb import material_menu
-
-from database.requests.user_access import can_use_feature
+from keyboards.registration_keyb import registration_menu
 
 router = Router()
 
-@router.message(F.text == "Советы 🦉")
-async def adviсe_handler(message: types.Message):
-
-    user_id = message.from_user.id
-    can_use, response_message = await can_use_feature(user_id)
-
-    if can_use:
-        await message.reply(f'Выберите одну из опций ниже: ', reply_markup=advice_menu)
-    else:
-        await message.reply(response_message)
-
-@router.message(F.text == "Материалы 📔")
-async def materials_handler(message: types.Message):
-
-    user_id = message.from_user.id
-    can_use, response_message = await can_use_feature(user_id)
-
-    if can_use:
-        await message.reply(f'Выберите одну из опций ниже: ', reply_markup=material_menu)
-    else:
-        await message.reply(response_message)
-
-@router.message(F.text == "Мероприятия 🎉")
-async def events_handler(message: types.Message):
-
-    user_id = message.from_user.id
-    can_use, response_message = await can_use_feature(user_id)
-
-    if can_use:
-        await message.reply("Выберите одну из опций ниже:", reply_markup=events_menu)
-    else:
-        await message.reply(response_message)
+@router.message(F.text.in_(["Советы 🦉", "Материалы 📔", "Мероприятия 🎉"]))
+async def general_handler(message: types.Message):
+    menus = {
+        "Советы 🦉": advice_menu,
+        "Материалы 📔": material_menu,
+        "Мероприятия 🎉": events_menu
+    }
+    await message.reply("Выберите одну из опций ниже:", reply_markup=menus.get(message.text))
 
 @router.message(F.text == "Настройки ⚙️")
-async def events_handler(message: types.Message):
+async def setting_handler(message: types.Message):
 
-    user_id = message.from_user.id
-    can_use, response_message = await can_use_feature(user_id)
+    await message.reply(f'Вы перешли в настройки платформы ⚙️', reply_markup=settings_menu)
 
-    if can_use:
-        await message.reply(f'Вы перешли в настройки платформы ⚙️', reply_markup=settings_menu)
-    else:
-        await message.reply(response_message)
+@router.message(F.text == 'Меню оплаты ◀️')
+async def back_menu_handler(message: types.Message):
+
+    await message.reply(f'Вы вернулись в меню регистрации 🙂', reply_markup=registration_menu)

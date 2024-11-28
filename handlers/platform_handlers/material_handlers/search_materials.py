@@ -10,7 +10,6 @@ from aiogram.fsm.context import FSMContext
 
 from keyboards.material_keyb import material_menu
 from keyboards.cancellation_states import cancel_state
-from keyboards.material_keyb import grade_material_keyboard
 
 from states.material_state import View_materials
 from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
@@ -29,25 +28,19 @@ user_results = {}
 
 @router.message(F.text == 'Поиск материалов 🔍')
 async def send_welcome(message: types.Message, state: FSMContext):
-    user_id = message.from_user.id
-    can_use, response_message = await can_use_feature(user_id)
 
-    if can_use:
-        text = (
-            "🔎 <b>Поиск материалов</b>\n\n"
-            "Введите <i>ключевое слово</i> или <i>фразу</i>, чтобы найти подходящий материал.\n\n"
-            "📚 <b>Примеры:</b>\n"
-            "— математика\n"
-            "— программирование\n"
-            "— 1 курс\n\n"
-            "✨ Мы найдём все материалы, соответствующие вашему запросу!"
-        )
+    text = (
+        "🔎 <b>Поиск материалов</b>\n\n"
+        "Введите <i>ключевое слово</i> или <i>фразу</i>, чтобы найти подходящий материал.\n\n"
+        "📚 <b>Примеры:</b>\n"
+        "— математика\n"
+        "— программирование\n"
+        "— 1 курс\n\n"
+        "✨ Мы найдём все материалы, соответствующие вашему запросу!"
+    )
 
-        await message.reply(text, reply_markup=cancel_state, parse_mode="HTML")
-        await state.set_state(View_materials.keyword)
-        
-    else:
-        await message.answer(response_message)
+    await message.reply(text, reply_markup=cancel_state, parse_mode="HTML")
+    await state.set_state(View_materials.keyword)
 
 @router.message(View_materials.keyword)
 async def search_materials(message: types.Message, state: FSMContext):
@@ -108,7 +101,7 @@ async def material_id(callback_query: CallbackQuery, state: FSMContext):
     # Клавиатура с кнопками "🔑 Скачать" и "◀️ Назад"
     download_menu = InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text='🔑 Скачать', callback_data=f'download:{material_id}')],
+            [InlineKeyboardButton(text='🔑 Скачать ZIP файл', callback_data=f'download:{material_id}'), InlineKeyboardButton(text='🗝 Вывести в чат', callback_data=f'download_chat:{material_id}')],
             [InlineKeyboardButton(text='◀️ Назад', callback_data='back')]
         ]
     )
@@ -132,111 +125,192 @@ async def material_id(callback_query: CallbackQuery, state: FSMContext):
 
     await state.update_data(topic=element['topic'])
 
-# Обработчик скачивания
+
+# Обработчик скачивания ZIP файлов
 @router.callback_query(lambda c: c.data.startswith("download:"))
 async def download_material(callback_query: CallbackQuery, state: FSMContext):
 
-    data = await state.get_data()
-    bot = callback_query.bot
-    user_id = str(callback_query.from_user.id) 
-    material_id = int(callback_query.data.split(':')[-1])
-    
-    # Получаем список файлов из БД
-    files_data_text = await get_file_id_material(material_id)  # Здесь ваш метод получения данных из БД
-    files_data = json.loads(files_data_text.replace("'", '"'))
-    file_ids = [item['file_id'] for item in files_data]  # Извлекаем только file_id
-    
-    # Создаём временную папку для хранения файлов
-    user_folder = f"temp_zip/{user_id}"
-    os.makedirs(user_folder, exist_ok=True)
-    zip_filename = f"{user_folder}/{data['topic']}.zip"
+    user_id = callback_query.from_user.id
+    can_use, response_message = await can_use_feature(int(user_id))
+    await callback_query.message.edit_reply_markup(reply_markup=None)
 
-    # Загружаем файлы и создаём ZIP-архив
-    with zipfile.ZipFile(zip_filename, 'w') as zipf:
-        for idx, file_id in enumerate(file_ids):
-            file = await bot.get_file(file_id)  # Получаем файл с сервера Telegram
-            local_file_path = os.path.join(user_folder, f"file_{idx}.{file.file_path.split('.')[-1]}")
-            await bot.download_file(file.file_path, local_file_path)  # Загружаем файл
-            
-            zipf.write(local_file_path, f"file_{idx}.{file.file_path.split('.')[-1]}")  # Добавляем в архив
-            os.remove(local_file_path)  # Удаляем временный файл после добавления в архив
+    if can_use == 2:
 
-    # Отправляем архив пользователю
-    document = FSInputFile(zip_filename)
-    caption_text = (
-        f"Ваши материалы успешно обработаны 📂\n\n"
-        f"Файлы сохранены в архиве под ID: {material_id}. Благодарим за использование нашего сервиса!\n"
-        "Не забудьте оценить материал — это поможет нам стать лучше. 😊"
-    )
-    await callback_query.message.answer_document(document, caption=caption_text, reply_markup=grade_material_keyboard)
-    await callback_query.message.answer(
-        "Выберите дальнейшее действие:",
-        reply_markup=material_menu 
-    )
+        data = await state.get_data()
+        bot = callback_query.bot
+        user_id = str(callback_query.from_user.id) 
+        material_id = int(callback_query.data.split(':')[-1])
+        
+        # Получаем список файлов из БД
+        files_data_text = await get_file_id_material(material_id)  # Здесь ваш метод получения данных из БД
+        files_data = json.loads(files_data_text.replace("'", '"'))
+        file_ids = [item['file_id'] for item in files_data]  # Извлекаем только file_id
+        
+        # Создаём временную папку для хранения файлов
+        user_folder = f"temp_zip/{user_id}"
+        os.makedirs(user_folder, exist_ok=True)
+        zip_filename = f"{user_folder}/{data['topic']}.zip"
+
+        # Загружаем файлы и создаём ZIP-архив
+        with zipfile.ZipFile(zip_filename, 'w') as zipf:
+            for idx, file_id in enumerate(file_ids):
+                file = await bot.get_file(file_id)  # Получаем файл с сервера Telegram
+                local_file_path = os.path.join(user_folder, f"file_{idx}.{file.file_path.split('.')[-1]}")
+                await bot.download_file(file.file_path, local_file_path)  # Загружаем файл
+                
+                zipf.write(local_file_path, f"file_{idx}.{file.file_path.split('.')[-1]}")  # Добавляем в архив
+                os.remove(local_file_path)  # Удаляем временный файл после добавления в архив
+
+        # Отправляем архив пользователю
+        document = FSInputFile(zip_filename)
+        caption_text = (
+            f"Ваши материалы успешно обработаны 📂\n\n"
+            f"Файлы сохранены в архиве под ID: {material_id}. Благодарим за использование нашего сервиса!\n"
+            "Не забудьте оценить материал — это поможет нам стать лучше. 😊"
+        )
+
+        grade_material_keyboard = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [InlineKeyboardButton(text='👍', callback_data=f'like_material:{material_id}'), InlineKeyboardButton(text='👎', callback_data=f'dislike_material:{material_id}')]
+            ]
+        )
+        
+        await callback_query.message.answer_document(document, caption=caption_text, reply_markup=grade_material_keyboard)
+        await callback_query.message.answer(
+            "Выберите дальнейшее действие:",
+            reply_markup=material_menu 
+        )
+        
+        # Удаляем временные данные
+        os.remove(zip_filename)
+        os.rmdir(user_folder)
+
+        await state.clear()
+        await callback_query.answer()
+    else:
+        await callback_query.message.answer(response_message, reply_markup=material_menu)
+        await callback_query.answer()
+        await state.clear()
+
+# Обработчик вывода в чат
+@router.callback_query(lambda c: c.data.startswith('download_chat:'))
+async def download_material_chat(callback_query: CallbackQuery, state: FSMContext):
+
+    user_id = callback_query.from_user.id
+    can_use, response_message = await can_use_feature(user_id)
+    await callback_query.message.edit_reply_markup(reply_markup=None)
+
+    if can_use == 2:
+        bot = callback_query.bot
+        user_id = str(callback_query.from_user.id) 
+        material_id = int(callback_query.data.split(':')[-1])
+        
+        # Получаем список файлов из БД
+        files_data_text = await get_file_id_material(material_id)  # Здесь ваш метод получения данных из БД
+        files_data = json.loads(files_data_text.replace("'", '"'))
+        file_ids = [item['file_id'] for item in files_data]  # Извлекаем только file_id
+        
+        # Отправляем данные
+        for media_id in file_ids:
+            file = await bot.get_file(media_id)
+            file_path = file.file_path
+
+            # Локальное имя файла для сохранения
+            local_file_path = f"downloads/{media_id}.jpg"
+            os.makedirs("downloads", exist_ok=True)  # Создаем папку, если ее нет
+
+            # Скачиваем файл на сервер и отправляем его
+            await bot.download_file(file_path, destination=local_file_path)
+            document = FSInputFile(local_file_path)
+            await bot.send_document(chat_id=user_id, document=document)
+
+            # Удаляем локальный файл
+            os.remove(local_file_path)
+            await callback_query.answer()
+
+        caption_text = (
+                f"Ваши материалы успешно обработаны 📂\n\n"
+                f"Файлы сохранены в архиве под ID: {material_id}. Благодарим за использование нашего сервиса!\n"
+                "Не забудьте оценить материал — это поможет нам стать лучше. 😊"
+            )
+        
+        grade_material_keyboard = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [InlineKeyboardButton(text='👍', callback_data=f'like_material:{material_id}'), InlineKeyboardButton(text='👎', callback_data=f'dislike_material:{material_id}')]
+            ]
+        )
+
+        await callback_query.message.answer(
+            caption_text,
+            reply_markup=grade_material_keyboard
+        )
+
+        await callback_query.message.answer(
+            "Выберите дальнейшее действие:",
+            reply_markup=material_menu 
+        )
+        await state.clear()
+    else:
+        await callback_query.message.answer(response_message, reply_markup=material_menu)
+        await callback_query.answer()
+        await state.clear()
     
-    # Удаляем временные данные
-    os.remove(zip_filename)
-    os.rmdir(user_folder)
-
-    await callback_query.answer()
-    await state.clear()
 
 # Обработчик нажатия на кнопки для лайка и дизлайка
-@router.callback_query(lambda c: c.data in ['like_material', 'dislike_material'])
+@router.callback_query(lambda c: c.data.startswith('like_material:') or c.data.startswith('dislike_material:'))
 async def process_rating_callback(callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     can_use, response_message = await can_use_feature(user_id)
 
-    if can_use:
+    if can_use == 2:
 
-        action_type = callback_query.data  # Получаем тип действия: "like_material" или "dislike_material"
+        temp = callback_query.data.split(":")
+        action_type = temp[0]
+        material_id = int(temp[1])
+
         accrual_date = datetime.now().date()
         rating_value = '2' if action_type == 'like_material' else '-2'  # Начисляем +2 за лайк и -2 за дизлайк
-
-        # Используем регулярное выражение для поиска ID и material_id
-        message_text = callback_query.message.caption
-        temp = re.search(r'ID:\s*(\d+)', message_text)
-        material_id = int(temp.group(1)) 
 
         # Обрабатываем действие пользователя
         user_material = await get_user_id_by_material_id(material_id)
         result = await check_rating_history(material_id, callback_query.from_user.id, type='material_id')
 
-        if result:
-        
-            # Добавляем рейтинг пользователю, который опубликовал совет
-            await add_user_rating_history(
-                advice_id='None',
-                material_id=str(material_id),
-                id_user=user_material,
-                granted_by=callback_query.from_user.id,
-                accrual_date=accrual_date,
-                action_type=action_type + '_material',
-                rating_value=rating_value
-            )
-
-            # Добавлеяем лайк или дизлайк на совет
-            if action_type == "like_material":
-                await like_material(material_id)
-            if action_type == "dislike_material":
-                await dislike_material(material_id)
-
-            # Отправляем сообщение пользователю, который опубликовал совет
-            await callback_query.bot.send_message(
-                chat_id=user_material,
-                text = (
-                    f"🎉<b>Вы получили {'👍 лайк' if action_type == 'like_material' else '👎 дизлайк'} от пользователя ID: {callback_query.from_user.id}!</b>\n\n"
-                    f"{'📈 Ваш рейтинг повысился на 2 балла!' if action_type == 'like_material' else '📉 Ваш рейтинг понизился на 2 балла!'}\n\n"
-                    "Спасибо за вклад в сообщество и продолжайте делиться материалами! 🚀"
-                ),
-                parse_mode="HTML"
-            )
+        if int(user_id) == int(user_material):
+            await callback_query.answer(f"Вы не можете оценить свой же материал!")
         else:
-            if int(user_id) != int(user_material):
-                await callback_query.answer(f"Вы уже оставляли свой отзыв для этого материала!")
+
+            if result:
+            
+                # Добавляем рейтинг пользователю, который опубликовал совет
+                await add_user_rating_history(
+                    advice_id='None',
+                    material_id=str(material_id),
+                    id_user=user_material,
+                    granted_by=callback_query.from_user.id,
+                    accrual_date=accrual_date,
+                    action_type=action_type + '_material',
+                    rating_value=rating_value
+                )
+
+                # Добавлеяем лайк или дизлайк на совет
+                if action_type == "like_material":
+                    await like_material(material_id)
+                if action_type == "dislike_material":
+                    await dislike_material(material_id)
+
+                # Отправляем сообщение пользователю, который опубликовал совет
+                await callback_query.bot.send_message(
+                    chat_id=user_material,
+                    text = (
+                        f"🎉<b>Вы получили {'👍 лайк' if action_type == 'like_material' else '👎 дизлайк'} от пользователя ID: {callback_query.from_user.id}!</b>\n\n"
+                        f"{'📈 Ваш рейтинг повысился на 2 балла!' if action_type == 'like_material' else '📉 Ваш рейтинг понизился на 2 балла!'}\n\n"
+                        "Спасибо за вклад в сообщество и продолжайте делиться материалами! 🚀"
+                    ),
+                    parse_mode="HTML"
+                )
             else:
-                await callback_query.answer(f"Вы не можете оценить свой же материал!")
-        
+                await callback_query.answer(f"Вы уже оставляли свой отзыв для этого материала!")
+            
         if callback_query.message.reply_markup:
             await callback_query.message.edit_reply_markup()
     else:

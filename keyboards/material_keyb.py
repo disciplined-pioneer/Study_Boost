@@ -16,7 +16,7 @@ type_material = ReplyKeyboardMarkup(
         [KeyboardButton(text='Домашняя работа 🏠')],
         [KeyboardButton(text='Контрольная работа 📝')],
         [KeyboardButton(text='Лабораторная работа 🔬')],
-        [KeyboardButton(text='Отменить состояние ❌')]
+        [KeyboardButton(text='Отменить ❌')]
     ],
     resize_keyboard=True  # Сделаем клавиатуру компактной
 )

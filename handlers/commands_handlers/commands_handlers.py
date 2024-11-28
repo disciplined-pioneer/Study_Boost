@@ -58,7 +58,7 @@ async def fetch_user_data(user_id):
     
     async with aiosqlite.connect(database_path) as db:
         async with db.execute('''
-            SELECT id, ID_user, telegram, referrer_id, name_user, city_university, name_university, faculty, course
+            SELECT id, ID_user, telegram, referrer_id
             FROM users
             WHERE ID_user = ?
         ''', (user_id,)) as cursor:
@@ -68,12 +68,7 @@ async def fetch_user_data(user_id):
                     "id": user_data[0],
                     "ID_user": user_data[1],
                     "telegram": user_data[2],
-                    "referrer_id": user_data[3],
-                    "name_user": user_data[4],
-                    "city_university": user_data[5],
-                    "name_university": user_data[6],
-                    "faculty": user_data[7],
-                    "course": user_data[8],
+                    "referrer_id": user_data[3]
                 }
             else:
                 return None  # Пользователь не найден

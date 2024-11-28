@@ -13,12 +13,6 @@ async def create_users_table():
                 ID_user INTEGER UNIQUE,
                 telegram TEXT UNIQUE,
                 referrer_id TEXT,
-                name_user TEXT,
-                city_university TEXT,
-                name_university TEXT,
-                faculty TEXT,
-                course TEXT,
-                ID_message INTEGER,
                 photo_payment TEXT
             )
         ''')

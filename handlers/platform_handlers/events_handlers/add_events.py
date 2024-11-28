@@ -21,7 +21,7 @@ async def start_add_event(message: Message, state: FSMContext):
     user_id = message.from_user.id
     can_use, response_message = await can_use_feature(user_id)
     
-    if can_use:
+    if can_use == 2:
 
         await message.reply(
         "❌ Чтобы завершить процесс добавления мероприятия, нажмите кнопку *«Отменить ❌»*. \n\n",

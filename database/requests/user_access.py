@@ -1,24 +1,18 @@
 from datetime import datetime
-from database.requests.user_search import check_user_registration, check_user_payment
+from database.requests.user_search import check_user_payment
 
 async def can_use_feature(user_id):
-
-    """Проверка регистрации пользователя и статуса подписки."""
-    result, _ = await check_user_registration(user_id)
-
-    if not result:
-        return False, 'Вы не были зарегистрированы! Пожалуйста, зарегистрируйтесь и попробуйте снова, нажав на кнопку "Регистрация 📝"!'
-
     user_payment = await check_user_payment(user_id)
-
     if not user_payment:
-        return False, 'Не найдены данные о платеже. Пожалуйста, свяжитесь с поддержкой.'
+        text = 'Эта функция недоступна. Для доступа оформите подписку по кнопке "Оплатить подписку 💳"'
+        return 0, text
 
-    expiration_date = user_payment[3]  # Предполагается, что expiration_date находится на 4-й позиции
-    now_date = datetime.now().date()
-    expiration_date = datetime.strptime(expiration_date, '%Y-%m-%d').date()
+    expiration_date = datetime.strptime(user_payment['expiration_date'], '%Y-%m-%d').date()
+    if expiration_date <= datetime.now().date():
+        text = 'Срок вашей подписки вышел! Вам доступен ограниченный функционал по кнопке ❌'
+        return 1, text
+    else:
+        text = 'Кажется, ваша подписка уже активна! Вы можете воспользоваться ботом, нажав кнопку "Войти в систему 🚪"'
+        return 2, text
 
-    if expiration_date <= now_date:
-        return False, 'Ваша подписка не оплачена! Пожалуйста, введите команду /start и войдите в систему, предоставим фото оплаты.'
-
-    return True, ''
+    

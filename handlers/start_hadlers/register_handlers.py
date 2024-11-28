@@ -13,87 +13,40 @@ from keyboards.registration_keyb import registration_menu
 
 from states.registration_state import RegistrationStates
 
-from database.requests.user_search import check_user_registration, count_users
+from database.requests.user_search import count_users
+from database.requests.user_access import can_use_feature
+from handlers.commands_handlers.commands_handlers import user_subscription
 
 # Хранение данных новых пользователей
 new_users = []
 router = Router()
 
 # Обработчик для начала регистрации
-@router.message(F.text == 'Регистрация 📝')
+@router.message(F.text == 'Оплатить подписку 💳')
 async def registration_handler(message: Message, state: FSMContext):
     user_id = message.from_user.id
-    result, _ = await check_user_registration(user_id)
-    if result:
-        await message.answer('УПС! Вы уже зарегистрированы! Пожалуйста, войдите в платформу, нажав на кнопку "Войти в систему 🚪"', reply_markup=registration_menu)
-    else:
+    can_use, response_message = await can_use_feature(user_id)
+
+    if can_use == 2:
+        await message.reply(response_message, reply_markup=registration_menu)
+
+    if can_use == 1:
+        await message.reply(response_message, reply_markup=registration_menu)
         await start_registration(message, state)
 
-# Имя пользователя
+    if can_use == 0:
+        await message.answer(
+            "Чтобы отменить действие, нажмите кнопку *Отменить ❌»*. \n\n⚠️ Обратите внимание: при отмене ваш реферальный ID будет утерян. Для повторной регистрации потребуется перейти по реферальной ссылке снова.",
+            parse_mode="Markdown"
+        )
+        await start_registration(message, state)
+
+# Обработка фотографии
 async def start_registration(message: Message, state: FSMContext):
-    await message.answer(
-        "❌ Чтобы завершить процесс регистрации, нажмите кнопку *Отменить ❌»*. \n\n⚠️ Обратите внимание: при отмене состояния ваш реферальный ID будет утерян. Для повторной регистрации потребуется перейти по реферальной ссылке снова.",
-        parse_mode="Markdown"
-    )
 
     time.sleep(1)
-    await message.answer('Пожалуйста, укажите ваше имя: ', reply_markup=cancel_state)
-    await state.set_state(RegistrationStates.name)
-
-# Город университета
-@router.message(F.text, RegistrationStates.name)
-async def process_city_university(message: Message, state: FSMContext):
-    if message.text not in ['/cancellation', 'Отменить ❌']:
-        await state.update_data(name=message.text)
-        await message.answer("Введите город, в котором расположено ваше учебное заведение: ")
-        await state.set_state(RegistrationStates.city_university)
-    else:
-        await state.clear()
-        await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊', reply_markup=registration_menu)
-
-# Название университета
-@router.message(F.text, RegistrationStates.city_university)
-async def process_name_university(message: Message, state: FSMContext):
-    if message.text not in ['/cancellation', 'Отменить ❌']:
-        await state.update_data(city_university=message.text)
-        await message.answer("Укажите полное название вашего учебного заведения: ")
-        await state.set_state(RegistrationStates.name_university)
-    else:
-        await state.clear()
-        await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊', reply_markup=registration_menu)
-
-# Название факультета
-@router.message(F.text, RegistrationStates.name_university)
-async def process_faculty(message: Message, state: FSMContext):
-    if message.text not in ['/cancellation', 'Отменить ❌']:
-        await state.update_data(name_university=message.text)
-        await message.answer("Введите название вашего факультета: ")
-        await state.set_state(RegistrationStates.faculty)
-    else:
-        await state.clear()
-        await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊', reply_markup=registration_menu)
-
-# Номер курса
-@router.message(F.text, RegistrationStates.faculty)
-async def process_course(message: Message, state: FSMContext):
-    if message.text not in ['/cancellation', 'Отменить ❌']:
-        await state.update_data(faculty=message.text)
-        await message.answer("На каком курсе вы обучаетесь? Пожалуйста, укажите номер курса: ")
-        await state.set_state(RegistrationStates.course)
-    else:
-        await state.clear()
-        await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊', reply_markup=registration_menu)
-
-# Фото оплаты
-@router.message(F.text, RegistrationStates.course)
-async def process_payment_photo(message: Message, state: FSMContext):
-    if message.text not in ['/cancellation', 'Отменить ❌']:
-        await state.update_data(course=message.text)
-        await message.answer("Пожалуйста, отправьте фото, подтверждающее оплату: ")
-        await state.set_state(RegistrationStates.payment_photo)
-    else:
-        await state.clear()
-        await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊', reply_markup=registration_menu)
+    await message.answer("Пожалуйста, отправьте фото, подтверждающее оплату: ", reply_markup=cancel_state)
+    await state.set_state(RegistrationStates.payment_photo)
 
 @router.message(F.text, RegistrationStates.payment_photo)
 async def cancel_registration(message: Message, state: FSMContext):
@@ -104,7 +57,7 @@ async def cancel_registration(message: Message, state: FSMContext):
         await message.answer('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊', reply_markup=registration_menu)
         return
 
-# Завершение регистрации и добавление пользователя в список
+# Завершение оплаты и добавление пользователя в список
 @router.message(F.photo, RegistrationStates.payment_photo)
 async def finish_registration(message: Message, state: FSMContext):
 
@@ -115,34 +68,25 @@ async def finish_registration(message: Message, state: FSMContext):
 
     # Получаем фотографию оплаты
     payment_photo = message.photo[-1].file_id
+    type_ubscription = await user_subscription(user_id)
 
     # Сохраняем данные пользователя
     user_info = {
-        "name_user": data.get("name"),
-        "city_university": data.get("city_university"),
-        "name_university": data.get("name_university"),
-        "faculty": data.get("faculty"),
-        "course": data.get("course"),
         "telegram": f"@{message.from_user.username}" if message.from_user.username else "Не указан",
         "ID_user": user_id,
         "ID_message": message.message_id,
         "photo_payment": payment_photo,
         "referrer_id": referrer_id,
-        "date_registration": datetime.now().date() #- timedelta(days=100)
+        "date_registration": datetime.now().date() - timedelta(days=100)
     }
 
     # Формируем текст для отправки админу
     user_info_text = (
-        f"Имя: {data.get('name')}\n\n"
-        f"Город университета: {data.get('city_university')}\n\n"
-        f"Название университета: {data.get('name_university')}\n\n"
-        f"Факультет: {data.get('faculty')}\n\n"
-        f"Курс: {data.get('course')}\n\n"
         f"Телеграм: {'@' + message.from_user.username if message.from_user.username else 'Не указан'}\n\n"
-        f"ID сообщения: {message.message_id}\n\n"
         f"ID пользователя: {user_id}\n\n"
         f"ID реферера: {referrer_id or 'None'}\n\n"
         f"Количество пользователей: {await count_users()}\n\n"
+        f"Тип подписки: {type_ubscription[0] if type_ubscription is not None else None}"
     )
 
     # Отправляем информацию админу
@@ -156,7 +100,7 @@ async def finish_registration(message: Message, state: FSMContext):
     # Отправляем сообщение пользователю
     new_users.append(user_info)
     await message.answer(
-        'Поздравляем, регистрация успешно завершена! 🎉\n\n'
+        'Данные успешно были сохранены! 🎉\n\n'
         'В ближайшее время администратор проверит ваши данные и активирует подписку.\n\n'
         'После этого вы получите уведомление. Желаем вам отличного дня!', reply_markup=registration_menu
     )

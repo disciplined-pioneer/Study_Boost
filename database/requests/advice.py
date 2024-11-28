@@ -52,14 +52,15 @@ async def check_rating_history(id: int, granted_by: int, type='advice_id') -> bo
     async with aiosqlite.connect(database_path) as db:
         # Выполняем запрос для подсчета строк, соответствующих условиям
         cursor = await db.execute(f'''
-            SELECT COUNT(*) FROM users_rating_history
+            SELECT COUNT(*)
+            FROM users_rating_history
             WHERE {type} = ? AND granted_by = ?
         ''', (id, granted_by))
         
         count = await cursor.fetchone()  # Получаем результат
         total_count = count[0] if count else 0  # Получаем количество
         
-        # Возвращаем True, если 0 или 1, иначе False
+        # Возвращаем True, если 0, иначе False
         return total_count == 0
     
 # Функция для получения последнего добавленного совета

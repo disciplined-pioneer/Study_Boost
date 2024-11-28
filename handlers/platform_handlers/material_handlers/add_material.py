@@ -27,7 +27,7 @@ async def process_add_material(message: types.Message, state: FSMContext):
     user_id = message.from_user.id
     can_use, response_message = await can_use_feature(user_id)
 
-    if can_use:
+    if can_use == 2:
         await message.reply(
         "❌ Чтобы завершить процесс добавления материала, нажмите кнопку *«Отменить ❌»»*. \n\n",
         reply_markup=material_menu,
@@ -62,6 +62,7 @@ async def process_faculty(message: types.Message, state: FSMContext):
 # Обработчик для ввода курса
 @router.message(MaterialStates.course)
 async def process_course(message: types.Message, state: FSMContext):
+
     if message.text not in ['/cancellation', 'Отменить ❌']:
         
         # Проверка формата текста
@@ -111,6 +112,7 @@ async def process_subject(message: types.Message, state: FSMContext):
 
 @router.message(MaterialStates.type_material)
 async def process_type_material(message: types.Message, state: FSMContext):
+
     if message.text not in ['/cancellation', 'Отменить ❌']:
         
         # Преобразуем текст в код материала
@@ -145,7 +147,6 @@ async def process_type_material(message: types.Message, state: FSMContext):
             reply_markup=material_menu
         )
 
-
 # Обработчик для ввода темы
 @router.message(MaterialStates.topic)
 async def process_topic(message: types.Message, state: FSMContext):
@@ -160,7 +161,7 @@ async def process_topic(message: types.Message, state: FSMContext):
             return
         
         await state.update_data(topic=topic)
-        await message.reply('"Теперь опишите материал.\nПример: "В этой лекции рассматриваются основные понятия операционных систем"')
+        await message.reply('Теперь опишите материал.\nПример: "В этой лекции рассматриваются основные понятия операционных систем"')
         await state.set_state(MaterialStates.description_material)
     else:
         await state.clear()
@@ -172,6 +173,7 @@ async def process_topic(message: types.Message, state: FSMContext):
 # Обработчик для ввода описания материала
 @router.message(MaterialStates.description_material)
 async def process_description_material(message: types.Message, state: FSMContext):
+
     if message.text not in ['/cancellation', 'Отменить ❌']:
         
         # Проверка качества текста
@@ -231,6 +233,7 @@ async def process_document(message: types.Message, state: FSMContext):
 
 # Обработчик для завершения процесса (теперь обычная асинхронная функция)
 async def finish_process(message: types.Message, state: FSMContext):
+    
     data = await state.get_data()
 
     # Добавление данных в БД

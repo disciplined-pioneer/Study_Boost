@@ -1,33 +1,45 @@
 import aiosqlite
 from datetime import date, time
 
+import aiosqlite
+
 # Регистрация пользователей с обновлением данных при совпадении по ID_user
 async def register_user(user_data):
     database_path = 'database/data/users.db'
     async with aiosqlite.connect(database_path) as db:
-        try:
-            # Используем `INSERT OR REPLACE` для автоматического обновления при совпадении
-            await db.execute(''' 
-                INSERT OR REPLACE INTO users 
-                (ID_user, telegram, referrer_id, name_user, city_university, name_university, faculty, course, ID_message, photo_payment)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        
+        # Проверяем, существует ли пользователь с таким ID_user
+        async with db.execute('SELECT 1 FROM users WHERE ID_user = ?', (user_data['ID_user'],)) as cursor:
+            user_exists = await cursor.fetchone()
+
+        if user_exists:
+            # Если пользователь существует, обновляем данные
+            await db.execute('''
+                UPDATE users
+                SET telegram = ?, referrer_id = ?, photo_payment = ?
+                WHERE ID_user = ?
+            ''', (
+                user_data['telegram'],
+                user_data['referrer_id'],
+                user_data['photo_payment'],
+                user_data['ID_user']
+            ))
+            await db.commit()
+            return 'Данные успешно обновлены!'
+        else:
+            # Если пользователя нет, добавляем нового
+            await db.execute('''
+                INSERT INTO users (ID_user, telegram, referrer_id, photo_payment)
+                VALUES (?, ?, ?, ?)
             ''', (
                 user_data['ID_user'],
                 user_data['telegram'],
                 user_data['referrer_id'],
-                user_data['name_user'],
-                user_data['city_university'],
-                user_data['name_university'],
-                user_data['faculty'],
-                user_data['course'],
-                user_data['ID_message'],
                 user_data['photo_payment']
             ))
             await db.commit()
-            return 'Данные успешно обновлены!'
-        except Exception as e:
-            print(f"Ошибка при регистрации пользователя: {e}")
-            return 'Произошла ошибка при регистрации!'
+            return 'Пользователь успешно зарегистрирован!'
+
 
 # Добавление статуса подписки
 async def add_subscription_status(ID_user, status):
