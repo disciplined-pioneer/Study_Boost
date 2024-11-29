@@ -29,7 +29,7 @@ async def process_add_material(message: types.Message, state: FSMContext):
 
     if can_use == 2:
         await message.reply(
-        "❌ Чтобы завершить процесс добавления материала, нажмите кнопку *«Отменить ❌»»*. \n\n",
+        "❌ Чтобы завершить процесс добавления материала, нажмите кнопку *«Отменить ❌»*. \n\n",
         reply_markup=material_menu,
         parse_mode="Markdown")
         time.sleep(1)
@@ -184,32 +184,11 @@ async def process_description_material(message: types.Message, state: FSMContext
             return
         
         await state.update_data(description_material=description_material)
-        await message.reply("Теперь отправьте фотографию материала или документ")
+        await message.reply("Теперь отправьте фотографию материала (без сжатия) или документ")
         await state.set_state(MaterialStates.files_id)
     else:
         await state.clear()
         await message.reply('Вы вышли из текущего режима и вернулись в основной режим работы с ботом 😊', reply_markup=material_menu)
-
-
-# Обработчик для получения фотографий и добавления их в общее хранилище
-@router.message(MaterialStates.files_id, F.content_type == 'photo')
-async def process_photo(message: types.Message, state: FSMContext):
-
-    # Получаем список фотографий
-    photos_info = message.photo
-    photos_id = [photo.file_id for photo in photos_info]  # Сохраняем все фотографии
-
-    # Получаем данные состояния
-    data = await state.get_data()
-    files = data.get('files', [])  # Получаем общий список данных
-    files.append({'type': 'photo', 'file_id': photos_id[-1]})  # Добавляем фотографию с указанием типа
-
-    # Обновляем данные состояния
-    await state.update_data(files=files)
-    await message.reply(
-        "Фотография успешно добавлена! Вы можете отправить ещё фотографии, документы или завершить процесс.",
-        reply_markup=complete_process
-    )
 
 # Обработчик для получения документов и добавления их в общее хранилище
 @router.message(MaterialStates.files_id, F.content_type == 'document')
@@ -227,7 +206,7 @@ async def process_document(message: types.Message, state: FSMContext):
     # Обновляем данные состояния
     await state.update_data(files=files)
     await message.reply(
-        "Документ успешно добавлен! Вы можете отправить ещё документы, фотографии или завершить процесс.",
+        "Документ успешно добавлен! Вы можете отправить ещё документы, фотографии (без сжатия) или завершить процесс.",
         reply_markup=complete_process
     )
 

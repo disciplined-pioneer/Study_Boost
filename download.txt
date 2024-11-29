@@ -1,0 +1,88 @@
+# Обработчик скачивания ZIP файлов
+@router.callback_query(lambda c: c.data.startswith("download:"))
+async def download_material(callback_query: CallbackQuery, state: FSMContext):
+
+    user_id = callback_query.from_user.id
+    can_use, response_message = await can_use_feature(user_id)
+    await callback_query.message.edit_reply_markup(reply_markup=None)
+    await callback_query.message.answer('Отправляю Вам материалы...')
+
+    if can_use != 2:
+        await callback_query.message.answer(response_message, reply_markup=material_menu)
+        await state.clear()
+
+    data = await state.get_data()
+    bot = callback_query.bot
+    user_id = str(callback_query.from_user.id) 
+    material_id = int(callback_query.data.split(':')[-1])
+    
+    # Получаем список файлов из БД
+    files_data_text = await get_file_id_material(material_id)  # Здесь ваш метод получения данных из БД
+    files_data = json.loads(files_data_text.replace("'", '"'))
+    file_ids = [item['file_id'] for item in files_data]  # Извлекаем только file_id
+    
+    # Создаём временную папку для хранения файлов
+    user_folder = f"temp_files/{user_id}"
+    os.makedirs(user_folder, exist_ok=True)
+    zip_filename = f"{user_folder}/{data['topic']}.zip"
+
+    # Загружаем файлы и создаём ZIP-архив
+    with zipfile.ZipFile(zip_filename, 'w') as zipf:
+        for idx, file_id in enumerate(file_ids):
+            file = await bot.get_file(file_id)  # Получаем файл с сервера Telegram
+            local_file_path = os.path.join(user_folder, f"file_{idx}.{file.file_path.split('.')[-1]}")
+            await bot.download_file(file.file_path, local_file_path)  # Загружаем файл
+            
+            zipf.write(local_file_path, f"file_{idx}.{file.file_path.split('.')[-1]}")  # Добавляем в архив
+            os.remove(local_file_path)  # Удаляем временный файл после добавления в архив
+
+    # Отправляем архив пользователю
+    document = FSInputFile(zip_filename)
+    caption_text = (
+        f"Ваши материалы успешно обработаны 📂\n\n"
+        f"Файлы сохранены в архиве под ID: {material_id}. Благодарим за использование нашего сервиса!\n"
+        "Не забудьте оценить материал — это поможет нам стать лучше. 😊"
+    )
+
+    grade_material_keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text='👍', callback_data=f'like_material:{material_id}'), InlineKeyboardButton(text='👎', callback_data=f'dislike_material:{material_id}')]
+        ]
+    )
+    
+    await callback_query.message.answer_document(document, caption=caption_text, reply_markup=grade_material_keyboard)
+    await callback_query.message.answer(
+        "Выберите дальнейшее действие:",
+        reply_markup=material_menu 
+    )
+    
+    # Удаляем временные данные
+    os.remove(zip_filename)
+    os.rmdir(user_folder)
+
+    await state.clear()
+
+
+
+
+
+
+
+# Обработчик для получения фотографий и добавления их в общее хранилище
+@router.message(MaterialStates.files_id, F.content_type == 'photo')
+async def process_photo(message: types.Message, state: FSMContext):
+
+    # Получаем id лучшего изображения
+    best_photo = max(message.photo, key=lambda p: p.width * p.height)
+
+    # Получаем данные состояния
+    data = await state.get_data()
+    files = data.get('files', [])  # Получаем общий список данных
+    files.append({'type': 'photo', 'file_id': best_photo.file_id})  # Добавляем фотографию с указанием типа
+
+    # Обновляем данные состояния
+    await state.update_data(files=files)
+    await message.reply(
+        "Фотография успешно добавлена! Вы можете отправить ещё фотографии, документы или завершить процесс.",
+        reply_markup=complete_process
+    )

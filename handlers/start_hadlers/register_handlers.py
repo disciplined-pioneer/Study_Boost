@@ -35,7 +35,7 @@ async def registration_handler(message: Message, state: FSMContext):
         await start_registration(message, state)
 
     if can_use == 0:
-        await message.answer(
+        await message.reply(
             "Чтобы отменить действие, нажмите кнопку *Отменить ❌»*. \n\n⚠️ Обратите внимание: при отмене ваш реферальный ID будет утерян. Для повторной регистрации потребуется перейти по реферальной ссылке снова.",
             parse_mode="Markdown"
         )
@@ -45,7 +45,10 @@ async def registration_handler(message: Message, state: FSMContext):
 async def start_registration(message: Message, state: FSMContext):
 
     time.sleep(1)
-    await message.answer("Пожалуйста, отправьте фото, подтверждающее оплату: ", reply_markup=cancel_state)
+    text = ('Пожалуйста, отправьте скриншот, подтверждающий оплату по карте "КЛЕВЕР 🍀"\n\n'
+            "🔗 Нажмите на номер, чтобы скопировать: <code>9104016039962016</code>"
+            )
+    await message.reply(text, reply_markup=cancel_state, parse_mode='HTML')
     await state.set_state(RegistrationStates.payment_photo)
 
 @router.message(F.text, RegistrationStates.payment_photo)

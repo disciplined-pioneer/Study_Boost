@@ -40,6 +40,11 @@ async def my_rating(message: Message):
             f"🌟 <b>Ваш рейтинг за текущий месяц:</b> <b>{rating:.1f}</b>\n\n"
             "🎉 Поздравляем с вашими достижениями! Продолжайте в том же духе!"
         )
+    elif rating < 0:
+        response = (
+                    f"❌ У вас <b>отрицательный рейтинг</b> пока за текущий месяц: <b>{rating:.1f}</b>\n\n"
+                    "💪 Не упустите возможность заработать баллы! Участвуйте в активности!"
+                )
     else:
         response = (
             "❌ У вас пока нет рейтинга за текущий месяц\n\n"
@@ -106,38 +111,37 @@ async def referral_handler(message: Message):
 @router.message(lambda message: message.text == '/subscription_status')
 async def subscription_status(message: Message):
 
-    # Определеяем тип подписки пользователя
     user_id = message.from_user.id
-    subscription_data = await user_subscription(user_id)
-    
-    # Если подписка не найдена
-    if not subscription_data:
-        await message.reply("Вы не были найден в базе данных. Пожалуйста, пройдите регистрацию")
-        return
+    can_use, response_message = await can_use_feature(user_id)
 
-    # Получаем статус подписки
-    subscription_status = subscription_data[0]
-    payment_data = await payment_information(user_id)
+    if can_use > 1:
+        
+        # Получаем статус подписки
+        subscription_data = await user_subscription(user_id)
+        subscription_status = subscription_data[0]
+        payment_data = await payment_information(user_id)
 
-    # Если информация об оплате не найдена
-    if not payment_data:
-        await message.reply("Информация о вашей оплате не найдена. Пожалуйста, свяжитесь с поддержкой")
-        return
+        # Если информация об оплате не найдена
+        if not payment_data:
+            await message.reply("Информация о вашей оплате не найдена. Пожалуйста, свяжитесь с поддержкой")
+            return
 
-    # Получаем дату оплаты и окончания подписки
-    payment_date = datetime.strptime(payment_data[0], '%Y-%m-%d').date()
-    expiration_date = datetime.strptime(payment_data[1], '%Y-%m-%d').date()
-    days_left = (expiration_date - datetime.now().date()).days
+        # Получаем дату оплаты и окончания подписки
+        payment_date = datetime.strptime(payment_data[0], '%Y-%m-%d').date()
+        expiration_date = datetime.strptime(payment_data[1], '%Y-%m-%d').date()
+        days_left = (expiration_date - datetime.now().date()).days
 
-    # Формируем сообщение для пользователя
-    response_message = (
-        f"🔔 <b>Статус подписки:</b> {subscription_status}\n"
-        f"💵 <b>Дата оплаты:</b> {payment_date.strftime('%d.%m.%Y')}\n"
-        f"📅 <b>Дата окончания:</b> {expiration_date.strftime('%d.%m.%Y')}\n"
-        f"⏳ <b>Осталось дней до окончания:</b> {days_left} дней"
-    )
+        # Формируем сообщение для пользователя
+        response_message = (
+            f"🔔 <b>Статус подписки:</b> {subscription_status}\n"
+            f"💵 <b>Дата оплаты:</b> {payment_date.strftime('%d.%m.%Y')}\n"
+            f"📅 <b>Дата окончания:</b> {expiration_date.strftime('%d.%m.%Y')}\n"
+            f"⏳ <b>Осталось дней до окончания:</b> {days_left} дней"
+        )
+        await message.reply(response_message, parse_mode='HTML')
 
-    await message.reply(response_message, parse_mode='HTML')
+    else:
+        await message.reply(response_message)
 
 # Вывод реферальной ссылки
 @router.message(lambda message: message.text == '/cancellation')

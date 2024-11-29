@@ -4,12 +4,13 @@ from aiogram import Router, F, Bot
 from aiogram.types import CallbackQuery
 
 from handlers.start_hadlers.register_handlers import new_users
+
 from keyboards.platform_keyb import platform_menu
 from keyboards.admin_keyb import subscription_menu, subscription_menu_two
 
 from database.requests.user_search import count_referrals, count_users
-from database.handlers.database_handler import add_user_rating_history
-from database.handlers.database_handler import register_user, add_subscription_status, add_payment
+from handlers.commands_handlers.commands_handlers import payment_information
+from database.handlers.database_handler import register_user, add_user_rating_history, add_subscription_status, add_payment
 
 router = Router()
 
@@ -21,7 +22,7 @@ async def access(callback: CallbackQuery, bot: Bot):
     message_id = callback.message.message_id
 
     # Редактируем текущее сообщение, заменяя только клавиатуру
-    keyb = subscription_menu if await count_users() <= 55 else subscription_menu_two 
+    keyb = subscription_menu if await count_users() <= 50 else subscription_menu_two 
     await bot.edit_message_reply_markup(chat_id=admin_id, message_id=message_id, reply_markup=keyb)
     await callback.answer()
 
@@ -44,12 +45,18 @@ def calculate_expiration_date(payment_date, subscription_type):
 # Функция для уведомления пользователя о подписке
 async def notify_user(bot: Bot, user_id, subscription_type, bonus_awarded: bool = False):
 
+    payment_data = await payment_information(user_id)
+    expiration_date = datetime.strptime(payment_data[1], '%Y-%m-%d').date()
+    days_left = (expiration_date - datetime.now().date()).days
+
     text = (
-        f"Вам предоставлен доступ к платформе StudyBoost с подпиской «{subscription_type}»! ✅"
-        f"{'\n\nТакже вам начислено 10 баллов за регистрацию по реферальной ссылке.' if bonus_awarded else ''}"
+        f"Вам предоставлен доступ к платформе StudyBoost с подпиской <b>«{subscription_type}»</b>! ✅\n\n"
+        f"Дата окончания подписки: <b>{expiration_date.strftime('%d.%m.%Y')}</b>\n"
+        f"До окончания действия подписки осталось: <b>{days_left}</b> дней"
+        f"{'\n\nТакже вам начислено <b>10 баллов</b> за регистрацию по реферальной ссылке.' if bonus_awarded else ''}"
     )
     
-    await bot.send_message(user_id, text, reply_markup=platform_menu)
+    await bot.send_message(user_id, text, reply_markup=platform_menu, parse_mode='HTML')
 
 
 # Функция для уведомления реферала

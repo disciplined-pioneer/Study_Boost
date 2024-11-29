@@ -11,8 +11,8 @@ platform_menu = ReplyKeyboardMarkup(
 
 settings_menu = ReplyKeyboardMarkup(
     keyboard=[
-        [KeyboardButton(text='Команды 📜'), KeyboardButton(text='Предложения ➕')],
-        [KeyboardButton(text='Инструкция 📕'), KeyboardButton(text='Помощь ❓')], 
+        [KeyboardButton(text='Инструкция 📕'), KeyboardButton(text='Помощь ❓')],
+        [KeyboardButton(text='Команды 📜'), KeyboardButton(text='Предложения ➕')], 
         [KeyboardButton(text='Назад 🔙')]
     ],
     resize_keyboard=True  # Сделаем клавиатуру компактной

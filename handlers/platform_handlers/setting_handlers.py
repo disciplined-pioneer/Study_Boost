@@ -11,10 +11,8 @@ from states.help_suggestion_state import SuggestionsStates
 from keyboards.platform_keyb import platform_menu
 from keyboards.cancellation_states import cancel_state
 
-
 from NI_assistants.sentiment_text import analyze_sentiment
 from database.requests.user_access import can_use_feature
-from database.requests.user_search import check_user_registration
 from database.handlers.database_handler import add_help_suggestion
 
 router = Router()
