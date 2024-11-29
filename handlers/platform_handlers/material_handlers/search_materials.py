@@ -147,7 +147,7 @@ async def download_material(callback_query: CallbackQuery, state: FSMContext):
         file_ids = [item['file_id'] for item in files_data]  # Извлекаем только file_id
         
         # Создаём временную папку для хранения файлов
-        user_folder = f"temp_zip/{user_id}"
+        user_folder = f"temp_files/{user_id}"
         os.makedirs(user_folder, exist_ok=True)
         zip_filename = f"{user_folder}/{data['topic']}.zip"
 
@@ -216,8 +216,8 @@ async def download_material_chat(callback_query: CallbackQuery, state: FSMContex
             file_path = file.file_path
 
             # Локальное имя файла для сохранения
-            local_file_path = f"downloads/{media_id}.jpg"
-            os.makedirs("downloads", exist_ok=True)  # Создаем папку, если ее нет
+            local_file_path = f"temp_files/{media_id}.jpg"
+            os.makedirs("temp_files", exist_ok=True)  # Создаем папку, если ее нет
 
             # Скачиваем файл на сервер и отправляем его
             await bot.download_file(file_path, destination=local_file_path)

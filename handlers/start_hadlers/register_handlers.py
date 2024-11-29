@@ -77,7 +77,7 @@ async def finish_registration(message: Message, state: FSMContext):
         "ID_message": message.message_id,
         "photo_payment": payment_photo,
         "referrer_id": referrer_id,
-        "date_registration": datetime.now().date() - timedelta(days=100)
+        "date_registration": datetime.now().date() #- timedelta(days=100)
     }
 
     # Формируем текст для отправки админу
