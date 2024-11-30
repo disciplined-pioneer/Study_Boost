@@ -37,16 +37,13 @@ async def login_handler(message: Message):
     # Отправляем сообщение
     await message.reply(text_card, parse_mode="HTML")
 
-
-
-
 @router.message(F.text == 'Инструкция 📕')
 async def instruction_handler(message: Message):
 
     # Отправляем документ
     await message.bot.send_document(
         chat_id=message.from_user.id,
-        document='BQACAgIAAxkBAAJIFWdFmTZGtceue6YobNoRyuXtqzLkAAIrZwACH6MpSp7JeUtiwRbUNgQ',
+        document='BQACAgIAAxkBAAJUSmdLKRRfEi3Z5x1zOtvmmlZRombTAAL6eAAC0zJYStiveZibQMF0NgQ',
         caption = f'Инструкция содержит подробное описание всех функций платформы, пошаговое руководство по регистрации и использованию бота, а также примеры обмена учебными материалами и заработка очков за активность',
     )
 

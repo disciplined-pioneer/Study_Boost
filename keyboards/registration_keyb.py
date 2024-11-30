@@ -3,9 +3,9 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 registration_menu = ReplyKeyboardMarkup(
     keyboard=[
-        [KeyboardButton(text='Инструкция 📕'), KeyboardButton(text='Создатель ©️')],
+        [KeyboardButton(text='Войти в систему 🚪')],
         [KeyboardButton(text='Оплатить подписку 💳'), KeyboardButton(text='Виды подписок 💵')],
-        [KeyboardButton(text='Войти в систему 🚪')]
+        [KeyboardButton(text='Инструкция 📕'), KeyboardButton(text='Создатель ©️')]
     ],
     resize_keyboard=True
 )

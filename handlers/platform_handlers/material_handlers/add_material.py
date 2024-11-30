@@ -120,7 +120,9 @@ async def process_type_material(message: types.Message, state: FSMContext):
             'Лекция 📚': 'lecture',
             'Домашняя работа 🏠': 'homework',
             'Контрольная работа 📝': 'test',
-            'Лабораторная работа 🔬': 'laboratory_work'
+            'Лабораторная работа 🔬': 'laboratory_work',
+            'Семинар 🏫': 'seminar',
+            'Экзамен 📕': 'exam'
         }
         material_code = material_mapping.get(message.text)
         
