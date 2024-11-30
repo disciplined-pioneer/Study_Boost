@@ -118,7 +118,7 @@ async def material_id(callback_query: CallbackQuery, state: FSMContext):
         f"📌 <b>Тема:</b> {element['topic']}\n\n"
         "◆━━━━━━━━━━━━━━━━━━━━━━━━━━◆\n\n"
         f"📝 <b>Описание:</b>\n{element['description_material']}\n\n"
-        f"🔹 Рейтинг материала: {like_material} 👍 | 👎 {dislike_material}\n\n"
+        f"🔹 Рейтинг материала: {int(int(like_material)/2)} 👍 | 👎 {int(int(dislike_material)/2)}\n\n"
         "⬇️ <i>Выберите действие ниже:</i>",
         reply_markup=download_menu,
         parse_mode="HTML"
@@ -133,7 +133,6 @@ async def download_material_chat(callback_query: CallbackQuery, state: FSMContex
     user_id = callback_query.from_user.id
     can_use, response_message = await can_use_feature(user_id)
     await callback_query.message.edit_reply_markup(reply_markup=None)
-    await callback_query.message.answer('Отправляю Вам материалы...')
 
     if can_use != 2:
 
@@ -141,6 +140,7 @@ async def download_material_chat(callback_query: CallbackQuery, state: FSMContex
         await state.clear()
         return
 
+    await callback_query.message.answer('Отправляю Вам материалы...')
     bot = callback_query.bot
     user_id = str(callback_query.from_user.id)
     material_id = int(callback_query.data.split(':')[-1])
