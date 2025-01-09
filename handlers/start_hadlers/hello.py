@@ -15,7 +15,14 @@ async def start_handler(message: Message, state: FSMContext):
     args = message.text.split()
     referrer_id = args[1] if len(args) > 1 and args[1] != str(message.from_user.id) else 'None'
     await state.update_data(referrer_id=referrer_id)
-    welcome_message = f"Добро пожаловать! ☺️{'\nВы пришли по реферальной ссылке от пользователя с ID: ' + referrer_id if referrer_id != 'None' else ''}"
+    referral_message = (
+        f"\nВы пришли по реферальной ссылке от пользователя с ID: {referrer_id}"
+        if referrer_id != "None"
+        else ""
+    )
+
+    welcome_message = f"Добро пожаловать! ☺️{referral_message}"
+
     await message.answer(welcome_message)
 
     # Отправляем документ с соглашением

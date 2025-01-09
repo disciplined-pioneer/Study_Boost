@@ -49,12 +49,18 @@ async def notify_user(bot: Bot, user_id, subscription_type, bonus_awarded: bool 
     expiration_date = datetime.strptime(payment_data[1], '%Y-%m-%d').date()
     days_left = (expiration_date - datetime.now().date()).days
 
+    if bonus_awarded:
+        bonus_message = '\n\nТакже вам начислено <b>10 баллов</b> за регистрацию по реферальной ссылке.'
+    else:
+        bonus_message = ''
+
     text = (
         f"Вам предоставлен доступ к платформе StudyBoost с подпиской <b>«{subscription_type}»</b>! ✅\n\n"
         f"Дата окончания подписки: <b>{expiration_date.strftime('%d.%m.%Y')}</b>\n"
         f"До окончания действия подписки осталось: <b>{days_left}</b> дней"
-        f"{'\n\nТакже вам начислено <b>10 баллов</b> за регистрацию по реферальной ссылке.' if bonus_awarded else ''}"
+        f"{bonus_message}"
     )
+
     
     await bot.send_message(user_id, text, reply_markup=platform_menu, parse_mode='HTML')
 
