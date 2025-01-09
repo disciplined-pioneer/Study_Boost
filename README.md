@@ -113,8 +113,8 @@
 
 1. Склонируйте репозиторий:  
    ```bash
-   git clone 
-   cd study-boost
+   git clone https://github.com/disciplined-pioneer/Study_Boost.git
+   cd Study_Boost
    ```
 2. Активируйте виртуальное окружение:  
    ```bash
